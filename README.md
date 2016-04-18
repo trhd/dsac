@@ -1,6 +1,9 @@
 Data Structures and Algorithms for C
 ====================================
 
+[![Build Status](https://travis-ci.org/trhd/dsac.svg?branch=master)](https://travis-ci.org/trhd/dsac)
+[![Build Status](https://travis-ci.org/trhd/dsac.svg?branch=next)](https://travis-ci.org/trhd/dsac)
+
 
 About
 -----
