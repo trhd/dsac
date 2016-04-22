@@ -46,7 +46,7 @@ A-very-quick-guide to Meson based projects:
 	$ sudo ninja -C build install
 
 Asserts (see "man assert") may have been used in the implementations so
-one might want to define NDDEBUG compiler macro for release builds.
+one might want to define NDEBUG compiler macro for release builds.
 
 
 Bugs, Patches etc.
