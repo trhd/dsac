@@ -40,6 +40,17 @@ test(
 )
 
 test(
+	'bitmap',
+	executable(
+		'bitmap',
+		'bitmap.c',
+		link_with : DSAC_LIB_BITMAP,
+		include_directories : DSAC_INCLUDE
+	),
+	valgrind_args : VALGRIND_ARGS
+)
+
+test(
 	'linked_list',
 	executable(
 		'linked_list',

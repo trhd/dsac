@@ -35,6 +35,13 @@ DSAC_LIB_SPLAY_TREE = static_library(
 	c_args : release_flags
 )
 
+DSAC_LIB_BITMAP = static_library(
+	'bitmap',
+	'bitmap.c',
+	include_directories : DSAC_INCLUDE,
+	c_args : release_flags
+)
+
 DSAC_LIB_LINKED_LIST = static_library(
 	'linked_list',
 	'linked_list.c',
@@ -63,6 +70,7 @@ DSAC_LIB_QUICKSORT = static_library(
 DSAC_LIB = [
 	DSAC_LIB_AVL_TREE,
 	DSAC_LIB_SPLAY_TREE,
+	DSAC_LIB_BITMAP,
 	DSAC_LIB_LINKED_LIST,
 	DSAC_LIB_DOUBLY_LINKED_LIST,
 	# DSAC_LIB_LIFO == DSAC_LIB_DOUBLY_LINKED_LIST
@@ -74,6 +82,7 @@ DSAC_LIB_SHARED = shared_library(
 	'dsac',
 	[
 		'avl_tree.c',
+		'bitmap.c',
 		'doubly_linked_list.c',
 		'linked_list.c',
 		'splay_tree.c',
