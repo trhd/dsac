@@ -331,8 +331,8 @@ const struct avl_node *
 avl_find(const struct avl_tree *m, const void *d)
 {
 	assert(m);
-	assert(d);
 	assert(m->compare);
+	/** d might be null/zero if pretending pointers to be numbers. */
 
 	int cmp;
 	struct avl_node *t = m->root;
@@ -359,7 +359,7 @@ remove_recurse(const struct avl_tree *m, struct avl_node **r, const void * d)
 	assert(m);
 	assert(r);
 	assert(*r);
-	assert(d);
+	/** d might be null/zero if pretending pointers to be numbers. */
 
 	int cmp;
 	struct avl_node **t, *rv;
@@ -388,7 +388,7 @@ struct avl_node *
 avl_remove(struct avl_tree *m, const void *d)
 {
 	assert(m);
-	assert(d);
+	/** d might be null/zero if pretending pointers to be numbers. */
 
 	struct avl_node *r;
 

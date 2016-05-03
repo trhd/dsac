@@ -167,6 +167,10 @@ my_insert(struct avl_tree *m, struct avl_node *n, unsigned int s)
 {
 	DECLARE();
 
+	struct avl_node tmp;
+
+	avl_set(&tmp, avl_get(n));
+
 	if (s && avl_empty(m))
 	{
 		print_error("Non-empty AVL tree not reported as such.\n");
@@ -187,6 +191,12 @@ my_insert(struct avl_tree *m, struct avl_node *n, unsigned int s)
 	if (avl_insert(m, n))
 	{
 		print_error("Failed to insert AVL node into AVL tree.\n");
+		return -1;
+	}
+
+	if (!avl_insert(m, &tmp))
+	{
+		print_error("Somehow managed to insert AVL node into AVL tree twice.\n");
 		return -1;
 	}
 

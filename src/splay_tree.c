@@ -221,7 +221,7 @@ splay(int (*cmp) (const void *, const void *), struct splay_node **root, const v
 {
 	assert(cmp);
 	assert(root);
-	assert(key);
+	/** key could be null/zero if pretending pointers to be number */
 
 	struct splay_node *right_head = NULL, *right_tail = NULL,
 			  *left_head = NULL, *left_tail = NULL;
@@ -295,7 +295,7 @@ const struct splay_node *
 splay_find(struct splay_tree *tree, const void *key)
 {
 	assert(tree);
-	assert(key);
+	/** key could be null/zero if pretending pointers to be number */
 
 	if (!splay(tree->compare, &tree->root, key))
 		return tree->root;
@@ -474,7 +474,7 @@ struct splay_node *
 splay_remove(struct splay_tree *tree, const void *key)
 {
 	assert(tree);
-	assert(key);
+	/** key could be null/zero if pretending pointers to be number */
 
 	if (!splay_size(tree))
 		return NULL;

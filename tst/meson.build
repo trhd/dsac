@@ -40,6 +40,38 @@ test(
 )
 
 test(
+	'search_structure-avl',
+	executable(
+		'search_structure-avl',
+		'search_structure.c',
+		link_with : DSAC_LIB,
+		include_directories : DSAC_INCLUDE,
+		c_args : [
+			'-DSEARCH_STRUCTURE_AVL',
+			'-DTEST_ITERATION_COUNT=100000',
+			'-DTEST_ELEMENT_COUNT=100'
+		]
+		),
+	valgrind_args : VALGRIND_ARGS
+)
+
+test(
+	'search_structure-splay',
+	executable(
+		'search_structure-splay',
+		'search_structure.c',
+		link_with : DSAC_LIB,
+		include_directories : DSAC_INCLUDE,
+		c_args : [
+			'-DSEARCH_STRUCTURE_SPLAY',
+			'-DTEST_ITERATION_COUNT=100000',
+			'-DTEST_ELEMENT_COUNT=100'
+		]
+		),
+	valgrind_args : VALGRIND_ARGS
+)
+
+test(
 	'bitmap',
 	executable(
 		'bitmap',

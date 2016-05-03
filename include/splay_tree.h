@@ -67,7 +67,7 @@ static inline void
 splay_set(struct splay_node *node, const void *key)
 {
 	assert(node);
-	assert(key);
+	/** key could be null/zero if pretending pointers to be number */
 	node->data = key;
 }
 
