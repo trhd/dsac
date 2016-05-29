@@ -553,11 +553,31 @@ next_prev_null()
 	TEST(splay_remove(&t, "c"), &alphabet_nodes[2], "Failed to just remove \"c\".");
 }
 
+int
+fail_iteration(const struct splay_node *n __attribute__((unused)),
+		void *a __attribute__((unused)))
+{
+	abort();
+}
+
+static void
+iterate_empty_tree()
+{
+	struct splay_tree t;
+
+	splay_initialize(&t, (int(*)(const void *, const void *))strcmp);
+
+	TEST(splay_iterate(&t, assert_iteration_preorder, NULL), false,
+			"It should be safe to iterate empty tree.");
+
+}
+
 int main()
 {
 	test_remove_any();
 	next_prev_null();
 	next_prev_test();
+	iterate_empty_tree();
 
 	if (first() || second())
 		return EXIT_FAILURE;
