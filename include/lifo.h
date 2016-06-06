@@ -54,7 +54,7 @@ lifo_pop(lifo_meta_t *meta)
 	return doubly_linked_list_remove_head(meta);
 }
 
-static inline lifo_t *
+static inline const lifo_t *
 lifo_peek(lifo_meta_t *meta)
 {
 	return doubly_linked_list_find_head(meta);

@@ -54,7 +54,7 @@ fifo_pop(fifo_meta_t *meta)
 	return doubly_linked_list_remove_tail(meta);
 }
 
-static inline fifo_t *
+static inline const fifo_t *
 fifo_peek(fifo_meta_t *meta)
 {
 	return doubly_linked_list_find_tail(meta);
