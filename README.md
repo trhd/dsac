@@ -14,8 +14,8 @@ algorithms implemented in and for C.
 Why
 ---
 
-To get implementations for (various) data structures and algorithms that
-work and behave just the way I want them to and to educate myself while
+To get implementations for data structures and algorithms that work and
+behave just the way I want them to and to educate myself while
 implementing them.
 
 
@@ -33,9 +33,9 @@ How-To
 To use any data structures or algorithms implemented in this collection
 one can either:
 
-1. Install the shared library (and headers).
-2. Copy the source(s) to one's own project.
-3. Use this collection as a Meson submodule.
+- Install the shared library (and headers).
+- Copy the source(s) to one's own project.
+- Use this collection as a Meson submodule.
 
 A-very-quick-guide to Meson based projects:
 
@@ -44,8 +44,8 @@ A-very-quick-guide to Meson based projects:
 	$ ninja -C build test
 	$ sudo ninja -C build install
 
-Asserts (see "man assert") may have been used in the implementations so
-one might want to define NDEBUG compiler macro for release builds.
+Asserts (see "man 3 assert") may have been used in the implementations so
+one might want to define the NDEBUG compiler macro for release builds.
 
 
 Bugs, Patches etc.
