@@ -23,6 +23,9 @@
 static void
 swap(const void **a, const void **b)
 {
+	assert(a);
+	assert(b);
+
 	const void *t = *a;
 	*a = *b;
 	*b = t;

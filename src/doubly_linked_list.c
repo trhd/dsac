@@ -25,6 +25,7 @@ void
 doubly_linked_list_initialize(struct doubly_linked_list_meta * m)
 {
 	assert(m);
+
 	memset(m, 0, sizeof(*m));
 }
 
@@ -124,6 +125,8 @@ doubly_linked_list_remove_back(struct doubly_linked_list_meta *m, const void * p
 struct doubly_linked_list *
 doubly_linked_list_remove_head(struct doubly_linked_list_meta *m)
 {
+	assert(m);
+
 	struct doubly_linked_list * r = m->head;
 
 	if (r)
@@ -135,6 +138,8 @@ doubly_linked_list_remove_head(struct doubly_linked_list_meta *m)
 struct doubly_linked_list *
 doubly_linked_list_remove_tail(struct doubly_linked_list_meta *m)
 {
+	assert(m);
+
 	struct doubly_linked_list * r = m->tail;
 
 	if (r)

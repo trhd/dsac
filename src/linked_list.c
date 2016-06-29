@@ -33,6 +33,8 @@ linked_list_initialize(struct linked_list_meta *m)
 void
 linked_list_set(struct linked_list *e, const void *d)
 {
+	assert(e);
+
 	e->next = 0;
 	e->data = d;
 }
@@ -40,6 +42,8 @@ linked_list_set(struct linked_list *e, const void *d)
 void *
 linked_list_get(const struct linked_list *f)
 {
+	assert(f);
+
 	return (void*)f->data;
 }
 
@@ -47,6 +51,7 @@ struct linked_list **
 linked_list_next(const struct linked_list *f)
 {
 	assert(f);
+
 	return (struct linked_list **)&f->next;
 }
 
@@ -193,18 +198,23 @@ struct linked_list **
 linked_list_find_head(const struct linked_list_meta *m)
 {
 	assert(m);
+
 	return (struct linked_list **)&m->head;
 }
 
 int
 linked_list_empty(const struct linked_list_meta *m)
 {
+	assert(m);
+
 	return linked_list_size(m) == 0;
 }
 
 unsigned int
 linked_list_size(const struct linked_list_meta *m)
 {
+	assert(m);
+
 	return m->size;
 }
 
