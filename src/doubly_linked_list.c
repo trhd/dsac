@@ -22,7 +22,7 @@
 #include "doubly_linked_list.h"
 
 void
-doubly_linked_list_initialize(struct doubly_linked_list_meta * m)
+doubly_linked_list_initialize(struct doubly_linked_list_meta *m)
 {
 	assert(m);
 
@@ -95,12 +95,12 @@ doubly_linked_list_detach(struct doubly_linked_list_meta *m, struct doubly_linke
 }
 
 struct doubly_linked_list *
-doubly_linked_list_remove_front(struct doubly_linked_list_meta *m, const void * p)
+doubly_linked_list_remove_front(struct doubly_linked_list_meta *m, const void *p)
 {
 	assert(m);
 	assert(p);
 
-	struct doubly_linked_list * r = doubly_linked_list_find_front(m->head, p);
+	struct doubly_linked_list *r = doubly_linked_list_find_front(m->head, p);
 
 	if (r)
 		doubly_linked_list_detach(m, r);
@@ -109,12 +109,12 @@ doubly_linked_list_remove_front(struct doubly_linked_list_meta *m, const void * 
 }
 
 struct doubly_linked_list *
-doubly_linked_list_remove_back(struct doubly_linked_list_meta *m, const void * p)
+doubly_linked_list_remove_back(struct doubly_linked_list_meta *m, const void *p)
 {
 	assert(m);
 	assert(p);
 
-	struct doubly_linked_list * r = doubly_linked_list_find_back(m->tail, p);
+	struct doubly_linked_list *r = doubly_linked_list_find_back(m->tail, p);
 
 	if (r)
 		doubly_linked_list_detach(m, r);
@@ -127,7 +127,7 @@ doubly_linked_list_remove_head(struct doubly_linked_list_meta *m)
 {
 	assert(m);
 
-	struct doubly_linked_list * r = m->head;
+	struct doubly_linked_list *r = m->head;
 
 	if (r)
 		doubly_linked_list_detach(m, r);
@@ -140,7 +140,7 @@ doubly_linked_list_remove_tail(struct doubly_linked_list_meta *m)
 {
 	assert(m);
 
-	struct doubly_linked_list * r = m->tail;
+	struct doubly_linked_list *r = m->tail;
 
 	if (r)
 		doubly_linked_list_detach(m, r);

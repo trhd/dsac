@@ -79,7 +79,7 @@ linked_list_insert_back(struct linked_list_meta *m, struct linked_list *n)
 	assert(m);
 	assert(n);
 
-	struct linked_list ** h = &m->head;
+	struct linked_list **h = &m->head;
 
 	while (*h)
 	{
@@ -104,7 +104,7 @@ linked_list_detach(struct linked_list_meta *m, struct linked_list **e)
 	assert(e);
 	assert(*e);
 
-	struct linked_list * t = *e;
+	struct linked_list *t = *e;
 
 	*e = t->next;
 	t->next = 0;
@@ -176,7 +176,7 @@ linked_list_remove_match(struct linked_list_meta *m, const void *match,
 }
 
 struct linked_list **
-linked_list_find(struct linked_list_meta *m, const void * p)
+linked_list_find(struct linked_list_meta *m, const void *p)
 {
 	assert(m);
 	assert(p);
