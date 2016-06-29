@@ -92,7 +92,7 @@ splay_is_empty(const struct splay_tree *tree)
 	return splay_size(tree) == 0;
 }
 
-#if CMAKE_BUILD_TYPE == Debug
+#ifndef NDEBUG
 int splay_verify(const struct splay_tree *tree);
 void debug_print(const struct splay_node *m,
 		const struct splay_node *l,

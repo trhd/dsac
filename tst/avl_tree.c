@@ -25,7 +25,7 @@
 
 #define print_error(...) fprintf(stderr, "ERROR: " __VA_ARGS__)
 
-#if CMAKE_BUILD_TYPE == Debug
+#ifndef NDEBUG
 #define VERIFY(a) \
 do\
 {\
