@@ -24,8 +24,8 @@
 typedef struct doubly_linked_list_meta fifo_meta_t;
 typedef struct doubly_linked_list fifo_t;
 
-static inline void *
-fifo_get(fifo_t * fifo)
+static inline const void *
+fifo_get(const fifo_t * fifo)
 {
 	return doubly_linked_list_get(fifo);
 }

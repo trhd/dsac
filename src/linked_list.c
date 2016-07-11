@@ -39,7 +39,7 @@ linked_list_set(struct linked_list *e, const void *d)
 	e->data = d;
 }
 
-void *
+const void *
 linked_list_get(const struct linked_list *f)
 {
 	assert(f);

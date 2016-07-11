@@ -37,7 +37,7 @@ linked_list_initialize(struct linked_list_meta *meta);
 void
 linked_list_set(struct linked_list *entry, const void *data);
 
-void *
+const void *
 linked_list_get(const struct linked_list *from);
 
 struct linked_list **

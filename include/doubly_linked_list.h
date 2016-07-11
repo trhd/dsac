@@ -45,7 +45,7 @@ doubly_linked_list_set(struct doubly_linked_list *entry, const void *data)
 	entry->data = data;
 }
 
-static inline void *
+static inline const void *
 doubly_linked_list_get(const struct doubly_linked_list *entry)
 {
 	assert(entry);
