@@ -53,6 +53,13 @@ struct splay_node * splay_remove_prev(struct splay_tree *tree, const void *key);
 
 const struct splay_node * splay_find(struct splay_tree *tree, const void *key);
 
+static inline const struct splay_node *
+splay_find_any(struct splay_tree *tree)
+{
+	assert(tree);
+	return tree->root;
+}
+
 const struct splay_node * splay_find_min(struct splay_tree *tree);
 const struct splay_node * splay_find_max(struct splay_tree *tree);
 

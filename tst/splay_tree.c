@@ -465,6 +465,28 @@ test_remove_any()
 }
 
 static void
+test_find_any()
+{
+	size_t i;
+	struct splay_tree t;
+	const struct splay_node *n;
+
+	splay_initialize(&t, (int(*)(const void *, const void *))strcmp);
+
+	for (i = 0; i < sizeof(alphabet_nodes) / sizeof(struct splay_node); ++i)
+		do_insertion(&t, &alphabet_nodes[i]);
+
+	for (i = 0; i < sizeof(alphabet_nodes) / sizeof(struct splay_node); ++i)
+	{
+		n = splay_find_any(&t);
+		TEST_NOT(n, NULL, "splay_find_any() failed.");
+		TEST_NOT(splay_remove(&t, splay_get(n)), NULL, "Failed to remove previously found node.");
+	}
+
+	TEST(splay_is_empty(&t), true, "Splay tree doesn't appear to be empty.");
+}
+
+static void
 next_prev_test()
 {
 	size_t i;
@@ -575,6 +597,7 @@ iterate_empty_tree()
 int main()
 {
 	test_remove_any();
+	test_find_any();
 	next_prev_null();
 	next_prev_test();
 	iterate_empty_tree();
