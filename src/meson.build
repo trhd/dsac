@@ -90,7 +90,6 @@ DSAC_LIB_SHARED = shared_library(
 	],
 	include_directories : DSAC_INCLUDE,
 	version : meson.project_version(),
-	install : true,
 	c_args : release_flags,
 	install : true
 )
