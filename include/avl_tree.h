@@ -21,6 +21,8 @@
 
 #include <assert.h>
 
+#define AVL_TREE_INITIALIZER(comparison_function) { 0, comparison_function, NULL }
+
 struct avl_node
 {
 	struct avl_node * left;

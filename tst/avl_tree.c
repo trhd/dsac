@@ -293,6 +293,24 @@ test_iteration(struct avl_tree *m)
 }
 
 int
+test_static_initializer()
+{
+	static struct avl_tree s = AVL_TREE_INITIALIZER((int(*)(const void *, const void *))strcmp),
+	                       d;
+
+	avl_initialize(&d, (int(*)(const void *, const void *))strcmp);
+
+	if (memcmp(&d, &s, sizeof(s)))
+	{
+		print_error("static initializer test failed; dynamically and "
+				"statically initialized AVL trees don't match.\n");
+		return 1;
+	}
+
+	return 0;
+}
+
+int
 main(int ac __attribute__((unused)),
 		char **av __attribute__((unused)))
 {
@@ -309,6 +327,9 @@ main(int ac __attribute__((unused)),
 	}
 
 	avl_initialize(&m, (int(*)(const void *, const void *))strcmp);
+
+	if (test_static_initializer())
+		goto err;
 
 	if (!avl_empty(&m))
 	{
