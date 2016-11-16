@@ -21,6 +21,7 @@ TEST_TIMEOUT = 900
 test_deps = [ CMOCKA, THREADS ]
 test_cflags = [
 	'-DUNIT_TESTING',
+	'-D_GNU_SOURCE',
 	'-isystem', meson.current_source_dir() + '/system'
 ]
 
@@ -86,6 +87,7 @@ foreach t : [
 		'flags',
 		'lifo',
 		'linked_list',
+		'lock',
 		'quicksort',
 		'splay_tree'
 		]

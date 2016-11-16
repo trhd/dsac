@@ -15,10 +15,9 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+cflags = [ '-D_GNU_SOURCE' ]
 if get_option('buildtype') == 'release'
-	release_flags = [ '-DNDEBUG' ]
-else
-	release_flags = []
+	cflags += [ '-DNDEBUG' ]
 endif
 
 DSAC_LIB_SOURCES = files(
@@ -26,6 +25,7 @@ DSAC_LIB_SOURCES = files(
 		'bitmap.c',
 		'doubly_linked_list.c',
 		'linked_list.c',
+		'lock.c',
 		'quicksort.c',
 		'splay_tree.c'
 	)
@@ -38,6 +38,6 @@ DSAC_LIB = library(
 	include_directories : DSAC_INCLUDE,
 	version : meson.project_version(),
 	dependencies : THREADS,
-	c_args : release_flags,
+	c_args : cflags,
 	install : true
 )
