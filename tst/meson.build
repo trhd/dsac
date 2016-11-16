@@ -83,6 +83,7 @@ foreach t : [
 		'bitmap',
 		'debug_flags',
 		'doubly_linked_list',
+		'condition',
 		'fifo',
 		'flags',
 		'lifo',
