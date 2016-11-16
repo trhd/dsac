@@ -82,6 +82,7 @@ foreach t : [
 		'bitmap',
 		'doubly_linked_list',
 		'fifo',
+		'flags',
 		'lifo',
 		'linked_list',
 		'quicksort',
