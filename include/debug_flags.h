@@ -5,7 +5,7 @@
 #include <string.h>
 #include "flags.h"
 
-#ifdef NDEBUG
+#if defined(NDEBUG) && !defined(UNIT_TESTING)
 
 #define DEBUG_FLAGS(n)
 #define DEBUG_FLAGS_ENUM(...)
@@ -57,4 +57,4 @@
 #define debug_flags_compare(d, s)\
 	(assert(d), assert(s), _flags_compare((d)->_debug_flags, sizeof((d)->_debug_flags), (s)->_debug_flags, sizeof((s)->_debug_flags)))
 
-#endif /** NDEBUG */
+#endif
