@@ -80,6 +80,7 @@ test('search_structure-splay',
 foreach t : [
 		'avl_tree',
 		'bitmap',
+		'debug_flags',
 		'doubly_linked_list',
 		'fifo',
 		'flags',
