@@ -20,7 +20,9 @@
 #include <errno.h>
 #include "splay_tree.h"
 
-#define NULL ((void*)0)
+#ifndef NULL
+# define NULL ((void*)0)
+#endif
 
 static int
 dummy_min_compare(void const * a __attribute__((unused)),
