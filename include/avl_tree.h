@@ -28,57 +28,77 @@ struct avl_node
 	struct avl_node * left;
 	struct avl_node * right;
 	unsigned short height;
-	const void * data;
+	void const * data;
 };
 
 struct avl_tree
 {
 	unsigned int size;
-	int (*compare)(const void *, const void *);
+	int (*compare)(void const *, void const *);
 	struct avl_node * root;
 };
 
-void avl_initialize(struct avl_tree *, int (*)(const void *, const void *));
+void
+avl_initialize(struct avl_tree *, int (*)(void const *, void const *));
 
-int avl_insert(struct avl_tree *, struct avl_node *);
+int
+avl_insert(struct avl_tree *, struct avl_node *);
 
-struct avl_node * avl_remove(struct avl_tree *, const void *);
-struct avl_node * avl_remove_min(struct avl_tree *);
-struct avl_node * avl_remove_max(struct avl_tree *);
+struct avl_node *
+avl_remove(struct avl_tree *, void const *);
 
-const struct avl_node * avl_find(const struct avl_tree *, const void *);
-const struct avl_node * avl_find_min(const struct avl_tree *);
-const struct avl_node * avl_find_max(const struct avl_tree *);
+struct avl_node *
+avl_remove_min(struct avl_tree *);
 
-int avl_iterate(const struct avl_tree *, int(*)(const struct avl_node *, void *), void *);
+struct avl_node *
+avl_remove_max(struct avl_tree *);
+
+struct avl_node const *
+avl_find(struct avl_tree const *, void const *);
+
+struct avl_node const *
+avl_find_min(struct avl_tree const *);
+
+struct avl_node const *
+avl_find_max(struct avl_tree const *);
+
+int
+avl_iterate(struct avl_tree const *, int (*)(struct avl_node const *, void *), void *);
 
 static inline void
-avl_set(struct avl_node *n, const void *d)
+avl_set(struct avl_node * n, void const * d)
 {
+	assert(n);
 	n->data = d;
 }
 
-static inline const void *
-avl_get(const struct avl_node *n)
+static inline void const *
+avl_get(struct avl_node const * n)
 {
+	assert(n);
 	return n->data;
 }
 
 static inline unsigned int
-avl_size(const struct avl_tree *meta)
+avl_size(struct avl_tree const * meta)
 {
 	assert(meta);
 	return meta->size;
 }
 
 static inline int
-avl_empty(const struct avl_tree *meta)
+avl_empty(struct avl_tree const * meta)
 {
 	assert(meta);
 	return avl_size(meta) == 0;
 }
 
-#ifndef NDEBUG
-int avl_verify(const struct avl_tree *);
-void avl_print(const struct avl_tree *);
+#if !defined(NDEBUG) || defined(UNIT_TESTING)
+
+int
+avl_verify(struct avl_tree const *);
+
+void
+avl_print(struct avl_tree const *);
+
 #endif

@@ -32,18 +32,18 @@ enum direction
 };
 
 void
-avl_initialize(struct avl_tree *t, int (*cmp)(const void*, const void *))
+avl_initialize(struct avl_tree * t, int (*cmp)(void const *, void const *))
 {
 	assert(t);
 	assert(cmp);
 
 	t->size = 0;
 	t->compare = cmp;
-	t->root = 0;
+	t->root = NULL;
 }
 
 static void
-initialize_leaf(struct avl_node *l)
+initialize_leaf(struct avl_node * l)
 {
 	assert(l);
 
@@ -53,7 +53,7 @@ initialize_leaf(struct avl_node *l)
 }
 
 static int
-update_height(struct avl_node *n)
+update_height(struct avl_node * n)
 {
 	if (!n)
 		return 0;
@@ -69,7 +69,7 @@ update_height(struct avl_node *n)
 }
 
 static int
-get_balance_factor(const struct avl_node *n)
+get_balance_factor(struct avl_node const * n)
 {
 	if (!n)
 		return 0;
@@ -78,11 +78,11 @@ get_balance_factor(const struct avl_node *n)
 }
 
 static void
-rotate_left(struct avl_node **p)
+rotate_left(struct avl_node ** p)
 {
 	assert(p);
 
-	struct avl_node *a = *p;
+	struct avl_node * a = *p;
 
 	*p = a->right;
 	a->right = (*p)->left;
@@ -94,11 +94,11 @@ rotate_left(struct avl_node **p)
 }
 
 static void
-rotate_right(struct avl_node **p)
+rotate_right(struct avl_node ** p)
 {
 	assert(p);
 
-	struct avl_node *a = *p;
+	struct avl_node * a = *p;
 
 	*p = a->left;
 	a->left = (*p)->right;
@@ -110,12 +110,12 @@ rotate_right(struct avl_node **p)
 }
 
 static void
-balance(struct avl_node **n)
+balance(struct avl_node ** n)
 {
 	assert(n);
 	assert(*n);
 
-	struct avl_node **c;
+	struct avl_node ** c;
 	int b = get_balance_factor(*n);
 
 	if (b == 2)
@@ -142,9 +142,9 @@ balance(struct avl_node **n)
 }
 
 static int
-insert_recurse(struct avl_tree *t,
-		struct avl_node **r,
-		struct avl_node *n)
+insert_recurse(struct avl_tree * t,
+		struct avl_node ** r,
+		struct avl_node * n)
 {
 	assert(t);
 	assert(r);
@@ -177,7 +177,7 @@ insert_recurse(struct avl_tree *t,
 }
 
 int
-avl_insert(struct avl_tree *t, struct avl_node *n)
+avl_insert(struct avl_tree * t, struct avl_node * n)
 {
 	assert(t);
 	assert(n);
@@ -198,12 +198,12 @@ avl_insert(struct avl_tree *t, struct avl_node *n)
 }
 
 struct avl_node *
-remove_rightmost(struct avl_node **t)
+remove_rightmost(struct avl_node ** t)
 {
 	assert(t);
 	assert(*t);
 
-	struct avl_node *h;
+	struct avl_node * h;
 
 	if ((*t)->right)
 		h = remove_rightmost(&(*t)->right);
@@ -220,7 +220,7 @@ remove_rightmost(struct avl_node **t)
 }
 
 static struct avl_node *
-remove_node(struct avl_node **r)
+remove_node(struct avl_node ** r)
 {
 	assert(r);
 	assert(*r);
@@ -250,13 +250,13 @@ remove_node(struct avl_node **r)
 }
 
 struct avl_node *
-remove_leaf_r(struct avl_tree *m, struct avl_node **r, const enum direction d)
+remove_leaf_r(struct avl_tree * m, struct avl_node ** r, enum direction const d)
 {
 	assert(m);
 	assert(r);
 	assert(*r);
 
-	struct avl_node *rv;
+	struct avl_node * rv;
 
 	if (d == MIN && (*r)->left)
 		rv = remove_leaf_r(m, &(*r)->left, d);
@@ -299,12 +299,12 @@ avl_remove_max(struct avl_tree * m)
 	return r;
 }
 
-const struct avl_node *
-avl_find_min(const struct avl_tree *m)
+struct avl_node const *
+avl_find_min(struct avl_tree const * m)
 {
 	assert(m);
 
-	struct avl_node *r = m->root;
+	struct avl_node * r = m->root;
 
 	if (r)
 		while (r->left)
@@ -313,12 +313,12 @@ avl_find_min(const struct avl_tree *m)
 	return r;
 }
 
-const struct avl_node *
-avl_find_max(const struct avl_tree *m)
+struct avl_node const *
+avl_find_max(struct avl_tree const * m)
 {
 	assert(m);
 
-	struct avl_node *r = m->root;
+	struct avl_node * r = m->root;
 
 	if (r)
 		while (r->right)
@@ -327,15 +327,15 @@ avl_find_max(const struct avl_tree *m)
 	return r;
 }
 
-const struct avl_node *
-avl_find(const struct avl_tree *m, const void *d)
+struct avl_node const *
+avl_find(struct avl_tree const * m, void const * d)
 {
 	assert(m);
 	assert(m->compare);
 	/** d might be null/zero if pretending pointers to be numbers. */
 
 	int cmp;
-	struct avl_node *t = m->root;
+	struct avl_node * t = m->root;
 
 	while (t != NULL)
 	{
@@ -354,7 +354,7 @@ avl_find(const struct avl_tree *m, const void *d)
 }
 
 static struct avl_node *
-remove_recurse(const struct avl_tree *m, struct avl_node **r, const void * d)
+remove_recurse(struct avl_tree const * m, struct avl_node ** r, void const * d)
 {
 	assert(m);
 	assert(r);
@@ -385,12 +385,12 @@ remove_recurse(const struct avl_tree *m, struct avl_node **r, const void * d)
 }
 
 struct avl_node *
-avl_remove(struct avl_tree *m, const void *d)
+avl_remove(struct avl_tree * m, void const * d)
 {
 	assert(m);
 	/** d might be null/zero if pretending pointers to be numbers. */
 
-	struct avl_node *r;
+	struct avl_node * r;
 
 	if (!m->root)
 		return NULL;
@@ -404,7 +404,7 @@ avl_remove(struct avl_tree *m, const void *d)
 }
 
 static int
-avl_iterate_recurse(const struct avl_node *n, int (*cb)(const struct avl_node *, void *), void *a)
+avl_iterate_recurse(struct avl_node const * n, int (*cb)(struct avl_node const *, void *), void * a)
 {
 	assert(n);
 	assert(cb);
@@ -424,7 +424,7 @@ avl_iterate_recurse(const struct avl_node *n, int (*cb)(const struct avl_node *,
 }
 
 int
-avl_iterate(const struct avl_tree *m, int(*cb)(const struct avl_node *, void *), void *a)
+avl_iterate(struct avl_tree const * m, int(*cb)(struct avl_node const *, void *), void * a)
 {
 	assert(m);
 	assert(cb);
@@ -440,7 +440,7 @@ avl_iterate(const struct avl_tree *m, int(*cb)(const struct avl_node *, void *),
 #include <stdio.h>
 
 static int
-verify_inner(const struct avl_node * n)
+verify_inner(struct avl_node const * n)
 {
 	int l = 0, r = 0, d = 0;
 
@@ -474,7 +474,7 @@ verify_inner(const struct avl_node * n)
 }
 
 int
-avl_verify(const struct avl_tree *m)
+avl_verify(struct avl_tree const * m)
 {
 	assert(m);
 
@@ -494,7 +494,7 @@ avl_verify(const struct avl_tree *m)
 }
 
 static void
-print_inner(const struct avl_node *n, int l, char *pf)
+print_inner(struct avl_node const * n, int l, char * pf)
 {
 	int i;
 
@@ -514,7 +514,7 @@ print_inner(const struct avl_node *n, int l, char *pf)
 }
 
 void
-avl_print(const struct avl_tree *m)
+avl_print(struct avl_tree const * m)
 {
 	assert(m);
 
