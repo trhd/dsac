@@ -25,12 +25,28 @@ struct bitmap_guard
 	unsigned long bitmap_length;
 };
 
-void bitmap_initialize(void *buffer, unsigned long buffer_length);
-int bitmap_set(void *buffer, unsigned long index);
-int bitmap_get(const void *buffer, unsigned long index);
-int bitmap_clear(void *buffer, unsigned long index);
+void
+bitmap_initialize(void * buffer, unsigned long buffer_length);
 
-void bitmap_guard_initialize(struct bitmap_guard *guard, void *buffer, unsigned long buffer_length);
-int bitmap_guard_set(struct bitmap_guard *guard, unsigned long index);
-int bitmap_guard_get(const struct bitmap_guard *guard, unsigned long index);
-int bitmap_guard_clear(struct bitmap_guard *guard, unsigned long index);
+int
+bitmap_set(void * buffer, unsigned long index);
+
+int
+bitmap_get(void const * buffer, unsigned long index);
+
+int
+bitmap_clear(void * buffer, unsigned long index);
+
+
+void
+bitmap_guard_initialize(struct bitmap_guard * guard, void * buffer,
+		unsigned long buffer_length);
+
+int
+bitmap_guard_set(struct bitmap_guard * guard, unsigned long index);
+
+int
+bitmap_guard_get(struct bitmap_guard const * guard, unsigned long index);
+
+int
+bitmap_guard_clear(struct bitmap_guard * guard, unsigned long index);
