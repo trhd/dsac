@@ -23,21 +23,21 @@
 #define NULL ((void*)0)
 
 static int
-dummy_min_compare(const void *a __attribute__((unused)),
-		const void *b __attribute__((unused)))
+dummy_min_compare(void const * a __attribute__((unused)),
+		void const * b __attribute__((unused)))
 {
 	return -1;
 }
 
 static int
-dummy_max_compare(const void *a __attribute__((unused)),
-		const void *b __attribute__((unused)))
+dummy_max_compare(void const * a __attribute__((unused)),
+		void const * b __attribute__((unused)))
 {
 	return 1;
 }
 
 static struct splay_node **
-find_max(struct splay_node **root)
+find_max(struct splay_node ** root)
 {
 	assert(root);
 	assert(*root);
@@ -48,33 +48,33 @@ find_max(struct splay_node **root)
 }
 
 static void
-rotate_right(struct splay_node **root)
+rotate_right(struct splay_node ** root)
 {
 	assert(root);
 	assert(*root);
 	assert((*root)->left);
 
-	struct splay_node *n = (*root)->left;
+	struct splay_node * n = (*root)->left;
 	(*root)->left = n->right;
 	n->right = *root;
 	*root = n;
 }
 
 static void
-rotate_left(struct splay_node **root)
+rotate_left(struct splay_node ** root)
 {
 	assert(root);
 	assert(*root);
 	assert((*root)->right);
 
-	struct splay_node *n = (*root)->right;
+	struct splay_node * n = (*root)->right;
 	(*root)->right = n->left;
 	n->left = *root;
 	*root = n;
 }
 
 static void
-zig_right(struct splay_node **root, struct splay_node **right_tail)
+zig_right(struct splay_node ** root, struct splay_node ** right_tail)
 {
 	assert(root);
 	assert(right_tail);
@@ -92,7 +92,7 @@ zig_right(struct splay_node **root, struct splay_node **right_tail)
 }
 
 static void
-zig_left(struct splay_node **root, struct splay_node **left_tail)
+zig_left(struct splay_node ** root, struct splay_node ** left_tail)
 {
 	assert(root);
 	assert(left_tail);
@@ -110,7 +110,7 @@ zig_left(struct splay_node **root, struct splay_node **left_tail)
 }
 
 static int
-insert(struct splay_tree *tree, struct splay_node *node, int c)
+insert(struct splay_tree * tree, struct splay_node * node, int c)
 {
 	assert(tree);
 	assert(node);
@@ -139,12 +139,12 @@ insert(struct splay_tree *tree, struct splay_node *node, int c)
 }
 
 static struct splay_node *
-remove_root_node(struct splay_tree *tree)
+remove_root_node(struct splay_tree * tree)
 {
 	assert(tree);
 	assert(tree->root);
 
-	struct splay_node **n;
+	struct splay_node ** n;
 	struct splay_node * const rv = tree->root;
 
 	if (!tree->root->left && !tree->root->right)
@@ -172,7 +172,7 @@ remove_root_node(struct splay_tree *tree)
 }
 
 void
-splay_initialize(struct splay_tree *tree, int (*cmp)(const void*, const void *))
+splay_initialize(struct splay_tree * tree, int (*cmp)(void const *, void const *))
 {
 	assert(tree);
 	assert(cmp);
@@ -183,11 +183,11 @@ splay_initialize(struct splay_tree *tree, int (*cmp)(const void*, const void *))
 }
 
 static void
-reassemble(struct splay_node **middle,
-		struct splay_node **left_head,
-		struct splay_node **left_tail,
-		struct splay_node **right_head,
-		struct splay_node **right_tail)
+reassemble(struct splay_node ** middle,
+		struct splay_node ** left_head,
+		struct splay_node ** left_tail,
+		struct splay_node ** right_head,
+		struct splay_node ** right_tail)
 {
 	assert(middle);
 	assert(left_head);
@@ -217,15 +217,17 @@ reassemble(struct splay_node **middle,
 }
 
 static int
-splay(int (*cmp) (const void *, const void *), struct splay_node **root, const void *key)
+splay(int (*cmp) (void const *, void const *), struct splay_node ** root, void const * key)
 {
 	assert(cmp);
 	assert(root);
 	/** key could be null/zero if pretending pointers to be number */
 
-	struct splay_node *right_head = NULL, *right_tail = NULL,
-			  *left_head = NULL, *left_tail = NULL;
 	int c = 1;
+	struct splay_node * right_head = NULL,
+	                  * right_tail = NULL,
+	                  * left_head = NULL,
+	                  * left_tail = NULL;
 
 	if (!*root)
 		return 0;
@@ -281,7 +283,7 @@ splay(int (*cmp) (const void *, const void *), struct splay_node **root, const v
 }
 
 int
-splay_insert(struct splay_tree *tree, struct splay_node *node)
+splay_insert(struct splay_tree * tree, struct splay_node * node)
 {
 	assert(tree);
 	assert(node);
@@ -291,8 +293,8 @@ splay_insert(struct splay_tree *tree, struct splay_node *node)
 	return insert(tree, node, c);
 }
 
-const struct splay_node *
-splay_find(struct splay_tree *tree, const void *key)
+struct splay_node const *
+splay_find(struct splay_tree * tree, void const * key)
 {
 	assert(tree);
 	/** key could be null/zero if pretending pointers to be number */
@@ -303,8 +305,8 @@ splay_find(struct splay_tree *tree, const void *key)
 	return NULL;
 }
 
-static const struct splay_node *
-splay_min(struct splay_node **root)
+static struct splay_node const *
+splay_min(struct splay_node ** root)
 {
 	assert(root);
 
@@ -313,8 +315,8 @@ splay_min(struct splay_node **root)
 	return *root;
 }
 
-const struct splay_node *
-splay_find_min(struct splay_tree *tree)
+struct splay_node const *
+splay_find_min(struct splay_tree * tree)
 {
 	assert(tree);
 
@@ -324,8 +326,8 @@ splay_find_min(struct splay_tree *tree)
 	return splay_min(&tree->root);
 }
 
-static const struct splay_node *
-splay_max(struct splay_node **root)
+static struct splay_node const *
+splay_max(struct splay_node ** root)
 {
 	assert(root);
 
@@ -334,8 +336,8 @@ splay_max(struct splay_node **root)
 	return *root;
 }
 
-const struct splay_node *
-splay_find_max(struct splay_tree *tree)
+struct splay_node const *
+splay_find_max(struct splay_tree * tree)
 {
 	assert(tree);
 
@@ -345,13 +347,13 @@ splay_find_max(struct splay_tree *tree)
 	return splay_max(&tree->root);
 }
 
-const struct splay_node *
-splay_find_next(struct splay_tree *tree, const void *key)
+struct splay_node const *
+splay_find_next(struct splay_tree * tree, void const * key)
 {
 	assert(tree);
 	assert(key);
 
-	const struct splay_node *n = splay_find(tree, key);
+	struct splay_node const * n = splay_find(tree, key);
 
 	if (!n)
 		return NULL;
@@ -367,13 +369,13 @@ splay_find_next(struct splay_tree *tree, const void *key)
 	return NULL;
 }
 
-const struct splay_node *
-splay_find_prev(struct splay_tree *tree, const void *key)
+struct splay_node const *
+splay_find_prev(struct splay_tree * tree, void const * key)
 {
 	assert(tree);
 	assert(key);
 
-	const struct splay_node *n = splay_find(tree, key);
+	struct splay_node const * n = splay_find(tree, key);
 
 	if (!n)
 		return NULL;
@@ -390,7 +392,7 @@ splay_find_prev(struct splay_tree *tree, const void *key)
 }
 
 struct splay_node *
-splay_remove_min(struct splay_tree *tree)
+splay_remove_min(struct splay_tree * tree)
 {
 	assert(tree);
 
@@ -403,7 +405,7 @@ splay_remove_min(struct splay_tree *tree)
 }
 
 struct splay_node *
-splay_remove_max(struct splay_tree *tree)
+splay_remove_max(struct splay_tree * tree)
 {
 	assert(tree);
 
@@ -416,12 +418,12 @@ splay_remove_max(struct splay_tree *tree)
 }
 
 struct splay_node *
-splay_remove_next(struct splay_tree *tree, const void *key)
+splay_remove_next(struct splay_tree * tree, void const * key)
 {
 	assert(tree);
 	assert(key);
 
-	const struct splay_node *n = splay_find(tree, key);
+	struct splay_node const * n = splay_find(tree, key);
 
 	if (!n)
 		return NULL;
@@ -438,12 +440,12 @@ splay_remove_next(struct splay_tree *tree, const void *key)
 }
 
 struct splay_node *
-splay_remove_prev(struct splay_tree *tree, const void *key)
+splay_remove_prev(struct splay_tree * tree, void const * key)
 {
 	assert(tree);
 	assert(key);
 
-	const struct splay_node *n = splay_find(tree, key);
+	struct splay_node const * n = splay_find(tree, key);
 
 	if (!n)
 		return NULL;
@@ -460,7 +462,7 @@ splay_remove_prev(struct splay_tree *tree, const void *key)
 }
 
 struct splay_node *
-splay_remove_any(struct splay_tree *tree)
+splay_remove_any(struct splay_tree * tree)
 {
 	assert(tree);
 
@@ -471,7 +473,7 @@ splay_remove_any(struct splay_tree *tree)
 }
 
 struct splay_node *
-splay_remove(struct splay_tree *tree, const void *key)
+splay_remove(struct splay_tree * tree, void const * key)
 {
 	assert(tree);
 	/** key could be null/zero if pretending pointers to be number */
@@ -486,7 +488,7 @@ splay_remove(struct splay_tree *tree, const void *key)
 }
 
 static int
-iteration_recursion(const struct splay_node *node, int (*cb)(const struct splay_node *, void *), void *arg)
+iteration_recursion(struct splay_node const * node, int (*cb)(struct splay_node const *, void *), void * arg)
 {
 	assert(node);
 	assert(cb);
@@ -506,7 +508,7 @@ iteration_recursion(const struct splay_node *node, int (*cb)(const struct splay_
 }
 
 int
-splay_iterate(const struct splay_tree *tree, int(*cb)(const struct splay_node *, void *), void *arg)
+splay_iterate(struct splay_tree const * tree, int(*cb)(struct splay_node const *, void *), void * arg)
 {
 	assert(tree);
 	assert(cb);
@@ -524,12 +526,12 @@ splay_iterate(const struct splay_tree *tree, int(*cb)(const struct splay_node *,
 struct verification_variables
 {
 	size_t counter, err;
-	const void *prev;
-	int (*compare)(const void *, const void *);
+	void const * prev;
+	int (*compare)(void const *, void const *);
 };
 
 static void
-print_inner(const struct splay_node *node, int lvl, char *pf)
+print_inner(struct splay_node const * node, int lvl, char * pf)
 {
 	int i;
 
@@ -549,9 +551,9 @@ print_inner(const struct splay_node *node, int lvl, char *pf)
 }
 
 void
-debug_print(const struct splay_node *m,
-		const struct splay_node *lvl,
-		const struct splay_node *r)
+debug_print(struct splay_node const * m,
+		struct splay_node const * lvl,
+		struct splay_node const * r)
 {
 	if (lvl)
 	{
@@ -571,7 +573,7 @@ debug_print(const struct splay_node *m,
 }
 
 void
-splay_print(const struct splay_tree *tree)
+splay_print(struct splay_tree const * tree)
 {
 	assert(tree);
 
@@ -580,9 +582,9 @@ splay_print(const struct splay_tree *tree)
 }
 
 static int
-ensure_preorder(const struct splay_node *node, struct verification_variables *vars)
+ensure_preorder(struct splay_node const * node, struct verification_variables * vars)
 {
-        static const struct splay_node *prev;
+        static struct splay_node const * prev;
 
         if (node)
         {
@@ -601,7 +603,7 @@ ensure_preorder(const struct splay_node *node, struct verification_variables *va
 }
 
 int
-splay_verify(const struct splay_tree *tree)
+splay_verify(struct splay_tree const * tree)
 {
 	struct verification_variables vars = { 0, 0, NULL, NULL };
 
@@ -610,7 +612,7 @@ splay_verify(const struct splay_tree *tree)
 	ensure_preorder(NULL, NULL);
 
 	vars.err += splay_iterate(tree,
-			(int(*)(const struct splay_node *, void *))ensure_preorder,
+			(int(*)(struct splay_node const *, void *))ensure_preorder,
 			&vars);
 
 	if (vars.counter != splay_size(tree))

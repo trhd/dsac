@@ -25,84 +25,114 @@
 
 struct splay_node
 {
-	const void *data;
+	void const * data;
 	struct splay_node *left, *right;
 };
 
 struct splay_tree
 {
 	size_t size;
-	int (*compare)(const void *, const void *);
-	struct splay_node *root;
+	int (*compare)(void const *, void const *);
+	struct splay_node * root;
 };
 
-void splay_initialize(struct splay_tree *tree,
-		int (*comparison_function)(const void *, const void *key));
+void
+splay_initialize(struct splay_tree * tree,
+		int (*comparison_function)(void const *, void const * key));
 
-int splay_insert(struct splay_tree *tree, struct splay_node *node);
 
-struct splay_node * splay_remove(struct splay_tree *, const void *);
+int
+splay_insert(struct splay_tree * tree, struct splay_node * node);
 
-struct splay_node * splay_remove_any(struct splay_tree *tree);
 
-struct splay_node * splay_remove_min(struct splay_tree *tree);
-struct splay_node * splay_remove_max(struct splay_tree *tree);
+struct splay_node *
+splay_remove(struct splay_tree *, void const *);
 
-struct splay_node * splay_remove_next(struct splay_tree *tree, const void *key);
-struct splay_node * splay_remove_prev(struct splay_tree *tree, const void *key);
+struct splay_node *
+splay_remove_any(struct splay_tree * tree);
 
-const struct splay_node * splay_find(struct splay_tree *tree, const void *key);
+struct splay_node *
+splay_remove_min(struct splay_tree * tree);
 
-static inline const struct splay_node *
-splay_find_any(struct splay_tree *tree)
+struct splay_node *
+splay_remove_max(struct splay_tree * tree);
+
+struct splay_node *
+splay_remove_next(struct splay_tree * tree, void const * key);
+
+struct splay_node *
+splay_remove_prev(struct splay_tree * tree, void const * key);
+
+
+struct splay_node const *
+splay_find(struct splay_tree * tree, void const * key);
+
+struct splay_node const *
+splay_find_min(struct splay_tree * tree);
+
+struct splay_node const *
+splay_find_max(struct splay_tree * tree);
+
+struct splay_node const *
+splay_find_next(struct splay_tree * tree, void const * key);
+
+struct splay_node const *
+splay_find_prev(struct splay_tree * tree, void const * key);
+
+static inline struct splay_node const *
+splay_find_any(struct splay_tree * tree)
 {
 	assert(tree);
 	return tree->root;
 }
 
-const struct splay_node * splay_find_min(struct splay_tree *tree);
-const struct splay_node * splay_find_max(struct splay_tree *tree);
 
-const struct splay_node * splay_find_next(struct splay_tree *tree, const void *key);
-const struct splay_node * splay_find_prev(struct splay_tree *tree, const void *key);
+int
+splay_iterate(struct splay_tree const * tree,
+		int (*callback_function)(struct splay_node const *, void *),
+		void * argument_pointer);
 
-int splay_iterate(const struct splay_tree *tree,
-		int (*callback_function)(const struct splay_node *, void *),
-		void *argument_pointer);
 
 static inline void
-splay_set(struct splay_node *node, const void *key)
+splay_set(struct splay_node * node, void const * key)
 {
 	assert(node);
 	/** key could be null/zero if pretending pointers to be number */
 	node->data = key;
 }
 
-static inline const void *
-splay_get(const struct splay_node *node)
+static inline void const *
+splay_get(struct splay_node const * node)
 {
 	assert(node);
 	return node->data;
 }
 
+
 static inline size_t
-splay_size(const struct splay_tree *tree)
+splay_size(struct splay_tree const * tree)
 {
 	assert(tree);
 	return tree->size;
 }
 
+
 static inline bool
-splay_is_empty(const struct splay_tree *tree)
+splay_is_empty(struct splay_tree const * tree)
 {
 	assert(tree);
 	return splay_size(tree) == 0;
 }
 
 #ifndef NDEBUG
-int splay_verify(const struct splay_tree *tree);
-void debug_print(const struct splay_node *m,
-		const struct splay_node *l,
-		const struct splay_node *r);
-void splay_print(const struct splay_tree *tree);
+
+int
+splay_verify(struct splay_tree const * tree);
+
+void
+debug_print(struct splay_node const * m, struct splay_node const * l,
+            struct splay_node const * r);
+void
+splay_print(struct splay_tree const * tree);
+
 #endif
