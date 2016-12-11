@@ -19,11 +19,23 @@ DSAC_INCLUDE = include_directories(meson.current_source_dir())
 install_headers(
 	[
 		'avl_tree.h',
-		'splay_tree.h',
-		'linked_list.h',
+		'bitmap.h',
+		'blocking_homogeneous_ring_buffer.h',
+		'blocking_ring_buffer.h',
+		'condition.h',
+		'debug_flags.h',
 		'doubly_linked_list.h',
-		'quicksort.h',
 		'fifo.h',
-		'lifo.h'
-	]
+		'flags.h',
+		'homogeneous_ring_buffer.h',
+		'lifo.h',
+		'linked_list.h',
+		'lock.h',
+		'quicksort.h',
+		'ring_buffer.h',
+		'search_structure-avl.h',
+		'search_structure.h',
+		'search_structure-splay.h',
+		'splay_tree.h'
+	],
 )
