@@ -23,9 +23,13 @@ endif
 DSAC_LIB_SOURCES = files(
 		'avl_tree.c',
 		'bitmap.c',
+		'blocking_ring_buffer.c',
+		'blocking_homogeneous_ring_buffer.c',
 		'doubly_linked_list.c',
+		'homogeneous_ring_buffer.c',
 		'linked_list.c',
 		'lock.c',
+		'ring_buffer.c',
 		'quicksort.c',
 		'splay_tree.c'
 	)

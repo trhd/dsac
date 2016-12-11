@@ -82,14 +82,18 @@ foreach t : [
 		'avl_tree',
 		'bitmap',
 		'debug_flags',
+		'blocking_ring_buffer',
+		'blocking_homogeneous_ring_buffer',
 		'doubly_linked_list',
 		'condition',
 		'fifo',
 		'flags',
+		'homogeneous_ring_buffer',
 		'lifo',
 		'linked_list',
 		'lock',
 		'quicksort',
+		'ring_buffer',
 		'splay_tree'
 		]
 	test(t,
