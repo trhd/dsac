@@ -21,75 +21,23 @@ else
 	release_flags = []
 endif
 
-DSAC_LIB_AVL_TREE = static_library(
-	'avl_tree',
-	'avl_tree.c',
-	include_directories : DSAC_INCLUDE,
-	c_args : release_flags
-)
-
-DSAC_LIB_SPLAY_TREE = static_library(
-	'splay_tree',
-	'splay_tree.c',
-	include_directories : DSAC_INCLUDE,
-	c_args : release_flags
-)
-
-DSAC_LIB_BITMAP = static_library(
-	'bitmap',
-	'bitmap.c',
-	include_directories : DSAC_INCLUDE,
-	c_args : release_flags
-)
-
-DSAC_LIB_LINKED_LIST = static_library(
-	'linked_list',
-	'linked_list.c',
-	include_directories : DSAC_INCLUDE,
-	c_args : release_flags
-)
-
-DSAC_LIB_DOUBLY_LINKED_LIST = static_library(
-	'doubly_linked_list',
-	'doubly_linked_list.c',
-	include_directories : DSAC_INCLUDE,
-	c_args : release_flags
-)
-
-DSAC_LIB_LIFO = DSAC_LIB_DOUBLY_LINKED_LIST
-
-DSAC_LIB_FIFO = DSAC_LIB_DOUBLY_LINKED_LIST
-
-DSAC_LIB_QUICKSORT = static_library(
-	'quicksort',
-	'quicksort.c',
-	include_directories : DSAC_INCLUDE,
-	c_args : release_flags
-)
-
-DSAC_LIB = [
-	DSAC_LIB_AVL_TREE,
-	DSAC_LIB_SPLAY_TREE,
-	DSAC_LIB_BITMAP,
-	DSAC_LIB_LINKED_LIST,
-	DSAC_LIB_DOUBLY_LINKED_LIST,
-	# DSAC_LIB_LIFO == DSAC_LIB_DOUBLY_LINKED_LIST
-	# DSAC_LIB_FIFO == DSAC_LIB_DOUBLY_LINKED_LIST
-	DSAC_LIB_QUICKSORT
-]
-
-DSAC_LIB_SHARED = shared_library(
-	'dsac',
-	[
+DSAC_LIB_SOURCES = files(
 		'avl_tree.c',
 		'bitmap.c',
 		'doubly_linked_list.c',
 		'linked_list.c',
-		'splay_tree.c',
-		'quicksort.c'
-	],
+		'quicksort.c',
+		'splay_tree.c'
+	)
+
+THREADS = dependency('threads')
+
+DSAC_LIB = library(
+	'dsac',
+	DSAC_LIB_SOURCES,
 	include_directories : DSAC_INCLUDE,
 	version : meson.project_version(),
+	dependencies : THREADS,
 	c_args : release_flags,
 	install : true
 )
