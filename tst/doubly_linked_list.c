@@ -21,587 +21,510 @@
 #include <string.h>
 #include <sys/types.h>
 #include "doubly_linked_list.h"
+#include "cmocka-wrapper.h"
 
-#define test_find_head()\
-do\
-{\
-	if (doubly_linked_list_find_head(&dlmeta) != dlmeta.head)\
-	{\
-		printf("Received unexpected list head.\n");\
-		goto err;\
-	}\
-} while (0)
+#ifndef NULL
+# define NULL ((void*)0)
+#endif
 
-#define test_find_tail()\
-do\
-{\
-	if (doubly_linked_list_find_tail(&dlmeta) != dlmeta.tail)\
-	{\
-		printf("Received unexpected list tail.\n");\
-		goto err;\
-	}\
-} while (0)
-
-#define test_find_tail_and_head()\
-do\
-{\
-	test_find_head();\
-	test_find_tail();\
-} while (0)
-
-#define test_next(a, b)\
-do\
-{\
-	struct doubly_linked_list * T = b >= bufs_len ? 0 : &ll_bufs[b],\
-			*U = doubly_linked_list_next(&ll_bufs[a]);\
-	\
-	if (!U || U != T)\
-	{\
-		printf("Linked list \"next\" was wrong.\n");\
-		goto err;\
-	}\
-} while (0)
-
-#define test_size(I)\
-do\
-{\
-	unsigned int T;\
-	if ((T = doubly_linked_list_size(&dlmeta)) != I)\
-	{\
-		printf("Linked list reported wrong size (Got: %u, Expected %u).\n",\
-				T, (unsigned int)I);\
-		goto err;\
-	}\
-} while (0)
-
-#define test_empty()\
-do\
-{\
-	if (!doubly_linked_list_empty(&dlmeta))\
-	{\
-		printf("Empty linked list reported as non-empty.\n");\
-		goto err;\
-	}\
-	\
-	test_size(0);\
-} while (0)
-
-#define test_nonempty()\
-do\
-{\
-	if (doubly_linked_list_empty(&dlmeta))\
-	{\
-		printf("Non-empty linked list reported as emtpy.\n");\
-		goto err;\
-	}\
-} while (0)
-
-#define test_add_back(I)\
-do\
-{\
-	if (doubly_linked_list_insert_back(&dlmeta, &ll_bufs[I]))\
-	{\
-		printf("Failed to \"insert back\" \"%s\" into the linked list.\n",\
-				(char*)doubly_linked_list_get(&ll_bufs[I]));\
-		goto err;\
-	}\
-} while (0)
-
-#define test_add_front(I)\
-do\
-{\
-	if (doubly_linked_list_insert_front(&dlmeta, &ll_bufs[I]))\
-	{\
-		printf("Failed to \"insert front\" \"%s\" into the linked list.\n",\
-				(char*)doubly_linked_list_get(&ll_bufs[I]));\
-		goto err;\
-	}\
-} while (0)
-
-#define test_add(I)\
-do\
-{\
-	if (I % 2)\
-		test_add_front(I);\
-	else\
-		test_add_back(I);\
-} while (0)
-
-#define test_add_front_existing(I)\
-do\
-{\
-	if (!doubly_linked_list_insert_front(&dlmeta, &ll_bufs[I]))\
-	{\
-		printf("Succeeded to insert \"%s\" existing entry to the front of the linked list.\n",\
-				(char*)doubly_linked_list_get(&ll_bufs[I]));\
-		goto err;\
-	}\
-} while (0)
-
-#define test_add_back_existing(I)\
-do\
-{\
-	if (!doubly_linked_list_insert_back(&dlmeta, &ll_bufs[I]))\
-	{\
-		printf("Succeeded to insert \"%s\" existing entry to the back of the linked list.\n",\
-				(char*)doubly_linked_list_get(&ll_bufs[I]));\
-		goto err;\
-	}\
-} while (0)
-
-#define test_add_existing(I)\
-do\
-{\
-	test_add_front_existing(I);\
-	test_add_back_existing(I);\
-	test_find_tail_and_head();\
-} while (0)
-
-#define test_find_nonexisting(I)\
-do\
-{\
-	if (doubly_linked_list_find_front(dlmeta.head, data_bufs[I]))\
-	{\
-		printf("Found an entry for nonexisting request.\n");\
-		goto err;\
-	}\
-	if (doubly_linked_list_find_back(dlmeta.tail, data_bufs[I]))\
-	{\
-		printf("Found an entry for nonexisting request.\n");\
-		goto err;\
-	}\
-	test_find_tail_and_head();\
-} while (0)
-
-#define test_find(I)\
-do\
-{\
-	struct doubly_linked_list * T = doubly_linked_list_find_front(dlmeta.head, data_bufs[I]);\
-	\
-	if (!T)\
-	{\
-		printf("Failed to find \"%s\" from the linked list.\n",\
-				data_bufs[I]);\
-		goto err;\
-	}\
-	\
-	if (strcmp((char*)doubly_linked_list_get(T), data_bufs[I]))\
-	{\
-		printf("Found incorrect data from received entry (Got: \"%s\", "\
-				"Expected \"%s\").\n", (char*)doubly_linked_list_get(T), data_bufs[I]);\
-		goto err;\
-	}\
-	\
-	if (doubly_linked_list_find_back(dlmeta.tail, data_bufs[I]) != T)\
-	{\
-		printf("Failed to find the correct entry when searching backwards.\n");\
-		goto err;\
-	}\
-	test_find_tail_and_head();\
-} while (0)
-
-#define test_remove_head(I)\
-do\
-{\
-	struct doubly_linked_list * T = doubly_linked_list_remove_head(&dlmeta);\
-	\
-	if (!T)\
-	{\
-		printf("Failed to remove the head \"%s\" from of the linked list.\n",\
-				data_bufs[I]);\
-		goto err;\
-	}\
-	\
-	if (strcmp((char*)doubly_linked_list_get(T), data_bufs[I]))\
-	{\
-		printf("Found incorrect data from the removed entry (Got: \"%s\", "\
-				"Expected \"%s\").\n", (char*)T->data, data_bufs[I]);\
-		goto err;\
-	}\
-} while (0)
-
-#define test_remove_tail(I)\
-do\
-{\
-	struct doubly_linked_list * T = doubly_linked_list_remove_tail(&dlmeta);\
-	\
-	if (!T)\
-	{\
-		printf("Failed to remove \"%s\" \"the tail\" of the linked list.\n",\
-				data_bufs[I]);\
-		goto err;\
-	}\
-	\
-	if (strcmp((char*)doubly_linked_list_get(T), data_bufs[I]))\
-	{\
-		printf("Found incorrect data from the removed entry (Got: \"%s\", "\
-				"Expected \"%s\").\n", (char*)T->data, data_bufs[I]);\
-		goto err;\
-	}\
-} while (0)
-
-#define test_remove_front(I)\
-do\
-{\
-	struct doubly_linked_list * T = doubly_linked_list_remove_front(&dlmeta, data_bufs[I]);\
-	\
-	if (!T)\
-	{\
-		printf("Failed to remove \"%s\" \"from the front\" of the linked list.\n",\
-				data_bufs[I]);\
-		goto err;\
-	}\
-	\
-	if (strcmp((char*)doubly_linked_list_get(T), data_bufs[I]))\
-	{\
-		printf("Found incorrect data from the removed entry (Got: \"%s\", "\
-				"Expected \"%s\").\n", (char*)T->data, data_bufs[I]);\
-		goto err;\
-	}\
-} while (0)
-
-#define test_remove_back(I)\
-do\
-{\
-	struct doubly_linked_list * T = doubly_linked_list_remove_back(&dlmeta, data_bufs[I]);\
-	\
-	if (!T)\
-	{\
-		printf("Failed to remove \"%s\" \"from the back\" of the linked list.\n",\
-				data_bufs[I]);\
-		goto err;\
-	}\
-	\
-	if (strcmp((char*)doubly_linked_list_get(T), data_bufs[I]))\
-	{\
-		printf("Found incorrect data from the removed entry (Got: \"%s\", "\
-				"Expected \"%s\").\n", (char*)T->data, data_bufs[I]);\
-		goto err;\
-	}\
-} while (0)
-
-#define test_remove(I)\
-do\
-{\
-	if (I % 2)\
-		test_remove_front(I);\
-	else\
-		test_remove_back(I);\
-} while (0)
-
-#define test_remove_back_nonexisting(I)\
-do\
-{\
-	if (doubly_linked_list_remove_back(&dlmeta, data_bufs[I]))\
-	{\
-		printf("Removing non-existing didn't return an error.\n");\
-		goto err;\
-	}\
-} while (0)
-
-#define test_remove_front_nonexisting(I)\
-do\
-{\
-	if (doubly_linked_list_remove_front(&dlmeta, data_bufs[I]))\
-	{\
-		printf("Removing non-existing didn't return an error.\n");\
-		goto err;\
-	}\
-} while (0)
-
-#define test_remove_nonexisting(I)\
-do\
-{\
-	test_remove_front_nonexisting(I);\
-	test_remove_back_nonexisting(I);\
-} while(0)
-
-#define test_remove_head_nonexisting()\
-do\
-{\
-	if (doubly_linked_list_remove_head(&dlmeta))\
-	{\
-		printf("Removing non-existing \"first\" didn't return an error.\n");\
-		goto err;\
-	}\
-} while (0)
-
-#define test_remove_tail_nonexisting()\
-do\
-{\
-	if (doubly_linked_list_remove_head(&dlmeta))\
-	{\
-		printf("Removing non-existing \"first\" didn't return an error.\n");\
-		goto err;\
-	}\
-} while (0)
-
-static void __attribute__((unused))
-print_list(const struct doubly_linked_list * l)
+static const char * TEST_DATA[] =
 {
-	const struct doubly_linked_list *p;
+	"aa",
+	"bb",
+	"cc",
+	"dd",
+	"ee",
+	"ff",
+	"gg",
+	"hh",
+	"ii",
+	"jj"
+};
 
-	printf("\n  Printing liked list:  \n");
+enum { TEST_DATA_LEN = sizeof(TEST_DATA) / sizeof(char*) };
 
-	while (l)
-	{
-		printf(" %s >", (char*)doubly_linked_list_get(l));
-		p = l;
-		l = doubly_linked_list_next(l);
-	}
-	printf("\n  ");
+/***********************************************************************/
 
-	l = p;
-	while (l)
-	{
-		printf(" %s <", (char*)doubly_linked_list_get(l));
-		l = doubly_linked_list_previous(l);
-	}
-
-	printf("\n");
-}
-
-int
-main(int ac __attribute__((unused)), char **av)
+static void
+FT_basic_usage__1()
 {
-	printf("Test %s.\n", av[0]);
-
-	int i;
-	const char * data_bufs[] =
-	{
-		"aa",
-		"bb",
-		"cc",
-		"dd",
-		"ee",
-		"ff",
-		"gg",
-		"hh",
-		"ii",
-		"jj"
-	};
-	ssize_t bufs_len = sizeof(data_bufs)/sizeof(char*);
-	struct doubly_linked_list ll_bufs[bufs_len];
 	struct doubly_linked_list_meta dlmeta;
+	struct doubly_linked_list ll_bufs[TEST_DATA_LEN], *t;
 
-	for (i = bufs_len - 1; i >= 0; --i)
-		doubly_linked_list_set(&ll_bufs[i], data_bufs[i]);
-
-	printf("Executing basic tests:\n");
-	fflush(stdout);
+	for (int i = TEST_DATA_LEN - 1; i >= 0; --i)
+		doubly_linked_list_set(&ll_bufs[i], TEST_DATA[i]);
 
 	doubly_linked_list_initialize(&dlmeta);
 
-	test_empty();
-
-	printf("Round 1: ");
-	for (i = 0; i < bufs_len; ++i)
+	for (int i = 0; i < TEST_DATA_LEN; ++i)
 	{
-		test_empty();
-		test_find_nonexisting(i);
-		test_add(i);
-		test_add_existing(i);
-		test_nonempty();
-		test_size(1);
-		test_find(i);
-		test_remove(i);
-		test_remove_nonexisting(i);
+		assert_true(doubly_linked_list_empty(&dlmeta));
+		assert_null(doubly_linked_list_find_front(dlmeta.head, TEST_DATA[i]));
+		assert_null(doubly_linked_list_find_back(dlmeta.tail, TEST_DATA[i]));
+		assert_ptr_equal(doubly_linked_list_find_head(&dlmeta), NULL);
+		assert_ptr_equal(doubly_linked_list_find_tail(&dlmeta), NULL);;
+		assert_int_equal(doubly_linked_list_size(&dlmeta), 0);
+
+		if (i % 2)
+			assert_false(doubly_linked_list_insert_front(&dlmeta, &ll_bufs[i]));
+		else
+			assert_false(doubly_linked_list_insert_back(&dlmeta, &ll_bufs[i]));
+
+		assert_true(doubly_linked_list_insert_front(&dlmeta, &ll_bufs[i]));
+		assert_true(doubly_linked_list_insert_back(&dlmeta, &ll_bufs[i]));
+		assert_ptr_equal(doubly_linked_list_find_head(&dlmeta), &ll_bufs[i]);
+		assert_ptr_equal(doubly_linked_list_find_tail(&dlmeta), &ll_bufs[i]);
+
+		assert_false(doubly_linked_list_empty(&dlmeta));
+		assert_int_equal(doubly_linked_list_size(&dlmeta), 1);
+
+		t = doubly_linked_list_find_front(dlmeta.head, TEST_DATA[i]);
+		assert_non_null(t);
+		assert_string_equal((char*)doubly_linked_list_get(t), TEST_DATA[i]);
+		assert_ptr_equal(doubly_linked_list_find_back(dlmeta.tail, TEST_DATA[i]), t);
+
+		if (i % 3 % 2)
+			t = doubly_linked_list_remove_front(&dlmeta, TEST_DATA[i]);
+		else
+			t = doubly_linked_list_remove_back(&dlmeta, TEST_DATA[i]);
+		assert_non_null(t);
+		assert_string_equal((char*)doubly_linked_list_get(t), TEST_DATA[i]);
+
+		assert_null(doubly_linked_list_remove_front(&dlmeta, TEST_DATA[i]));
+		assert_null(doubly_linked_list_remove_back(&dlmeta, TEST_DATA[i]));
+
+		assert_null(doubly_linked_list_find_front(dlmeta.head, TEST_DATA[i]));
+		assert_null(doubly_linked_list_find_back(dlmeta.tail, TEST_DATA[i]));
 	}
-	printf("OK\n");
-
-	printf("Round 2: ");
-	test_empty();
-	for (i = 0; i < bufs_len; ++i)
-		test_add(i);
-	test_nonempty();
-	test_size(bufs_len);
-	for (i = 0; i < bufs_len; ++i)
-		test_find(i);
-	for (i = 0; i < bufs_len; ++i)
-		test_remove(i);
-	test_empty();
-	for (i = 0; i < bufs_len; ++i)
-		test_find_nonexisting(i);
-	printf("OK\n");
-
-	printf("Round 3: ");
-	test_empty();
-	test_remove_head_nonexisting();
-
-	for (i = 0; i < bufs_len; ++i)
-		test_add(i);
-
-	test_size(bufs_len);
-	test_nonempty();
-
-	for (i = 0; i < bufs_len; ++i)
-		test_find(i);
-
-	test_remove(2);
-	test_size(bufs_len - 1);
-
-	test_nonempty();
-
-	test_find(0);
-	test_find(1);
-	test_find_nonexisting(2);
-	for (i = 3; i < bufs_len; ++i)
-		test_find(i);
-
-	test_nonempty();
-
-	test_remove(3);
-	test_remove(5);
-	test_remove(7);
-	test_size(bufs_len - 4);
-
-	test_nonempty();
-
-	test_find(0);
-	test_find(1);
-	test_find_nonexisting(2);
-	test_find_nonexisting(3);
-	test_find(4);
-	test_find_nonexisting(5);
-	test_find(6);
-	test_find_nonexisting(7);
-	test_find(8);
-	test_find(9);
-
-	test_remove(0);
-	test_remove(1);
-	test_remove(4);
-	test_remove(6);
-	test_remove(8);
-	test_remove(9);
-
-	test_empty();
-	test_remove_head_nonexisting();
-
-	for (i = 0; i < bufs_len; ++i)
-		test_find_nonexisting(i);
-	printf("OK\n");
-
-	printf("Round 4: ");
-	test_empty();
-	test_add_back(5);
-	test_add_existing(5);
-	test_add_front(8);
-	test_add_existing(8);
-	test_add_back(2);
-	test_add_existing(2);
-	test_add_front(6);
-	test_add_existing(6);
-	test_add_back(7);
-	test_add_existing(7);
-	test_add_front(3);
-	test_add_existing(3);
-	test_add_back(1);
-	test_add_existing(1);
-	test_add_front(4);
-	test_add_existing(4);
-	test_add_back(9);
-	test_add_existing(9);
-	test_nonempty();
-
-	test_next(4, 3);
-	test_next(3, 6);
-	test_next(6, 8);
-	test_next(8, 5);
-	test_next(5, 2);
-	test_next(2, 7);
-	test_next(7, 1);
-	test_next(1, 9);
-
-	test_size(9);
-
-	test_remove_head(4);
-	test_remove_nonexisting(4);
-	test_remove_head(3);
-	test_remove_nonexisting(3);
-	test_remove_head(6);
-	test_remove_nonexisting(6);
-	test_remove_head(8);
-	test_remove_nonexisting(8);
-	test_remove_head(5);
-	test_remove_nonexisting(5);
-	test_remove_head(2);
-	test_remove_nonexisting(2);
-	test_remove_head(7);
-	test_remove_nonexisting(7);
-	test_remove_head(1);
-	test_remove_nonexisting(1);
-	test_remove_head(9);
-	test_remove_nonexisting(9);
-	test_empty();
-	test_remove_head_nonexisting();
-
-
-	for (i = 0; i < bufs_len; ++i)
-		test_find_nonexisting(i);
-	printf("OK\n");
-
-	printf("Round 5: ");
-	test_empty();
-	test_add_back(5);
-	test_add_existing(5);
-	test_add_front(8);
-	test_add_existing(8);
-	test_add_back(2);
-	test_add_existing(2);
-	test_add_front(6);
-	test_add_existing(6);
-	test_add_back(7);
-	test_add_existing(7);
-	test_add_front(3);
-	test_add_existing(3);
-	test_add_back(1);
-	test_add_existing(1);
-	test_add_front(4);
-	test_add_existing(4);
-	test_add_back(9);
-	test_add_existing(9);
-	test_nonempty();
-
-	test_next(4, 3);
-	test_next(3, 6);
-	test_next(6, 8);
-	test_next(8, 5);
-	test_next(5, 2);
-	test_next(2, 7);
-	test_next(7, 1);
-	test_next(1, 9);
-
-	test_size(9);
-
-	test_remove_tail(9);
-	test_remove_nonexisting(9);
-	test_remove_tail(1);
-	test_remove_nonexisting(1);
-	test_remove_tail(7);
-	test_remove_nonexisting(7);
-	test_remove_tail(2);
-	test_remove_nonexisting(2);
-	test_remove_tail(5);
-	test_remove_nonexisting(5);
-	test_remove_tail(8);
-	test_remove_nonexisting(8);
-	test_remove_tail(6);
-	test_remove_nonexisting(6);
-	test_remove_tail(3);
-	test_remove_nonexisting(3);
-	test_remove_tail(4);
-	test_remove_nonexisting(4);
-	test_empty();
-	test_remove_head_nonexisting();
-
-	for (i = 0; i < bufs_len; ++i)
-		test_find_nonexisting(i);
-	printf("OK\n");
-
-	printf("Test %s ended with SUCCESS!\n", av[0]);
-	return 0;
-err:
-	printf("Test %s ended with FAILURE!\n", av[0]);
-	return -1;
 }
+
+/***********************************************************************/
+
+static void
+FT_basic_usage__2()
+{
+	struct doubly_linked_list_meta dlmeta;
+	struct doubly_linked_list ll_bufs[TEST_DATA_LEN], *t;
+
+	for (int i = TEST_DATA_LEN - 1; i >= 0; --i)
+		doubly_linked_list_set(&ll_bufs[i], TEST_DATA[i]);
+
+	doubly_linked_list_initialize(&dlmeta);
+
+	assert_true(doubly_linked_list_empty(&dlmeta));
+
+	for (int i = 0; i < TEST_DATA_LEN; ++i)
+	{
+		assert_int_equal(doubly_linked_list_size(&dlmeta), i);
+
+		if (i % 2)
+			assert_false(doubly_linked_list_insert_front(&dlmeta, &ll_bufs[i]));
+		else
+			assert_false(doubly_linked_list_insert_back(&dlmeta, &ll_bufs[i]));
+
+		assert_false(doubly_linked_list_empty(&dlmeta));
+		assert_int_equal(doubly_linked_list_size(&dlmeta), i + 1);
+	}
+
+	for (int i = 0; i < TEST_DATA_LEN; ++i)
+	{
+		t = doubly_linked_list_find_front(dlmeta.head, TEST_DATA[i]);
+		assert_non_null(t);
+		assert_string_equal((char*)doubly_linked_list_get(t), TEST_DATA[i]);
+		assert_ptr_equal(doubly_linked_list_find_back(dlmeta.tail, TEST_DATA[i]), t);
+
+		assert_ptr_equal(doubly_linked_list_find_head(&dlmeta), dlmeta.head);
+		assert_ptr_equal(doubly_linked_list_find_tail(&dlmeta), dlmeta.tail);
+	}
+
+	for (int i = 0; i < TEST_DATA_LEN; ++i)
+	{
+		if (i % 2)
+			t = doubly_linked_list_remove_front(&dlmeta, TEST_DATA[i]);
+		else
+			t = doubly_linked_list_remove_back(&dlmeta, TEST_DATA[i]);
+		assert_non_null(t);
+		assert_string_equal((char*)doubly_linked_list_get(t), TEST_DATA[i]);
+
+		assert_int_equal(doubly_linked_list_size(&dlmeta), TEST_DATA_LEN - i - 1);
+		assert_true(doubly_linked_list_empty(&dlmeta) || i < TEST_DATA_LEN);
+	}
+
+	assert_true(doubly_linked_list_empty(&dlmeta));
+
+	assert_ptr_equal(doubly_linked_list_find_head(&dlmeta), NULL);
+	assert_ptr_equal(doubly_linked_list_find_tail(&dlmeta), NULL);
+
+	for (int i = 0; i < TEST_DATA_LEN; ++i)
+	{
+		assert_false(doubly_linked_list_find_front(dlmeta.head, TEST_DATA[i]));
+		assert_false(doubly_linked_list_find_back(dlmeta.tail, TEST_DATA[i]));
+	}
+}
+
+/***********************************************************************/
+
+static void
+FT_basic_usage__3()
+{
+	struct doubly_linked_list_meta dlmeta;
+	struct doubly_linked_list ll_bufs[TEST_DATA_LEN], *t;
+
+	for (int i = TEST_DATA_LEN - 1; i >= 0; --i)
+		doubly_linked_list_set(&ll_bufs[i], TEST_DATA[i]);
+
+	doubly_linked_list_initialize(&dlmeta);
+
+	assert_true(doubly_linked_list_empty(&dlmeta));
+	assert_null(doubly_linked_list_remove_head(&dlmeta));
+	assert_null(doubly_linked_list_remove_tail(&dlmeta));
+
+	for (int i = 0; i < TEST_DATA_LEN; ++i)
+	{
+		assert_int_equal(doubly_linked_list_size(&dlmeta), i);
+
+		if (i % 2)
+			assert_false(doubly_linked_list_insert_back(&dlmeta, &ll_bufs[i]));
+		else
+			assert_false(doubly_linked_list_insert_front(&dlmeta, &ll_bufs[i]));
+
+		assert_false(doubly_linked_list_empty(&dlmeta));
+		assert_int_equal(doubly_linked_list_size(&dlmeta), i + 1);
+	}
+
+	for (int i = 0; i < TEST_DATA_LEN; ++i)
+	{
+		t = doubly_linked_list_find_front(dlmeta.head, TEST_DATA[i]);
+		assert_non_null(t);
+		assert_string_equal((char*)doubly_linked_list_get(t), TEST_DATA[i]);
+		assert_ptr_equal(doubly_linked_list_find_back(dlmeta.tail, TEST_DATA[i]), t);
+	}
+
+	assert_ptr_equal(doubly_linked_list_find_head(&dlmeta), dlmeta.head);
+	assert_ptr_equal(doubly_linked_list_find_tail(&dlmeta), dlmeta.tail);
+
+	t = doubly_linked_list_remove_back(&dlmeta, TEST_DATA[2]);
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), TEST_DATA[2]);
+
+	assert_ptr_equal(doubly_linked_list_find_head(&dlmeta), dlmeta.head);
+	assert_ptr_equal(doubly_linked_list_find_tail(&dlmeta), dlmeta.tail);
+
+	assert_int_equal(doubly_linked_list_size(&dlmeta), TEST_DATA_LEN - 1);
+	assert_false(doubly_linked_list_empty(&dlmeta));
+
+	t = doubly_linked_list_find_front(dlmeta.head, TEST_DATA[0]);
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), TEST_DATA[0]);
+	assert_ptr_equal(doubly_linked_list_find_back(dlmeta.tail, TEST_DATA[0]), t);
+
+	t = doubly_linked_list_find_front(dlmeta.head, TEST_DATA[1]);
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), TEST_DATA[1]);
+	assert_ptr_equal(doubly_linked_list_find_back(dlmeta.tail, TEST_DATA[1]), t);
+
+	assert_null(doubly_linked_list_find_front(dlmeta.head, TEST_DATA[2]));
+	assert_null(doubly_linked_list_find_back(dlmeta.tail, TEST_DATA[2]));
+
+	for (int i = 3; i < TEST_DATA_LEN; ++i)
+	{
+		t = doubly_linked_list_find_front(dlmeta.head, TEST_DATA[i]);
+		assert_non_null(t);
+		assert_string_equal((char*)doubly_linked_list_get(t), TEST_DATA[i]);
+		assert_ptr_equal(doubly_linked_list_find_back(dlmeta.tail, TEST_DATA[i]), t);
+	}
+
+	assert_false(doubly_linked_list_empty(&dlmeta));
+
+	t = doubly_linked_list_remove_front(&dlmeta, TEST_DATA[3]);
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), TEST_DATA[3]);
+
+	t = doubly_linked_list_remove_front(&dlmeta, TEST_DATA[5]);
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), TEST_DATA[5]);
+
+	t = doubly_linked_list_remove_front(&dlmeta, TEST_DATA[7]);
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), TEST_DATA[7]);
+
+	assert_int_equal(doubly_linked_list_size(&dlmeta), TEST_DATA_LEN - 4);
+
+	assert_false(doubly_linked_list_empty(&dlmeta));
+
+	assert_ptr_equal(doubly_linked_list_find_head(&dlmeta), dlmeta.head);
+	assert_ptr_equal(doubly_linked_list_find_tail(&dlmeta), dlmeta.tail);
+
+	t = doubly_linked_list_find_front(dlmeta.head, TEST_DATA[0]);
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), TEST_DATA[0]);
+	assert_ptr_equal(doubly_linked_list_find_back(dlmeta.tail, TEST_DATA[0]), t);
+
+	t = doubly_linked_list_find_front(dlmeta.head, TEST_DATA[1]);
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), TEST_DATA[1]);
+	assert_ptr_equal(doubly_linked_list_find_back(dlmeta.tail, TEST_DATA[1]), t);
+
+	assert_null(doubly_linked_list_find_front(dlmeta.head, TEST_DATA[2]));
+	assert_null(doubly_linked_list_find_back(dlmeta.tail, TEST_DATA[2]));
+
+	assert_null(doubly_linked_list_find_front(dlmeta.head, TEST_DATA[3]));
+	assert_null(doubly_linked_list_find_back(dlmeta.tail, TEST_DATA[3]));
+
+	t = doubly_linked_list_find_front(dlmeta.head, TEST_DATA[4]);
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), TEST_DATA[4]);
+	assert_ptr_equal(doubly_linked_list_find_back(dlmeta.tail, TEST_DATA[4]), t);
+
+	assert_null(doubly_linked_list_find_front(dlmeta.head, TEST_DATA[5]));
+	assert_null(doubly_linked_list_find_back(dlmeta.tail, TEST_DATA[5]));
+
+	t = doubly_linked_list_find_front(dlmeta.head, TEST_DATA[6]);
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), TEST_DATA[6]);
+	assert_ptr_equal(doubly_linked_list_find_back(dlmeta.tail, TEST_DATA[6]), t);
+
+	assert_false(doubly_linked_list_find_front(dlmeta.head, TEST_DATA[7]));
+	assert_false(doubly_linked_list_find_back(dlmeta.tail, TEST_DATA[7]));
+
+	t = doubly_linked_list_find_front(dlmeta.head, TEST_DATA[8]);
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), TEST_DATA[8]);
+	assert_ptr_equal(doubly_linked_list_find_back(dlmeta.tail, TEST_DATA[8]), t);
+
+	t = doubly_linked_list_find_front(dlmeta.head, TEST_DATA[9]);
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), TEST_DATA[9]);
+	assert_ptr_equal(doubly_linked_list_find_back(dlmeta.tail, TEST_DATA[9]), t);
+
+	t = doubly_linked_list_remove_back(&dlmeta, TEST_DATA[0]);
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), TEST_DATA[0]);
+
+	t = doubly_linked_list_remove_front(&dlmeta, TEST_DATA[1]);
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), TEST_DATA[1]);
+
+	t = doubly_linked_list_remove_back(&dlmeta, TEST_DATA[4]);
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), TEST_DATA[4]);
+
+	t = doubly_linked_list_remove_back(&dlmeta, TEST_DATA[6]);
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), TEST_DATA[6]);
+
+	t = doubly_linked_list_remove_back(&dlmeta, TEST_DATA[8]);
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), TEST_DATA[8]);
+
+	t = doubly_linked_list_remove_front(&dlmeta, TEST_DATA[9]);
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), TEST_DATA[9]);
+
+	assert_true(doubly_linked_list_empty(&dlmeta));
+	assert_int_equal(doubly_linked_list_size(&dlmeta), 0);
+	assert_null(doubly_linked_list_remove_head(&dlmeta));
+	assert_ptr_equal(doubly_linked_list_find_head(&dlmeta), NULL);
+	assert_ptr_equal(doubly_linked_list_find_tail(&dlmeta), NULL);
+
+	for (int i = 0; i < TEST_DATA_LEN; ++i)
+	{
+		assert_false(doubly_linked_list_find_front(dlmeta.head, TEST_DATA[i]));
+		assert_false(doubly_linked_list_find_back(dlmeta.tail, TEST_DATA[i]));
+	}
+}
+
+/***********************************************************************/
+
+static void
+FT_basic_usage__4()
+{
+	struct doubly_linked_list_meta dlmeta;
+	struct doubly_linked_list ll_bufs[TEST_DATA_LEN], *t;
+
+	for (int i = TEST_DATA_LEN - 1; i >= 0; --i)
+		doubly_linked_list_set(&ll_bufs[i], TEST_DATA[i]);
+
+	doubly_linked_list_initialize(&dlmeta);
+
+	assert_true(doubly_linked_list_empty(&dlmeta));
+
+	assert_false(doubly_linked_list_insert_back(&dlmeta, &ll_bufs[5]));
+	assert_true(doubly_linked_list_insert_back(&dlmeta, &ll_bufs[5]));
+	assert_true(doubly_linked_list_insert_front(&dlmeta, &ll_bufs[5]));
+	assert_ptr_equal(doubly_linked_list_find_head(&dlmeta), &ll_bufs[5]);
+	assert_ptr_equal(doubly_linked_list_find_tail(&dlmeta), &ll_bufs[5]);
+
+	assert_false(doubly_linked_list_insert_front(&dlmeta, &ll_bufs[8]));
+	assert_true(doubly_linked_list_insert_front(&dlmeta, &ll_bufs[8]));
+	assert_true(doubly_linked_list_insert_back(&dlmeta, &ll_bufs[8]));
+
+	assert_ptr_equal(doubly_linked_list_find_head(&dlmeta), dlmeta.head);
+	assert_ptr_equal(doubly_linked_list_find_tail(&dlmeta), dlmeta.tail);
+
+	assert_false(doubly_linked_list_insert_back(&dlmeta, &ll_bufs[2]));
+	assert_true(doubly_linked_list_insert_front(&dlmeta, &ll_bufs[2]));
+	assert_true(doubly_linked_list_insert_back(&dlmeta, &ll_bufs[2]));
+
+	assert_ptr_equal(doubly_linked_list_find_head(&dlmeta), dlmeta.head);
+	assert_ptr_equal(doubly_linked_list_find_tail(&dlmeta), dlmeta.tail);
+
+	assert_false(doubly_linked_list_insert_front(&dlmeta, &ll_bufs[6]));
+	assert_true(doubly_linked_list_insert_front(&dlmeta, &ll_bufs[6]));
+	assert_true(doubly_linked_list_insert_back(&dlmeta, &ll_bufs[6]));
+
+	assert_ptr_equal(doubly_linked_list_find_head(&dlmeta), dlmeta.head);
+	assert_ptr_equal(doubly_linked_list_find_tail(&dlmeta), dlmeta.tail);
+
+	assert_false(doubly_linked_list_insert_back(&dlmeta, &ll_bufs[7]));
+	assert_true(doubly_linked_list_insert_front(&dlmeta, &ll_bufs[7]));
+	assert_true(doubly_linked_list_insert_back(&dlmeta, &ll_bufs[7]));
+
+	assert_ptr_equal(doubly_linked_list_find_head(&dlmeta), dlmeta.head);
+	assert_ptr_equal(doubly_linked_list_find_tail(&dlmeta), dlmeta.tail);
+
+	assert_false(doubly_linked_list_insert_front(&dlmeta, &ll_bufs[3]));
+	assert_true(doubly_linked_list_insert_front(&dlmeta, &ll_bufs[3]));
+	assert_true(doubly_linked_list_insert_back(&dlmeta, &ll_bufs[3]));
+
+	assert_ptr_equal(doubly_linked_list_find_head(&dlmeta), dlmeta.head);
+	assert_ptr_equal(doubly_linked_list_find_tail(&dlmeta), dlmeta.tail);
+
+	assert_false(doubly_linked_list_insert_back(&dlmeta, &ll_bufs[1]));
+	assert_true(doubly_linked_list_insert_front(&dlmeta, &ll_bufs[1]));
+	assert_true(doubly_linked_list_insert_back(&dlmeta, &ll_bufs[1]));
+
+	assert_ptr_equal(doubly_linked_list_find_head(&dlmeta), dlmeta.head);
+	assert_ptr_equal(doubly_linked_list_find_tail(&dlmeta), dlmeta.tail);
+
+	assert_false(doubly_linked_list_insert_front(&dlmeta, &ll_bufs[4]));
+	assert_true(doubly_linked_list_insert_front(&dlmeta, &ll_bufs[4]));
+	assert_true(doubly_linked_list_insert_back(&dlmeta, &ll_bufs[4]));
+
+	assert_ptr_equal(doubly_linked_list_find_head(&dlmeta), dlmeta.head);
+	assert_ptr_equal(doubly_linked_list_find_tail(&dlmeta), dlmeta.tail);
+
+	assert_false(doubly_linked_list_insert_back(&dlmeta, &ll_bufs[9]));
+	assert_true(doubly_linked_list_insert_front(&dlmeta, &ll_bufs[9]));
+	assert_true(doubly_linked_list_insert_back(&dlmeta, &ll_bufs[9]));
+
+	assert_ptr_equal(doubly_linked_list_find_head(&dlmeta), dlmeta.head);
+	assert_ptr_equal(doubly_linked_list_find_tail(&dlmeta), dlmeta.tail);
+
+	assert_false(doubly_linked_list_empty(&dlmeta));
+
+	assert_ptr_equal(doubly_linked_list_next(&ll_bufs[4]), &ll_bufs[3]);
+	assert_ptr_equal(doubly_linked_list_next(&ll_bufs[3]), &ll_bufs[6]);
+	assert_ptr_equal(doubly_linked_list_next(&ll_bufs[6]), &ll_bufs[8]);
+	assert_ptr_equal(doubly_linked_list_next(&ll_bufs[8]), &ll_bufs[5]);
+	assert_ptr_equal(doubly_linked_list_next(&ll_bufs[5]), &ll_bufs[2]);
+	assert_ptr_equal(doubly_linked_list_next(&ll_bufs[2]), &ll_bufs[7]);
+	assert_ptr_equal(doubly_linked_list_next(&ll_bufs[7]), &ll_bufs[1]);
+	assert_ptr_equal(doubly_linked_list_next(&ll_bufs[1]), &ll_bufs[9]);
+	assert_ptr_equal(doubly_linked_list_next(&ll_bufs[9]), NULL);
+
+	assert_ptr_equal(doubly_linked_list_previous(&ll_bufs[3]), &ll_bufs[4]);
+	assert_ptr_equal(doubly_linked_list_previous(&ll_bufs[6]), &ll_bufs[3]);
+	assert_ptr_equal(doubly_linked_list_previous(&ll_bufs[8]), &ll_bufs[6]);
+	assert_ptr_equal(doubly_linked_list_previous(&ll_bufs[5]), &ll_bufs[8]);
+	assert_ptr_equal(doubly_linked_list_previous(&ll_bufs[2]), &ll_bufs[5]);
+	assert_ptr_equal(doubly_linked_list_previous(&ll_bufs[7]), &ll_bufs[2]);
+	assert_ptr_equal(doubly_linked_list_previous(&ll_bufs[1]), &ll_bufs[7]);
+	assert_ptr_equal(doubly_linked_list_previous(&ll_bufs[9]), &ll_bufs[1]);
+	assert_ptr_equal(doubly_linked_list_previous(&ll_bufs[4]), NULL);
+
+	assert_int_equal(doubly_linked_list_size(&dlmeta), 9);
+
+	t = doubly_linked_list_remove_head(&dlmeta);
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), TEST_DATA[4]);
+
+	assert_null(doubly_linked_list_remove_front(&dlmeta, TEST_DATA[4]));
+	assert_null(doubly_linked_list_remove_back(&dlmeta, TEST_DATA[4]));
+
+	t = doubly_linked_list_remove_tail(&dlmeta);
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), TEST_DATA[9]);
+
+	assert_null(doubly_linked_list_remove_front(&dlmeta, TEST_DATA[9]));
+	assert_null(doubly_linked_list_remove_back(&dlmeta, TEST_DATA[9]));
+
+	t = doubly_linked_list_remove_head(&dlmeta);
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), TEST_DATA[3]);
+
+	assert_null(doubly_linked_list_remove_front(&dlmeta, TEST_DATA[3]));
+	assert_null(doubly_linked_list_remove_back(&dlmeta, TEST_DATA[3]));
+
+	t = doubly_linked_list_remove_tail(&dlmeta);
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), TEST_DATA[1]);
+
+	assert_null(doubly_linked_list_remove_front(&dlmeta, TEST_DATA[1]));
+	assert_null(doubly_linked_list_remove_back(&dlmeta, TEST_DATA[1]));
+
+	t = doubly_linked_list_remove_head(&dlmeta);
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), TEST_DATA[6]);
+
+	assert_null(doubly_linked_list_remove_front(&dlmeta, TEST_DATA[6]));
+	assert_null(doubly_linked_list_remove_back(&dlmeta, TEST_DATA[6]));
+
+	t = doubly_linked_list_remove_head(&dlmeta);
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), TEST_DATA[8]);
+
+	assert_null(doubly_linked_list_remove_front(&dlmeta, TEST_DATA[8]));
+	assert_null(doubly_linked_list_remove_back(&dlmeta, TEST_DATA[8]));
+
+	t = doubly_linked_list_remove_head(&dlmeta);
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), TEST_DATA[5]);
+
+	assert_null(doubly_linked_list_remove_front(&dlmeta, TEST_DATA[5]));
+	assert_null(doubly_linked_list_remove_back(&dlmeta, TEST_DATA[5]));
+
+	t = doubly_linked_list_remove_head(&dlmeta);
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), TEST_DATA[2]);
+
+	assert_null(doubly_linked_list_remove_front(&dlmeta, TEST_DATA[2]));
+	assert_null(doubly_linked_list_remove_back(&dlmeta, TEST_DATA[2]));
+
+	t = doubly_linked_list_remove_head(&dlmeta);
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), TEST_DATA[7]);
+
+	assert_null(doubly_linked_list_remove_front(&dlmeta, TEST_DATA[7]));
+	assert_null(doubly_linked_list_remove_back(&dlmeta, TEST_DATA[7]));
+
+	assert_true(doubly_linked_list_empty(&dlmeta));
+	assert_false(doubly_linked_list_remove_head(&dlmeta));
+
+	assert_ptr_equal(doubly_linked_list_find_head(&dlmeta), NULL);
+	assert_ptr_equal(doubly_linked_list_find_tail(&dlmeta), NULL);
+
+	for (int i = 0; i < TEST_DATA_LEN; ++i)
+	{
+		assert_false(doubly_linked_list_find_front(dlmeta.head, TEST_DATA[i]));
+		assert_false(doubly_linked_list_find_back(dlmeta.tail, TEST_DATA[i]));
+	}
+}
+
+/***********************************************************************/
+
+int
+main()
+{
+	const struct CMUnitTest tests[] =
+	{
+		cmocka_unit_test(FT_basic_usage__1),
+		cmocka_unit_test(FT_basic_usage__2),
+		cmocka_unit_test(FT_basic_usage__3),
+		cmocka_unit_test(FT_basic_usage__4)
+	};
+
+	return cmocka_run_group_tests(tests, NULL, NULL);
+}
+
+/***********************************************************************/

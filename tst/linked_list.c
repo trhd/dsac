@@ -20,336 +20,29 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
+#include "cmocka-wrapper.h"
 #include "linked_list.h"
 
-#define test_find_head()\
-do\
-{\
-	if (linked_list_find_head(&llmeta) != &llmeta.head)\
-	{\
-		printf("Failed to find correct head for the linked list.\n");\
-		goto err;\
-	}\
-} while (0)
+static const char * data_bufs[] =
+{
+	"aa",
+	"bb",
+	"cc",
+	"dd",
+	"ee",
+	"ff",
+	"gg",
+	"hh",
+	"ii",
+	"jj"
+};
 
-#define test_find_head_empty()\
-do\
-{\
-	if (*linked_list_find_head(&llmeta) != NULL)\
-	{\
-		printf("Failed to find correct head (NULL) for the empty linked list.\n");\
-		goto err;\
-	}\
-} while (0)
+enum { bufs_len = sizeof(data_bufs) / sizeof(char*) };
 
-#define test_next(a, b)\
-do\
-{\
-	struct linked_list * T = b >= bufs_len ? 0 : &ll_bufs[b],\
-			**U = linked_list_next(&ll_bufs[a]);\
-	\
-	if (!U || *U != T)\
-	{\
-		printf("Linked list \"next\" was wrong.\n");\
-		goto err;\
-	}\
-} while (0)
-
-#define test_size(I)\
-do\
-{\
-	unsigned int T;\
-	if ((T = linked_list_size(&llmeta)) != I)\
-	{\
-		printf("Linked list reported wrong size (Got: %u, Expected %u).\n",\
-				T, (unsigned int)I);\
-		goto err;\
-	}\
-} while (0)
-
-#define test_empty()\
-do\
-{\
-	if (!linked_list_empty(&llmeta))\
-	{\
-		printf("Empty linked list reported as non-empty.\n");\
-		goto err;\
-	}\
-	\
-	test_size(0);\
-	test_find_head_empty();\
-} while (0)
-
-#define test_nonempty()\
-do\
-{\
-	if (linked_list_empty(&llmeta))\
-	{\
-		printf("Non-empty linked list reported as emtpy.\n");\
-		goto err;\
-	}\
-	\
-	test_find_head();\
-} while (0)
-
-
-#define test_add_back(I)\
-do\
-{\
-	if (linked_list_insert_back(&llmeta, &ll_bufs[I]))\
-	{\
-		printf("Failed to \"insert back\" \"%s\" into the linked list.\n",\
-				(char*)linked_list_get(&ll_bufs[I]));\
-		goto err;\
-	}\
-} while (0)
-
-#define test_add_front(I)\
-do\
-{\
-	if (linked_list_insert_front(&llmeta, &ll_bufs[I]))\
-	{\
-		printf("Failed to \"insert front\" \"%s\" into the linked list.\n",\
-				(char*)linked_list_get(&ll_bufs[I]));\
-		goto err;\
-	}\
-} while (0)
-
-#define test_add(I)\
-do\
-{\
-	if (I % 2)\
-		test_add_front(I);\
-	else\
-		test_add_back(I);\
-	\
-	test_find_head();\
-} while (0)
-
-#define test_add_existing(I)\
-do\
-{\
-	if (!linked_list_insert_front(&llmeta, &ll_bufs[I]))\
-	{\
-		printf("Succeeded to insert \"%s\" existing entry to the linked list.\n",\
-				(char*)linked_list_get(&ll_bufs[I]));\
-		goto err;\
-	}\
-	\
-	if (!linked_list_insert_back(&llmeta, &ll_bufs[I]))\
-	{\
-		printf("Succeeded to insert \"%s\" existing entry to the linked list.\n",\
-				(char*)linked_list_get(&ll_bufs[I]));\
-		goto err;\
-	}\
-} while (0)
-
-#define test_find_nonexisting(I)\
-do\
-{\
-	if (linked_list_find(&llmeta, data_bufs[I]))\
-	{\
-		printf("Found an entry for nonexisting request.\n");\
-		goto err;\
-	}\
-	test_find_match_nonexisting(I);\
-} while (0)
-
-#define test_find_match(I)\
-do\
-{\
-	char buf[20] = { 0 };\
-	memcpy(buf, data_bufs[I], strlen(data_bufs[I]));\
-	struct linked_list **T = linked_list_find_match(&llmeta, buf,\
-		       (int(*)(const void*, const void*))strcmp);\
-	\
-	if (!T)\
-	{\
-		printf("Failed to find \"%s\" from the linked list by value.\n", buf);\
-		goto err;\
-	}\
-	if (strcmp((char*)linked_list_get(*T), data_bufs[I]))\
-	{\
-		printf("Found incorrect data from received (match) entry (Got: \"%s\", "\
-				"Expected \"%s\").\n", (char*)linked_list_get(*T), data_bufs[I]);\
-		goto err;\
-	}\
-} while (0)\
-
-#define test_find_match_nonexisting(I)\
-do\
-{\
-	char buf[20] = { 0 };\
-	memcpy(buf, data_bufs[I], strlen(data_bufs[I]));\
-	struct linked_list **T = linked_list_find_match(&llmeta, buf,\
-		       (int(*)(const void*, const void*))strcmp);\
-	\
-	if (T)\
-	{\
-		printf("Found nonexisting entry from the linked list (match).\n");\
-		goto err;\
-	}\
-} while (0)\
-
-#define test_find(I)\
-do\
-{\
-	struct linked_list ** T = linked_list_find(&llmeta, data_bufs[I]);\
-	\
-	if (!T)\
-	{\
-		printf("Failed to find \"%s\" from the linked list.\n",\
-				data_bufs[I]);\
-		goto err;\
-	}\
-	\
-	if (strcmp((char*)linked_list_get(*T), data_bufs[I]))\
-	{\
-		printf("Found incorrect data from received entry (Got: \"%s\", "\
-				"Expected \"%s\").\n", (char*)linked_list_get(*T), data_bufs[I]);\
-		goto err;\
-	}\
-	\
-	test_find_head();\
-	test_find_match(I);\
-} while (0)
-
-#define test_remove(I)\
-do\
-{\
-	struct linked_list * T = linked_list_remove(&llmeta, data_bufs[I]);\
-	\
-	if (!T)\
-	{\
-		printf("Failed to remove \"%s\" from the linked list.\n",\
-				data_bufs[I]);\
-		goto err;\
-	}\
-	\
-	if (strcmp((char*)linked_list_get(T), data_bufs[I]))\
-	{\
-		printf("Found incorrect data from the removed entry (Got: \"%s\", "\
-				"Expected \"%s\").\n", (char*)linked_list_get(T), data_bufs[I]);\
-		goto err;\
-	}\
-} while (0)
-
-#define test_remove_head(I)\
-do\
-{\
-	test_find_head();\
-	\
-	struct linked_list * T = linked_list_remove_head(&llmeta);\
-	\
-	if (!T)\
-	{\
-		printf("Failed to remove \"%s\" \"from the front\" of the linked list.\n",\
-				data_bufs[I]);\
-		goto err;\
-	}\
-	\
-	if (strcmp((char*)linked_list_get(T), data_bufs[I]))\
-	{\
-		printf("Found incorrect data from the removed entry (Got: \"%s\", "\
-				"Expected \"%s\").\n", (char*)linked_list_get(T), data_bufs[I]);\
-		goto err;\
-	}\
-	\
-	if (linked_list_empty(&llmeta))\
-		test_find_head_empty();\
-	else\
-		test_find_head();\
-} while (0)
-
-#define test_remove_tail(I)\
-do\
-{\
-	test_find_head();\
-	\
-	struct linked_list * T = linked_list_remove_tail(&llmeta);\
-	\
-	if (!T)\
-	{\
-		printf("Failed to remove \"%s\" \"from the back\" of the linked list.\n",\
-				data_bufs[I]);\
-		goto err;\
-	}\
-	\
-	if (strcmp((char*)linked_list_get(T), data_bufs[I]))\
-	{\
-		printf("Found incorrect data from the removed entry (Got: \"%s\", "\
-				"Expected \"%s\").\n", (char*)linked_list_get(T), data_bufs[I]);\
-		goto err;\
-	}\
-	\
-	if (linked_list_empty(&llmeta))\
-		test_find_head_empty();\
-	else\
-		test_find_head();\
-} while (0)
-
-#define test_remove_match(I)\
-do\
-{\
-	char buf[20] = { 0 };\
-	memcpy(buf, data_bufs[I], strlen(data_bufs[I]));\
-	struct linked_list *T = linked_list_remove_match(&llmeta, buf,\
-		       (int(*)(const void*, const void*))strcmp);\
-	\
-	if (!T)\
-	{\
-		printf("Failed to remove \"%s\" from the linked list by value.\n", buf);\
-		goto err;\
-	}\
-	if (strcmp((char*)linked_list_get(T), data_bufs[I]))\
-	{\
-		printf("Found incorrect data from removed (match) entry (Got: \"%s\", "\
-				"Expected \"%s\").\n", (char*)linked_list_get(T), data_bufs[I]);\
-		goto err;\
-	}\
-} while (0)\
-
-#define test_remove_match_nonexisting(I)\
-do\
-{\
-	char buf[20] = { 0 };\
-	memcpy(buf, data_bufs[I], strlen(data_bufs[I]));\
-	struct linked_list *T = linked_list_remove_match(&llmeta, buf,\
-		       (int(*)(const void*, const void*))strcmp);\
-	\
-	if (T)\
-	{\
-		printf("Linked list returned something when removing nonexisting entry (match).\n");\
-		goto err;\
-	}\
-} while (0)\
-
-#define test_remove_nonexisting(I)\
-do\
-{\
-	if (linked_list_remove(&llmeta, data_bufs[I]))\
-	{\
-		printf("Removing non-existing didn't return an error.\n");\
-		goto err;\
-	}\
-	test_remove_match_nonexisting(I);\
-} while (0)
-
-#define test_remove_head_nonexisting()\
-do\
-{\
-	if (linked_list_remove_head(&llmeta))\
-	{\
-		printf("Removing non-existing \"first\" didn't return an error.\n");\
-		goto err;\
-	}\
-	\
-	test_find_head_empty();\
-} while (0)
-
+/***********************************************************************/
 
 static int
-_test_iteration(const struct linked_list *n, int *c)
+_assert_iteration_functionality(const struct linked_list *n, int *c)
 {
 	static const struct linked_list *p = NULL;
 
@@ -365,27 +58,15 @@ _test_iteration(const struct linked_list *n, int *c)
 	return 0;
 }
 
-static int
-test_iteration(const struct linked_list_meta *m)
+static void
+assert_iteration_functionality(const struct linked_list_meta *m)
 {
 	int s = linked_list_size(m),
 	    c = 0,
-	    t = linked_list_iterate(m,
-			    (int(*)(const struct linked_list *, void *))_test_iteration, &c);
+	    t = linked_list_iterate(m, (int(*)(const struct linked_list *, void *))_assert_iteration_functionality, &c);
 
-	if (s != c)
-	{
-		printf("%s failed.\n", __func__);
-		return -1;
-	}
-
-	if (t)
-	{
-		printf("linked_list_iterate returned an error %d.\n", t);
-		return -1;
-	}
-
-	return 0;
+	assert_int_equal(s, c);
+	assert_int_equal(t, 0);
 }
 
 
@@ -405,321 +86,753 @@ print_list(struct linked_list_meta *m)
 	printf("\n");
 }
 
-int
-main(int ac __attribute__((unused)), char **av)
-{
-	printf("Test %s.\n", av[0]);
+/***********************************************************************/
 
-	int i;
-	const char * data_bufs[] =
-	{
-		"aa",
-		"bb",
-		"cc",
-		"dd",
-		"ee",
-		"ff",
-		"gg",
-		"hh",
-		"ii",
-		"jj"
-	};
-	ssize_t bufs_len = sizeof(data_bufs)/sizeof(char*);
-	struct linked_list ll_bufs[bufs_len];
+static void
+FT_basic_usage__1()
+{
+	struct linked_list ll_bufs[bufs_len], **tt, *t;
 	struct linked_list_meta llmeta;
 
-	for (i = bufs_len - 1; i >= 0; --i)
+	for (int i = bufs_len - 1; i >= 0; --i)
 		linked_list_set(&ll_bufs[i], data_bufs[i]);
-
-	printf("Executing basic tests:\n");
-	fflush(stdout);
 
 	linked_list_initialize(&llmeta);
 
-	test_empty();
+	assert_true(linked_list_empty(&llmeta));
+	assert_int_equal(linked_list_size(&llmeta), 0);
+	assert_null(*linked_list_find_head(&llmeta));
 
-	printf("Round 1: ");
-	for (i = 0; i < bufs_len; ++i)
+	for (int i = 0; i < bufs_len; ++i)
 	{
-		test_empty();
-		test_find_nonexisting(i);
-		test_add(i);
-		test_add_existing(i);
-		test_nonempty();
-		test_size(1);
-		if (test_iteration(&llmeta))
-			goto err;
-		test_find(i);
-		test_remove(i);
-		test_remove_nonexisting(i);
+		assert_true(linked_list_empty(&llmeta));
+		assert_int_equal(linked_list_size(&llmeta), 0);
+		assert_null(*linked_list_find_head(&llmeta));
+
+		assert_null(linked_list_find(&llmeta, data_bufs[i]));
+		assert_null(linked_list_find_match(&llmeta, data_bufs[i], (int(*)(const void *, const void *))strcmp));
+
+		if (i % 2)
+			assert_false(linked_list_insert_front(&llmeta, &ll_bufs[i]));
+		else
+			assert_false(linked_list_insert_back(&llmeta, &ll_bufs[i]));
+		assert_true(linked_list_insert_front(&llmeta, &ll_bufs[i]));
+		assert_true(linked_list_insert_back(&llmeta, &ll_bufs[i]));
+
+		assert_false(linked_list_empty(&llmeta));
+		assert_false(linked_list_size(&llmeta) <= 0);
+		assert_non_null(*linked_list_find_head(&llmeta));
+
+		assert_int_equal(linked_list_size(&llmeta), 1);
+
+		assert_iteration_functionality(&llmeta);
+
+		tt = linked_list_find(&llmeta, data_bufs[i]);
+		assert_non_null(tt);
+		assert_string_equal((char*)linked_list_get(*tt), data_bufs[i]);
+		assert_ptr_equal(tt, linked_list_find_match(&llmeta, data_bufs[i], (int(*)(const void *, const void *))strcmp));
+
+		t = linked_list_remove(&llmeta, data_bufs[i]);
+		assert_null(linked_list_remove_match(&llmeta, data_bufs[i], (int(*)(const void *, const void *))strcmp));
+		assert_non_null(t);
+		assert_string_equal((char*)linked_list_get(t), data_bufs[i]);
+
+		assert_null(linked_list_remove(&llmeta, data_bufs[i]));
 	}
-	printf("OK\n");
-
-	printf("Round 2: ");
-	test_empty();
-	for (i = 0; i < bufs_len; ++i)
-		test_add(i);
-	if (test_iteration(&llmeta))
-		goto err;
-	test_nonempty();
-	test_size(bufs_len);
-	for (i = 0; i < bufs_len; ++i)
-		test_find(i);
-	for (i = 0; i < bufs_len; ++i)
-		test_remove(i);
-	test_empty();
-	for (i = 0; i < bufs_len; ++i)
-		test_find_nonexisting(i);
-	printf("OK\n");
-
-	printf("Round 3: ");
-	test_empty();
-
-	for (i = 0; i < bufs_len; ++i)
-		test_add(i);
-
-	test_size(bufs_len);
-	test_nonempty();
-
-	for (i = 0; i < bufs_len; ++i)
-		test_find(i);
-
-	test_remove(2);
-	test_size(bufs_len - 1);
-
-	test_nonempty();
-
-	test_find(0);
-	test_find(1);
-	test_find_nonexisting(2);
-	for (i = 3; i < bufs_len; ++i)
-		test_find(i);
-
-	test_nonempty();
-
-	test_remove(3);
-	test_remove_match(5);
-	test_remove(7);
-	test_size(bufs_len - 4);
-
-	test_nonempty();
-
-	test_find(0);
-	test_find(1);
-	test_find_nonexisting(2);
-	test_find_nonexisting(3);
-	test_find(4);
-	test_find_nonexisting(5);
-	test_find(6);
-	test_find_nonexisting(7);
-	test_find(8);
-	test_find(9);
-	if (test_iteration(&llmeta))
-		goto err;
-
-	test_remove(0);
-	test_remove_match(1);
-	test_remove(4);
-	if (test_iteration(&llmeta))
-		goto err;
-	test_remove_match(6);
-	test_remove(8);
-	test_remove_match(9);
-
-	test_empty();
-
-	for (i = 0; i < bufs_len; ++i)
-		test_find_nonexisting(i);
-	printf("OK\n");
-
-	printf("Round 4: ");
-	test_empty();
-	test_add_back(5);
-	if (test_iteration(&llmeta))
-		goto err;
-	test_add_existing(5);
-	test_add_front(8);
-	if (test_iteration(&llmeta))
-		goto err;
-	test_add_existing(8);
-	test_add_back(2);
-	if (test_iteration(&llmeta))
-		goto err;
-	test_add_existing(2);
-	test_add_front(6);
-	if (test_iteration(&llmeta))
-		goto err;
-	test_add_existing(6);
-	test_add_back(7);
-	if (test_iteration(&llmeta))
-		goto err;
-	test_add_existing(7);
-	test_add_front(3);
-	if (test_iteration(&llmeta))
-		goto err;
-	test_add_existing(3);
-	test_add_back(1);
-	if (test_iteration(&llmeta))
-		goto err;
-	test_add_existing(1);
-	test_add_front(4);
-	if (test_iteration(&llmeta))
-		goto err;
-	test_add_existing(4);
-	test_add_back(9);
-	if (test_iteration(&llmeta))
-		goto err;
-	test_add_existing(9);
-	test_nonempty();
-
-	test_next(4, 3);
-	test_next(3, 6);
-	test_next(6, 8);
-	test_next(8, 5);
-	test_next(5, 2);
-	test_next(2, 7);
-	test_next(7, 1);
-	test_next(1, 9);
-
-	test_size(9);
-
-	test_remove_head(4);
-	if (test_iteration(&llmeta))
-		goto err;
-	test_remove_nonexisting(4);
-	test_remove_head(3);
-	if (test_iteration(&llmeta))
-		goto err;
-	test_remove_nonexisting(3);
-	test_remove_head(6);
-	if (test_iteration(&llmeta))
-		goto err;
-	test_remove_nonexisting(6);
-	test_remove_head(8);
-	if (test_iteration(&llmeta))
-		goto err;
-	test_remove_nonexisting(8);
-	test_remove_head(5);
-	if (test_iteration(&llmeta))
-		goto err;
-	test_remove_nonexisting(5);
-	test_remove_head(2);
-	if (test_iteration(&llmeta))
-		goto err;
-	test_remove_nonexisting(2);
-	test_remove_head(7);
-	if (test_iteration(&llmeta))
-		goto err;
-	test_remove_nonexisting(7);
-	test_remove_head(1);
-	if (test_iteration(&llmeta))
-		goto err;
-	test_remove_nonexisting(1);
-	test_remove_head(9);
-	if (test_iteration(&llmeta))
-		goto err;
-	test_remove_nonexisting(9);
-	test_empty();
-	if (test_iteration(&llmeta))
-		goto err;
-
-	test_remove_head_nonexisting();
-
-	for (i = 0; i < bufs_len; ++i)
-		test_find_nonexisting(i);
-	printf("OK\n");
-
-	printf("Round 5: ");
-	test_empty();
-	test_add_back(5);
-	if (test_iteration(&llmeta))
-		goto err;
-	test_add_existing(5);
-	test_add_front(8);
-	if (test_iteration(&llmeta))
-		goto err;
-	test_add_existing(8);
-	test_add_back(2);
-	if (test_iteration(&llmeta))
-		goto err;
-	test_add_existing(2);
-	test_add_front(6);
-	if (test_iteration(&llmeta))
-		goto err;
-	test_add_existing(6);
-	test_add_back(7);
-	if (test_iteration(&llmeta))
-		goto err;
-	test_add_existing(7);
-	test_add_front(3);
-	if (test_iteration(&llmeta))
-		goto err;
-	test_add_existing(3);
-	test_add_back(1);
-	if (test_iteration(&llmeta))
-		goto err;
-	test_add_existing(1);
-	test_add_front(4);
-	if (test_iteration(&llmeta))
-		goto err;
-	test_add_existing(4);
-	test_add_back(9);
-	if (test_iteration(&llmeta))
-		goto err;
-	test_add_existing(9);
-	test_nonempty();
-
-	test_size(9);
-
-	test_remove_tail(9);
-	if (test_iteration(&llmeta))
-		goto err;
-	test_remove_nonexisting(9);
-	test_remove_tail(1);
-	if (test_iteration(&llmeta))
-		goto err;
-	test_remove_nonexisting(1);
-	test_remove_tail(7);
-	if (test_iteration(&llmeta))
-		goto err;
-	test_remove_nonexisting(7);
-	test_remove_tail(2);
-	if (test_iteration(&llmeta))
-		goto err;
-	test_remove_nonexisting(2);
-	test_remove_tail(5);
-	if (test_iteration(&llmeta))
-		goto err;
-	test_remove_nonexisting(5);
-	test_remove_tail(8);
-	if (test_iteration(&llmeta))
-		goto err;
-	test_remove_nonexisting(8);
-	test_remove_tail(6);
-	if (test_iteration(&llmeta))
-		goto err;
-	test_remove_nonexisting(6);
-	test_remove_tail(3);
-	if (test_iteration(&llmeta))
-		goto err;
-	test_remove_nonexisting(3);
-	test_remove_tail(4);
-	if (test_iteration(&llmeta))
-		goto err;
-	test_remove_nonexisting(4);
-	test_empty();
-	if (test_iteration(&llmeta))
-		goto err;
-
-	test_remove_head_nonexisting();
-
-	for (i = 0; i < bufs_len; ++i)
-		test_find_nonexisting(i);
-	printf("OK\n");
-
-	printf("Test %s ended with SUCCESS!\n", av[0]);
-	return 0;
-err:
-	printf("Test %s ended with FAILURE!\n", av[0]);
-	return -1;
 }
+
+/***********************************************************************/
+
+static void
+FT_basic_usage__2()
+{
+	struct linked_list ll_bufs[bufs_len], **tt, *t;
+	struct linked_list_meta llmeta;
+
+	for (int i = bufs_len - 1; i >= 0; --i)
+		linked_list_set(&ll_bufs[i], data_bufs[i]);
+
+	linked_list_initialize(&llmeta);
+
+	assert_true(linked_list_empty(&llmeta));
+	assert_int_equal(linked_list_size(&llmeta), 0);
+	assert_null(*linked_list_find_head(&llmeta));
+
+	for (int i = 0; i < bufs_len; ++i)
+	{
+		if (i % 2)
+			assert_false(linked_list_insert_front(&llmeta, &ll_bufs[i]));
+		else
+			assert_false(linked_list_insert_back(&llmeta, &ll_bufs[i]));
+	}
+
+	assert_iteration_functionality(&llmeta);
+
+	assert_false(linked_list_empty(&llmeta));
+	assert_false(linked_list_size(&llmeta) <= 0);
+	assert_non_null(*linked_list_find_head(&llmeta));
+	assert_int_equal(linked_list_size(&llmeta), bufs_len);
+
+	for (int i = 0; i < bufs_len; ++i)
+	{
+		tt = linked_list_find(&llmeta, data_bufs[i]);
+		assert_non_null(tt);
+		assert_string_equal((char*)linked_list_get(*tt), data_bufs[i]);
+		assert_ptr_equal(tt, linked_list_find_match(&llmeta, data_bufs[i],
+					(int(*)(const void *, const void *))strcmp));
+	}
+
+	for (int i = 0; i < bufs_len; ++i)
+	{
+		t = linked_list_remove(&llmeta, data_bufs[i]);
+		assert_null(linked_list_remove_match(&llmeta, data_bufs[i],
+					(int(*)(const void *, const void *))strcmp));
+		assert_non_null(t);
+		assert_string_equal((char*)linked_list_get(t), data_bufs[i]);
+	}
+
+	assert_true(linked_list_empty(&llmeta));
+	assert_int_equal(linked_list_size(&llmeta), 0);
+	assert_null(*linked_list_find_head(&llmeta));
+
+	for (int i = 0; i < bufs_len; ++i)
+	{
+		assert_null(linked_list_find(&llmeta, data_bufs[i]));
+		assert_null(linked_list_find_match(&llmeta, data_bufs[i], (int(*)(const void *, const void *))strcmp));
+	}
+}
+
+/***********************************************************************/
+
+static void
+FT_basic_usage__3()
+{
+	struct linked_list ll_bufs[bufs_len], **tt, *t;
+	struct linked_list_meta llmeta;
+
+	for (int i = bufs_len - 1; i >= 0; --i)
+		linked_list_set(&ll_bufs[i], data_bufs[i]);
+
+	linked_list_initialize(&llmeta);
+
+	assert_true(linked_list_empty(&llmeta));
+	assert_int_equal(linked_list_size(&llmeta), 0);
+	assert_null(*linked_list_find_head(&llmeta));
+
+	for (int i = 0; i < bufs_len; ++i)
+	{
+		if (i % 2)
+			assert_false(linked_list_insert_back(&llmeta, &ll_bufs[i]));
+		else
+			assert_false(linked_list_insert_front(&llmeta, &ll_bufs[i]));
+	}
+
+	assert_int_equal(linked_list_size(&llmeta), bufs_len);
+	assert_false(linked_list_empty(&llmeta));
+	assert_non_null(*linked_list_find_head(&llmeta));
+
+	for (int i = 0; i < bufs_len; ++i)
+	{
+		tt = linked_list_find(&llmeta, data_bufs[i]);
+		assert_non_null(tt);
+		assert_string_equal((char*)linked_list_get(*tt), data_bufs[i]);
+		assert_ptr_equal(tt, linked_list_find_match(&llmeta, data_bufs[i],
+				(int(*)(const void *, const void *))strcmp));
+	}
+
+	t = linked_list_remove(&llmeta, data_bufs[2]);
+	assert_null(linked_list_remove_match(&llmeta, data_bufs[2],
+				(int(*)(const void *, const void *))strcmp));
+	assert_non_null(t);
+	assert_string_equal((char*)linked_list_get(t), data_bufs[2]);
+
+	assert_int_equal(linked_list_size(&llmeta), bufs_len - 1);
+
+	assert_false(linked_list_empty(&llmeta));
+	assert_false(linked_list_size(&llmeta) <= 0);
+	assert_non_null(*linked_list_find_head(&llmeta));
+
+	tt = linked_list_find(&llmeta, data_bufs[0]);
+	assert_non_null(tt);
+	assert_string_equal((char*)linked_list_get(*tt), data_bufs[0]);
+	assert_ptr_equal(tt, linked_list_find_match(&llmeta, data_bufs[0],
+				(int(*)(const void *, const void *))strcmp));
+
+	tt = linked_list_find(&llmeta, data_bufs[1]);
+	assert_non_null(tt);
+	assert_string_equal((char*)linked_list_get(*tt), data_bufs[1]);
+	assert_ptr_equal(tt, linked_list_find_match(&llmeta, data_bufs[1],
+				(int(*)(const void *, const void *))strcmp));
+
+	assert_null(linked_list_find(&llmeta, data_bufs[2]));
+	assert_null(linked_list_find_match(&llmeta, data_bufs[2],
+				(int(*)(const void *, const void *))strcmp));
+
+	for (int i = 3; i < bufs_len; ++i)
+	{
+		tt = linked_list_find(&llmeta, data_bufs[i]);
+		assert_non_null(tt);
+		assert_string_equal((char*)linked_list_get(*tt), data_bufs[i]);
+		assert_ptr_equal(tt, linked_list_find_match(&llmeta, data_bufs[i],
+					(int(*)(const void *, const void *))strcmp));
+	}
+
+	assert_false(linked_list_empty(&llmeta));
+	assert_false(linked_list_size(&llmeta) <= 0);
+	assert_non_null(*linked_list_find_head(&llmeta));
+
+	t = linked_list_remove(&llmeta, data_bufs[3]);
+	assert_null(linked_list_remove_match(&llmeta, data_bufs[3],
+				(int(*)(const void *, const void *))strcmp));
+	assert_non_null(t);
+	assert_string_equal((char*)linked_list_get(t), data_bufs[3]);
+
+	t = linked_list_remove_match(&llmeta, data_bufs[5],
+			(int(*)(const void *, const void *))strcmp);
+	assert_non_null(t);
+	assert_string_equal((char*)linked_list_get(t), data_bufs[5]);
+
+	t = linked_list_remove(&llmeta, data_bufs[7]);
+	assert_null(linked_list_remove_match(&llmeta, data_bufs[7],
+				(int(*)(const void *, const void *))strcmp));
+	assert_non_null(t);
+	assert_string_equal((char*)linked_list_get(t), data_bufs[7]);
+
+	assert_int_equal(linked_list_size(&llmeta), bufs_len - 4);
+
+	assert_false(linked_list_empty(&llmeta));
+	assert_false(linked_list_size(&llmeta) <= 0);
+	assert_non_null(*linked_list_find_head(&llmeta));
+
+	tt = linked_list_find(&llmeta, data_bufs[0]);
+	assert_non_null(tt);
+	assert_string_equal((char*)linked_list_get(*tt), data_bufs[0]);
+	assert_ptr_equal(tt, linked_list_find_match(&llmeta, data_bufs[0],
+			(int(*)(const void *, const void *))strcmp));
+
+	tt = linked_list_find(&llmeta, data_bufs[1]);
+	assert_non_null(tt);
+	assert_string_equal((char*)linked_list_get(*tt), data_bufs[1]);
+	assert_ptr_equal(tt, linked_list_find_match(&llmeta, data_bufs[1],
+				(int(*)(const void *, const void *))strcmp));
+
+	assert_null(linked_list_find(&llmeta, data_bufs[2]));
+	assert_null(linked_list_find_match(&llmeta, data_bufs[2],
+				(int(*)(const void *, const void *))strcmp));
+
+	assert_null(linked_list_find(&llmeta, data_bufs[3]));
+	assert_null(linked_list_find_match(&llmeta, data_bufs[3],
+				(int(*)(const void *, const void *))strcmp));
+
+	tt = linked_list_find(&llmeta, data_bufs[4]);
+	assert_non_null(tt);
+	assert_string_equal((char*)linked_list_get(*tt), data_bufs[4]);
+	assert_ptr_equal(tt, linked_list_find_match(&llmeta, data_bufs[4],
+				(int(*)(const void *, const void *))strcmp));
+
+	assert_null(linked_list_find(&llmeta, data_bufs[5]));
+	assert_null(linked_list_find_match(&llmeta, data_bufs[5],
+				(int(*)(const void *, const void *))strcmp));
+
+	tt = linked_list_find(&llmeta, data_bufs[6]);
+	assert_non_null(tt);
+	assert_string_equal((char*)linked_list_get(*tt), data_bufs[6]);
+	assert_ptr_equal(tt, linked_list_find_match(&llmeta, data_bufs[6],
+				(int(*)(const void *, const void *))strcmp));
+
+	assert_null(linked_list_find(&llmeta, data_bufs[7]));
+	assert_null(linked_list_find_match(&llmeta, data_bufs[7],
+			(int(*)(const void *, const void *))strcmp));
+
+	tt = linked_list_find(&llmeta, data_bufs[8]);
+	assert_non_null(tt);
+	assert_string_equal((char*)linked_list_get(*tt), data_bufs[8]);
+	assert_ptr_equal(tt, linked_list_find_match(&llmeta, data_bufs[8],
+			(int(*)(const void *, const void *))strcmp));
+
+	tt = linked_list_find(&llmeta, data_bufs[9]);
+	assert_non_null(tt);
+	assert_string_equal((char*)linked_list_get(*tt), data_bufs[9]);
+	assert_ptr_equal(tt, linked_list_find_match(&llmeta, data_bufs[9],
+			(int(*)(const void *, const void *))strcmp));
+
+	assert_iteration_functionality(&llmeta);
+
+	t = linked_list_remove(&llmeta, data_bufs[0]);
+	assert_null(linked_list_remove_match(&llmeta, data_bufs[0],
+				(int(*)(const void *, const void *))strcmp));
+	assert_non_null(t);
+	assert_string_equal((char*)linked_list_get(t), data_bufs[0]);
+
+	t = linked_list_remove_match(&llmeta, data_bufs[1],
+		(int(*)(const void *, const void *))strcmp);
+	assert_non_null(t);
+	assert_string_equal((char*)linked_list_get(t), data_bufs[1]);
+
+	t = linked_list_remove(&llmeta, data_bufs[4]);
+	assert_null(linked_list_remove_match(&llmeta, data_bufs[4],
+			(int(*)(const void *, const void *))strcmp));
+	assert_non_null(t);
+	assert_string_equal((char*)linked_list_get(t), data_bufs[4]);
+
+	assert_iteration_functionality(&llmeta);
+
+	t = linked_list_remove_match(&llmeta, data_bufs[6],
+		(int(*)(const void *, const void *))strcmp);
+	assert_non_null(t);
+	assert_string_equal((char*)linked_list_get(t), data_bufs[6]);
+
+	t = linked_list_remove(&llmeta, data_bufs[8]);
+	assert_null(linked_list_remove_match(&llmeta, data_bufs[8],
+			(int(*)(const void *, const void *))strcmp));
+	assert_non_null(t);
+	assert_string_equal((char*)linked_list_get(t), data_bufs[8]);
+
+	t = linked_list_remove_match(&llmeta, data_bufs[9],
+		(int(*)(const void *, const void *))strcmp);
+	assert_non_null(t);
+	assert_string_equal((char*)linked_list_get(t), data_bufs[9]);
+
+	assert_true(linked_list_empty(&llmeta));
+	assert_int_equal(linked_list_size(&llmeta), 0);
+	assert_null(*linked_list_find_head(&llmeta));
+
+	for (int i = 0; i < bufs_len; ++i)
+	{
+		assert_null(linked_list_find(&llmeta, data_bufs[i]));
+		assert_null(linked_list_find_match(&llmeta, data_bufs[i],
+					(int(*)(const void *, const void *))strcmp));
+	}
+}
+
+/***********************************************************************/
+
+static void
+FT_basic_usage__4()
+{
+	struct linked_list ll_bufs[bufs_len], **tt, *t;
+	struct linked_list_meta llmeta;
+
+	for (int i = bufs_len - 1; i >= 0; --i)
+		linked_list_set(&ll_bufs[i], data_bufs[i]);
+
+	linked_list_initialize(&llmeta);
+
+	assert_true(linked_list_empty(&llmeta));
+	assert_int_equal(linked_list_size(&llmeta), 0);
+	assert_null(*linked_list_find_head(&llmeta));
+
+	assert_false(linked_list_insert_back(&llmeta, &ll_bufs[5]));
+
+	assert_iteration_functionality(&llmeta);
+
+	assert_true(linked_list_insert_front(&llmeta, &ll_bufs[5]));
+	assert_true(linked_list_insert_back(&llmeta, &ll_bufs[5]));
+
+	assert_false(linked_list_insert_front(&llmeta, &ll_bufs[8]));
+
+	assert_iteration_functionality(&llmeta);
+
+	assert_true(linked_list_insert_front(&llmeta, &ll_bufs[8]));
+	assert_true(linked_list_insert_back(&llmeta, &ll_bufs[8]));
+
+	assert_false(linked_list_insert_back(&llmeta, &ll_bufs[2]));
+
+	assert_iteration_functionality(&llmeta);
+
+	assert_true(linked_list_insert_front(&llmeta, &ll_bufs[2]));
+	assert_true(linked_list_insert_back(&llmeta, &ll_bufs[2]));
+
+	assert_false(linked_list_insert_front(&llmeta, &ll_bufs[6]));
+
+	assert_iteration_functionality(&llmeta);
+
+	assert_true(linked_list_insert_front(&llmeta, &ll_bufs[6]));
+	assert_true(linked_list_insert_back(&llmeta, &ll_bufs[6]));
+
+	assert_false(linked_list_insert_back(&llmeta, &ll_bufs[7]));
+
+	assert_iteration_functionality(&llmeta);
+
+	assert_true(linked_list_insert_front(&llmeta, &ll_bufs[7]));
+	assert_true(linked_list_insert_back(&llmeta, &ll_bufs[7]));
+
+	assert_false(linked_list_insert_front(&llmeta, &ll_bufs[3]));
+
+	assert_iteration_functionality(&llmeta);
+
+	assert_true(linked_list_insert_front(&llmeta, &ll_bufs[3]));
+	assert_true(linked_list_insert_back(&llmeta, &ll_bufs[3]));
+
+	assert_false(linked_list_insert_back(&llmeta, &ll_bufs[1]));
+
+	assert_iteration_functionality(&llmeta);
+
+	assert_true(linked_list_insert_front(&llmeta, &ll_bufs[1]));
+	assert_true(linked_list_insert_back(&llmeta, &ll_bufs[1]));
+
+	assert_false(linked_list_insert_front(&llmeta, &ll_bufs[4]));
+
+	assert_iteration_functionality(&llmeta);
+
+	assert_true(linked_list_insert_front(&llmeta, &ll_bufs[4]));
+	assert_true(linked_list_insert_back(&llmeta, &ll_bufs[4]));
+
+	assert_false(linked_list_insert_back(&llmeta, &ll_bufs[9]));
+
+	assert_iteration_functionality(&llmeta);
+
+	assert_true(linked_list_insert_front(&llmeta, &ll_bufs[9]));
+	assert_true(linked_list_insert_back(&llmeta, &ll_bufs[9]));
+
+	assert_false(linked_list_empty(&llmeta));
+	assert_non_null(*linked_list_find_head(&llmeta));
+	assert_int_equal(linked_list_size(&llmeta), 9);
+
+	assert_non_null(linked_list_next(&ll_bufs[4]));
+	assert_ptr_equal(&ll_bufs[3], *linked_list_next(&ll_bufs[4]));
+
+	assert_non_null(linked_list_next(&ll_bufs[3]));
+	assert_ptr_equal(&ll_bufs[6], *linked_list_next(&ll_bufs[3]));
+
+	assert_non_null(linked_list_next(&ll_bufs[6]));
+	assert_ptr_equal(&ll_bufs[8], *linked_list_next(&ll_bufs[6]));
+
+	assert_non_null(linked_list_next(&ll_bufs[8]));
+	assert_ptr_equal(&ll_bufs[5], *linked_list_next(&ll_bufs[8]));
+
+	assert_non_null(linked_list_next(&ll_bufs[5]));
+	assert_ptr_equal(&ll_bufs[2], *linked_list_next(&ll_bufs[5]));
+
+	assert_non_null(linked_list_next(&ll_bufs[2]));
+	assert_ptr_equal(&ll_bufs[7], *linked_list_next(&ll_bufs[2]));
+
+	assert_non_null(linked_list_next(&ll_bufs[7]));
+	assert_ptr_equal(&ll_bufs[1], *linked_list_next(&ll_bufs[7]));
+
+	assert_non_null(linked_list_next(&ll_bufs[1]));
+	assert_ptr_equal(&ll_bufs[9], *linked_list_next(&ll_bufs[1]));
+
+	assert_int_equal(linked_list_size(&llmeta), 9);
+
+	tt = linked_list_find_head(&llmeta);
+	assert_non_null(tt);
+	t = *tt;
+	assert_ptr_equal(t, linked_list_remove_head(&llmeta));
+	assert_string_equal((char*)linked_list_get(t), data_bufs[4]);
+	assert_ptr_not_equal(t, linked_list_find_head(&llmeta));
+
+	assert_iteration_functionality(&llmeta);
+
+	assert_null(linked_list_remove(&llmeta, data_bufs[4]));
+	assert_null(linked_list_remove_match(&llmeta, data_bufs[4],
+				(int(*)(const void *, const void *))strcmp));
+
+	tt = linked_list_find_head(&llmeta);
+	assert_non_null(tt);
+	t = *tt;
+	assert_ptr_equal(t, linked_list_remove_head(&llmeta));
+	assert_string_equal((char*)linked_list_get(t), data_bufs[3]);
+	assert_ptr_not_equal(t, linked_list_find_head(&llmeta));
+
+	assert_iteration_functionality(&llmeta);
+
+	assert_null(linked_list_remove(&llmeta, data_bufs[3]));
+	assert_null(linked_list_remove_match(&llmeta, data_bufs[3],
+			(int(*)(const void *, const void *))strcmp));
+
+	tt = linked_list_find_head(&llmeta);
+	assert_non_null(tt);
+	t = *tt;
+	assert_ptr_equal(t, linked_list_remove_head(&llmeta));
+	assert_string_equal((char*)linked_list_get(t), data_bufs[6]);
+	assert_ptr_not_equal(t, linked_list_find_head(&llmeta));
+
+	assert_iteration_functionality(&llmeta);
+
+	assert_null(linked_list_remove(&llmeta, data_bufs[6]));
+	assert_null(linked_list_remove_match(&llmeta, data_bufs[6],
+				(int(*)(const void *, const void *))strcmp));
+
+	tt = linked_list_find_head(&llmeta);
+	assert_non_null(tt);
+	t = *tt;
+	assert_ptr_equal(t, linked_list_remove_head(&llmeta));
+	assert_string_equal((char*)linked_list_get(t), data_bufs[8]);
+	assert_ptr_not_equal(t, linked_list_find_head(&llmeta));
+
+	assert_iteration_functionality(&llmeta);
+
+	assert_null(linked_list_remove(&llmeta, data_bufs[8]));
+	assert_null(linked_list_remove_match(&llmeta, data_bufs[8],
+			(int(*)(const void *, const void *))strcmp));
+
+	tt = linked_list_find_head(&llmeta);
+	assert_non_null(tt);
+	t = *tt;
+	assert_ptr_equal(t, linked_list_remove_head(&llmeta));
+	assert_string_equal((char*)linked_list_get(t), data_bufs[5]);
+	assert_ptr_not_equal(t, linked_list_find_head(&llmeta));
+
+	assert_iteration_functionality(&llmeta);
+
+	assert_null(linked_list_remove(&llmeta, data_bufs[5]));
+	assert_null(linked_list_remove_match(&llmeta, data_bufs[5],
+			(int(*)(const void *, const void *))strcmp));
+
+	tt = linked_list_find_head(&llmeta);
+	assert_non_null(tt);
+	t = *tt;
+	assert_ptr_equal(t, linked_list_remove_head(&llmeta));
+	assert_string_equal((char*)linked_list_get(t), data_bufs[2]);
+	assert_ptr_not_equal(t, linked_list_find_head(&llmeta));
+
+	assert_iteration_functionality(&llmeta);
+
+	assert_null(linked_list_remove(&llmeta, data_bufs[2]));
+	assert_null(linked_list_remove_match(&llmeta, data_bufs[2],
+			(int(*)(const void *, const void *))strcmp));
+
+	tt = linked_list_find_head(&llmeta);
+	assert_non_null(tt);
+	t = *tt;
+	assert_ptr_equal(t, linked_list_remove_head(&llmeta));
+	assert_string_equal((char*)linked_list_get(t), data_bufs[7]);
+	assert_ptr_not_equal(t, linked_list_find_head(&llmeta));
+
+	assert_iteration_functionality(&llmeta);
+
+	assert_null(linked_list_remove(&llmeta, data_bufs[7]));
+	assert_null(linked_list_remove_match(&llmeta, data_bufs[7],
+			(int(*)(const void *, const void *))strcmp));
+
+	tt = linked_list_find_head(&llmeta);
+	assert_non_null(tt);
+	t = *tt;
+	assert_ptr_equal(t, linked_list_remove_head(&llmeta));
+	assert_string_equal((char*)linked_list_get(t), data_bufs[1]);
+	assert_ptr_not_equal(t, linked_list_find_head(&llmeta));
+
+	assert_iteration_functionality(&llmeta);
+
+	assert_null(linked_list_remove(&llmeta, data_bufs[1]));
+	assert_null(linked_list_remove_match(&llmeta, data_bufs[1],
+			(int(*)(const void *, const void *))strcmp));
+
+	tt = linked_list_find_head(&llmeta);
+	assert_non_null(tt);
+	t = *tt;
+	assert_ptr_equal(t, linked_list_remove_head(&llmeta));
+	assert_string_equal((char*)linked_list_get(t), data_bufs[9]);
+	assert_ptr_not_equal(t, linked_list_find_head(&llmeta));
+
+	assert_iteration_functionality(&llmeta);
+
+	assert_null(linked_list_remove(&llmeta, data_bufs[9]));
+	assert_null(linked_list_remove_match(&llmeta, data_bufs[9],
+			(int(*)(const void *, const void *))strcmp));
+
+	assert_true(linked_list_empty(&llmeta));
+	assert_int_equal(linked_list_size(&llmeta), 0);
+	assert_null(*linked_list_find_head(&llmeta));
+
+	assert_iteration_functionality(&llmeta);
+
+	assert_null(linked_list_remove_head(&llmeta));
+
+	for (int i = 0; i < bufs_len; ++i)
+	{
+		assert_null(linked_list_find(&llmeta, data_bufs[i]));
+		assert_null(linked_list_find_match(&llmeta, data_bufs[i],
+					(int(*)(const void *, const void *))strcmp));
+	}
+}
+
+/***********************************************************************/
+
+static void
+FT_basic_usage__5()
+{
+	struct linked_list ll_bufs[bufs_len], **tt, *t;
+	struct linked_list_meta llmeta;
+
+	for (int i = bufs_len - 1; i >= 0; --i)
+		linked_list_set(&ll_bufs[i], data_bufs[i]);
+
+	linked_list_initialize(&llmeta);
+
+	assert_true(linked_list_empty(&llmeta));
+	assert_int_equal(linked_list_size(&llmeta), 0);
+	assert_null(*linked_list_find_head(&llmeta));
+
+	assert_false(linked_list_insert_back(&llmeta, &ll_bufs[5]));
+	assert_iteration_functionality(&llmeta);
+	assert_true(linked_list_insert_front(&llmeta, &ll_bufs[5]));
+	assert_true(linked_list_insert_back(&llmeta, &ll_bufs[5]));
+
+	assert_false(linked_list_insert_front(&llmeta, &ll_bufs[8]));
+	assert_iteration_functionality(&llmeta);
+	assert_true(linked_list_insert_front(&llmeta, &ll_bufs[8]));
+	assert_true(linked_list_insert_back(&llmeta, &ll_bufs[8]));
+
+	assert_false(linked_list_insert_back(&llmeta, &ll_bufs[2]));
+	assert_iteration_functionality(&llmeta);
+	assert_true(linked_list_insert_front(&llmeta, &ll_bufs[2]));
+	assert_true(linked_list_insert_back(&llmeta, &ll_bufs[2]));
+
+	assert_false(linked_list_insert_front(&llmeta, &ll_bufs[6]));
+	assert_iteration_functionality(&llmeta);
+	assert_true(linked_list_insert_front(&llmeta, &ll_bufs[6]));
+	assert_true(linked_list_insert_back(&llmeta, &ll_bufs[6]));
+
+	assert_false(linked_list_insert_back(&llmeta, &ll_bufs[7]));
+	assert_iteration_functionality(&llmeta);
+	assert_true(linked_list_insert_front(&llmeta, &ll_bufs[7]));
+	assert_true(linked_list_insert_back(&llmeta, &ll_bufs[7]));
+
+	assert_false(linked_list_insert_front(&llmeta, &ll_bufs[3]));
+	assert_iteration_functionality(&llmeta);
+	assert_true(linked_list_insert_front(&llmeta, &ll_bufs[3]));
+	assert_true(linked_list_insert_back(&llmeta, &ll_bufs[3]));
+
+	assert_false(linked_list_insert_back(&llmeta, &ll_bufs[1]));
+	assert_iteration_functionality(&llmeta);
+	assert_true(linked_list_insert_front(&llmeta, &ll_bufs[1]));
+	assert_true(linked_list_insert_back(&llmeta, &ll_bufs[1]));
+
+	assert_false(linked_list_insert_front(&llmeta, &ll_bufs[4]));
+	assert_iteration_functionality(&llmeta);
+	assert_true(linked_list_insert_front(&llmeta, &ll_bufs[4]));
+	assert_true(linked_list_insert_back(&llmeta, &ll_bufs[4]));
+
+	assert_false(linked_list_insert_back(&llmeta, &ll_bufs[9]));
+	assert_iteration_functionality(&llmeta);
+	assert_true(linked_list_insert_front(&llmeta, &ll_bufs[9]));
+	assert_true(linked_list_insert_back(&llmeta, &ll_bufs[9]));
+
+	assert_false(linked_list_empty(&llmeta));
+	assert_int_equal(linked_list_size(&llmeta), 9);
+	assert_non_null(*linked_list_find_head(&llmeta));
+
+	tt = linked_list_find_tail(&llmeta);
+	t = *tt;
+	assert_ptr_equal(t, linked_list_remove_tail(&llmeta));
+	assert_string_equal((char*)linked_list_get(t), data_bufs[9]);
+	assert_ptr_not_equal(t, linked_list_find_tail(&llmeta));
+	assert_iteration_functionality(&llmeta);
+	assert_null(linked_list_remove(&llmeta, data_bufs[9]));
+	assert_null(linked_list_remove_match(&llmeta, data_bufs[9],
+				(int(*)(const void *, const void *))strcmp));
+
+	tt = linked_list_find_tail(&llmeta);
+	t = *tt;
+	assert_ptr_equal(t, linked_list_remove_tail(&llmeta));
+	assert_string_equal((char*)linked_list_get(t), data_bufs[1]);
+	assert_ptr_not_equal(t, linked_list_find_tail(&llmeta));
+	assert_iteration_functionality(&llmeta);
+	assert_null(linked_list_remove(&llmeta, data_bufs[1]));
+	assert_null(linked_list_remove_match(&llmeta, data_bufs[1],
+				(int(*)(const void *, const void *))strcmp));
+
+	tt = linked_list_find_tail(&llmeta);
+	t = *tt;
+	assert_ptr_equal(t, linked_list_remove_tail(&llmeta));
+	assert_string_equal((char*)linked_list_get(t), data_bufs[7]);
+	assert_ptr_not_equal(t, linked_list_find_tail(&llmeta));
+	assert_iteration_functionality(&llmeta);
+	assert_null(linked_list_remove(&llmeta, data_bufs[7]));
+	assert_null(linked_list_remove_match(&llmeta, data_bufs[7],
+				(int(*)(const void *, const void *))strcmp));
+
+	tt = linked_list_find_tail(&llmeta);
+	t = *tt;
+	assert_ptr_equal(t, linked_list_remove_tail(&llmeta));
+	assert_string_equal((char*)linked_list_get(t), data_bufs[2]);
+	assert_ptr_not_equal(t, linked_list_find_tail(&llmeta));
+	assert_iteration_functionality(&llmeta);
+	assert_null(linked_list_remove(&llmeta, data_bufs[2]));
+	assert_null(linked_list_remove_match(&llmeta, data_bufs[2],
+				(int(*)(const void *, const void *))strcmp));
+
+	tt = linked_list_find_tail(&llmeta);
+	t = *tt;
+	assert_ptr_equal(t, linked_list_remove_tail(&llmeta));
+	assert_string_equal((char*)linked_list_get(t), data_bufs[5]);
+	assert_ptr_not_equal(t, linked_list_find_tail(&llmeta));
+	assert_iteration_functionality(&llmeta);
+	assert_null(linked_list_remove(&llmeta, data_bufs[5]));
+	assert_null(linked_list_remove_match(&llmeta, data_bufs[5],
+				(int(*)(const void *, const void *))strcmp));
+
+	tt = linked_list_find_tail(&llmeta);
+	t = *tt;
+	assert_ptr_equal(t, linked_list_remove_tail(&llmeta));
+	assert_string_equal((char*)linked_list_get(t), data_bufs[8]);
+	assert_ptr_not_equal(t, linked_list_find_tail(&llmeta));
+	assert_iteration_functionality(&llmeta);
+	assert_null(linked_list_remove(&llmeta, data_bufs[8]));
+	assert_null(linked_list_remove_match(&llmeta, data_bufs[8],
+				(int(*)(const void *, const void *))strcmp));
+
+	tt = linked_list_find_tail(&llmeta);
+	t = *tt;
+	assert_ptr_equal(t, linked_list_remove_tail(&llmeta));
+	assert_string_equal((char*)linked_list_get(t), data_bufs[6]);
+	assert_ptr_not_equal(t, linked_list_find_tail(&llmeta));
+	assert_iteration_functionality(&llmeta);
+	assert_null(linked_list_remove(&llmeta, data_bufs[6]));
+	assert_null(linked_list_remove_match(&llmeta, data_bufs[6],
+				(int(*)(const void *, const void *))strcmp));
+
+	tt = linked_list_find_tail(&llmeta);
+	t = *tt;
+	assert_ptr_equal(t, linked_list_remove_tail(&llmeta));
+	assert_string_equal((char*)linked_list_get(t), data_bufs[3]);
+	assert_ptr_not_equal(t, linked_list_find_tail(&llmeta));
+	assert_iteration_functionality(&llmeta);
+	assert_null(linked_list_remove(&llmeta, data_bufs[3]));
+	assert_null(linked_list_remove_match(&llmeta, data_bufs[3],
+				(int(*)(const void *, const void *))strcmp));
+
+	tt = linked_list_find_tail(&llmeta);
+	t = *tt;
+	assert_ptr_equal(t, linked_list_remove_tail(&llmeta));
+	assert_string_equal((char*)linked_list_get(t), data_bufs[4]);
+	assert_ptr_not_equal(t, linked_list_find_tail(&llmeta));
+	assert_iteration_functionality(&llmeta);
+	assert_null(linked_list_remove(&llmeta, data_bufs[4]));
+	assert_null(linked_list_remove_match(&llmeta, data_bufs[4],
+				(int(*)(const void *, const void *))strcmp));
+
+	assert_true(linked_list_empty(&llmeta));
+	assert_int_equal(linked_list_size(&llmeta), 0);
+	assert_null(*linked_list_find_head(&llmeta));
+	assert_iteration_functionality(&llmeta);
+	assert_null(linked_list_remove_head(&llmeta));
+
+	for (int i = 0; i < bufs_len; ++i)
+	{
+		assert_null(linked_list_find(&llmeta, data_bufs[i]));
+		assert_null(linked_list_find_match(&llmeta, data_bufs[i],
+					(int(*)(const void *, const void *))strcmp));
+	}
+}
+
+/***********************************************************************/
+
+int
+main()
+{
+	const struct CMUnitTest tests[] =
+	{
+		cmocka_unit_test(FT_basic_usage__1),
+		cmocka_unit_test(FT_basic_usage__2),
+		cmocka_unit_test(FT_basic_usage__3),
+		cmocka_unit_test(FT_basic_usage__4),
+		cmocka_unit_test(FT_basic_usage__5)
+	};
+
+	return cmocka_run_group_tests(tests, NULL, NULL);
+}
+
+/***********************************************************************/

@@ -18,14 +18,15 @@
  */
 
 #include <stdio.h>
+#include "cmocka-wrapper.h"
 #include "lifo.h"
 
-int
-test_1()
-{
-	printf("Starting test %s.\n", __func__);
+/***********************************************************************/
 
-	static const unsigned int val_count = 1000;
+static void
+FT_basic_usage__1()
+{
+	enum { val_count = 1000 };
 	unsigned int vals[val_count], i, j;
 	lifo_t valbufs[val_count];
 	lifo_meta_t meta;
@@ -38,91 +39,36 @@ test_1()
 
 	lifo_initialize(&meta);
 
-	if (!lifo_empty(&meta))
-	{
-		printf("ERROR: LIFO not reported as empty.\n");
-		return 1;
-	}
-
-	if (lifo_size(&meta) != 0)
-	{
-		printf("ERROR: LIFO size reported as non-zero.\n");
-		return 1;
-	}
+	assert_true(lifo_empty(&meta));
+	assert_int_equal(lifo_size(&meta), 0);
 
 	for (i = 0; i < val_count; ++i)
 	{
-		if (lifo_push(&meta, valbufs + i))
-		{
-			printf("ERROR: Failed to push into the LIFO.\n");
-			return 1;
-		}
-
-		if (lifo_size(&meta) != i + 1)
-		{
-			printf("ERROR: LIFO size reported as not equal to i + 1 (%d).\n", i + 1);
-			return 1;
-		}
+		assert_int_equal(lifo_push(&meta, valbufs + i), 0);
+		assert_int_equal(lifo_size(&meta), i + 1);
 	}
 
-	if (lifo_empty(&meta))
-	{
-		printf("ERROR: LIFO reported as empty.\n");
-		return 1;
-	}
+	assert_false(lifo_empty(&meta));
 
 	for (i = 0; i < val_count; ++i)
 	{
 		for (j = 0; j < 3; ++j)
-		{
-			if (lifo_peek(&meta) != valbufs + val_count - i - 1)
-			{
-				printf("ERROR: Peek returned invalid entry for "
-						"index %d (iteration %u).\n", i, j);
-				return 1;
-			}
-		}
+			assert_ptr_equal(lifo_peek(&meta), valbufs + val_count - i - 1);
 
-		if (lifo_pop(&meta) != valbufs + val_count - i - 1)
-		{
-			printf("ERROR: Pop returned invalid entry for index %d.\n", i);
-			return 1;
-		}
-
-		if (lifo_size(&meta) != val_count - i - 1)
-		{
-			printf("ERROR: LIFO size doesn't match val_count - i - 1 (%d).\n", val_count - i - 1);
-			return 1;
-		}
+		assert_ptr_equal(lifo_pop(&meta), valbufs + val_count - i - 1);
+		assert_int_equal(lifo_size(&meta), val_count - i - 1);
 	}
 
-	if (!lifo_empty(&meta))
-	{
-		printf("ERROR: LIFO not reported as empty.\n");
-		return 1;
-	}
-
-	if (lifo_peek(&meta) != 0)
-	{
-		printf("ERROR: Emtpy LIFO returned an pointer (on peek).\n");
-		return 1;
-	}
-
-	if (lifo_pop(&meta) != 0)
-	{
-		printf("ERROR: Emtpy LIFO returned an pointer (on pop).\n");
-		return 1;
-	}
-
-	printf("Ending test %s.\n", __func__);
-	return 0;
+	assert_true(lifo_empty(&meta));
+	assert_null(lifo_peek(&meta));
+	assert_null(lifo_pop(&meta));
 }
 
-int
-test_2()
-{
-	printf("Starting test %s.\n", __func__);
+/***********************************************************************/
 
+static void
+FT_basic_usage__2()
+{
 	unsigned int i, j, vals[] =
 	{
 		1, 1324, 1988432, 11, 13, 15, 165, 184, 151, 154, 168, 186, 198, 1654, 11, 1658, 16844, 121, 165, 184,
@@ -143,90 +89,36 @@ test_2()
 
 	lifo_initialize(&meta);
 
-	if (!lifo_empty(&meta))
-	{
-		printf("ERROR: LIFO not reported as empty.\n");
-		return 1;
-	}
-
-	if (lifo_size(&meta) != 0)
-	{
-		printf("ERROR: LIFO size reported as non-zero.\n");
-		return 1;
-	}
+	assert_true(lifo_empty(&meta));
+	assert_int_equal(lifo_size(&meta), 0);
 
 	for (i = 0; i < val_count; ++i)
-		if (lifo_push(&meta, valbufs + i))
-		{
-			printf("ERROR: Failed to push into the LIFO.\n");
-			return 1;
-		}
+		assert_int_equal(lifo_push(&meta, valbufs + i), 0);
 
-	if (lifo_empty(&meta))
-	{
-		printf("ERROR: LIFO reported as empty.\n");
-		return 1;
-	}
-
-	if (lifo_size(&meta) != val_count)
-	{
-		printf("ERROR: LIFO size reported as not equal to val_count.\n");
-		return 1;
-	}
+	assert_false(lifo_empty(&meta));
+	assert_int_equal(lifo_size(&meta), val_count);
 
 	for (i = 0; i < val_count; ++i)
 	{
 		for (j = 0; j < 3; ++j)
-		{
-			if (lifo_peek(&meta) != valbufs + val_count - 1 - i)
-			{
-				printf("ERROR: Peek returned invalid entry for "
-						"index %zd (iteration %u).\n", val_count - 1 - i, j);
-				return 1;
-			}
-		}
+			assert_ptr_equal(lifo_peek(&meta), valbufs + val_count - 1 - i);
 
-		if (lifo_pop(&meta) != valbufs + val_count - 1 - i)
-		{
-			printf("ERROR: Pop returned invalid entry for index %zd.\n", val_count - 1 - i);
-			return 1;
-		}
+		assert_ptr_equal(lifo_pop(&meta), valbufs + val_count - 1 - i);
 	}
 
-	if (!lifo_empty(&meta))
-	{
-		printf("ERROR: LIFO not reported as empty.\n");
-		return 1;
-	}
+	assert_true(lifo_empty(&meta));
+	assert_int_equal(lifo_size(&meta), 0);
 
-	if (lifo_size(&meta) != 0)
-	{
-		printf("ERROR: LIFO size reported as non-zero.\n");
-		return 1;
-	}
-
-	if (lifo_peek(&meta) != 0)
-	{
-		printf("ERROR: Emtpy LIFO returned an pointer (on peek).\n");
-		return 1;
-	}
-
-	if (lifo_pop(&meta) != 0)
-	{
-		printf("ERROR: Emtpy LIFO returned an pointer (on pop).\n");
-		return 1;
-	}
-
-	printf("Ending test %s.\n", __func__);
-	return 0;
+	assert_null(lifo_peek(&meta));
+	assert_null(lifo_pop(&meta));
 }
 
-int
-test_3()
-{
-	printf("Starting test %s.\n", __func__);
+/***********************************************************************/
 
-	static const unsigned int val_count = 1000;
+static void
+FT_basic_usage__3()
+{
+	enum { val_count = 1000 };
 	unsigned int vals[val_count], i, j;
 	lifo_t valbufs[val_count];
 	lifo_meta_t meta;
@@ -241,88 +133,33 @@ test_3()
 
 	for (i = 0; i < val_count; ++i)
 	{
+		assert_true(lifo_empty(&meta));
+		assert_int_equal(lifo_size(&meta), 0);
 
-		if (!lifo_empty(&meta))
-		{
-			printf("ERROR: LIFO not reported as empty.\n");
-			return 1;
-		}
+		assert_int_equal(lifo_push(&meta, valbufs + i), 0);
 
-		if (lifo_size(&meta) != 0)
-		{
-			printf("ERROR: LIFO size reported as non-zero.\n");
-			return 1;
-		}
-
-		if (lifo_push(&meta, valbufs + i))
-		{
-			printf("ERROR: Failed to push into the LIFO.\n");
-			return 1;
-		}
-
-		if (lifo_empty(&meta))
-		{
-			printf("ERROR: LIFO reported as empty.\n");
-			return 1;
-		}
-
-		if (lifo_size(&meta) != 1)
-		{
-			printf("ERROR: LIFO size reported as not equal to i.\n");
-			return 1;
-		}
+		assert_false(lifo_empty(&meta));
+		assert_int_equal(lifo_size(&meta), 1);
 
 		for (j = 0; j < 3; ++j)
-		{
-			if (lifo_peek(&meta) != valbufs + i)
-			{
-				printf("ERROR: Peek returned invalid entry for "
-						"index %d (iteration %u).\n", i, j);
-				return 1;
-			}
-		}
+			assert_ptr_equal(lifo_peek(&meta), valbufs + i);
 
-		if (lifo_pop(&meta) != valbufs + i)
-		{
-			printf("ERROR: Pop returned invalid entry for index %d.\n", i);
-			return 1;
-		}
+		assert_ptr_equal(lifo_pop(&meta), valbufs + i);
 
-		if (!lifo_empty(&meta))
-		{
-			printf("ERROR: LIFO not reported as empty.\n");
-			return 1;
-		}
+		assert_true(lifo_empty(&meta));
+		assert_int_equal(lifo_size(&meta), 0);
 
-		if (lifo_size(&meta) != 0)
-		{
-			printf("ERROR: LIFO size reported as non-zero.\n");
-			return 1;
-		}
-
-		if (lifo_peek(&meta) != 0)
-		{
-			printf("ERROR: Emtpy LIFO returned an pointer (on peek).\n");
-			return 1;
-		}
-
-		if (lifo_pop(&meta) != 0)
-		{
-			printf("ERROR: Emtpy LIFO returned an pointer (on pop).\n");
-			return 1;
-		}
+		assert_null(lifo_peek(&meta));
+		assert_null(lifo_pop(&meta));
 	}
-
-	printf("Ending test %s.\n", __func__);
-	return 0;
 }
 
-int
-test_4()
-{
-	printf("Starting test %s.\n", __func__);
+/***********************************************************************/
 
-	static const unsigned int val_count = 1000;
+static void
+FT_basic_usage__4()
+{
+	enum { val_count = 1000 };
 	unsigned int vals[val_count], i;
 	lifo_t valbufs[val_count];
 	lifo_meta_t meta;
@@ -336,255 +173,75 @@ test_4()
 	lifo_initialize(&meta);
 	i = 0;
 
-	if (!lifo_empty(&meta))
-	{
-		printf("ERROR: LIFO not reported as empty.\n");
-		return 1;
-	}
+	assert_true(lifo_empty(&meta));
+	assert_int_equal(lifo_size(&meta), 0);
 
-	if (lifo_size(&meta) != i)
-	{
-		printf("ERROR: LIFO size reported as not equal to %d.\n", i);
-		return 1;
-	}
+	assert_int_equal(lifo_push(&meta, valbufs + i++), 0);
+	assert_false(lifo_empty(&meta));
+	assert_int_equal(lifo_size(&meta), i);
 
-	if (lifo_push(&meta, valbufs + i++))
-	{
-		printf("ERROR: Failed to push into the LIFO.\n");
-		return 1;
-	}
 
-	if (lifo_empty(&meta))
-	{
-		printf("ERROR: LIFO reported as empty.\n");
-		return 1;
-	}
+	assert_int_equal(lifo_push(&meta, valbufs + i++), 0);
 
-	if (lifo_size(&meta) != i)
-	{
-		printf("ERROR: LIFO size reported as not equal to %d.\n", i);
-		return 1;
-	}
+	assert_ptr_equal(lifo_peek(&meta), valbufs + i - 1);
+	assert_ptr_equal(lifo_pop(&meta), valbufs + --i);
 
-	if (lifo_push(&meta, valbufs + i++))
-	{
-		printf("ERROR: Failed to push into the LIFO.\n");
-		return 1;
-	}
+	assert_int_equal(lifo_push(&meta, valbufs + i++), 0);
+	assert_int_equal(lifo_push(&meta, valbufs + i++), 0);
+	assert_int_equal(lifo_push(&meta, valbufs + i++), 0);
+	assert_int_equal(lifo_push(&meta, valbufs + i++), 0);
 
-	if (lifo_peek(&meta) != valbufs + i - 1)
-	{
-		printf("ERROR: Peek returned invalid entry for index %d.\n", i - 1);
-		return 1;
-	}
+	assert_ptr_equal(lifo_peek(&meta), valbufs + i - 1);
+	assert_ptr_equal(lifo_pop(&meta), valbufs + --i);
 
-	if (lifo_pop(&meta) != valbufs + --i)
-	{
-		printf("ERROR: #1 Pop returned invalid entry for index %d.\n", i + 1);
-		return 1;
-	}
+	assert_int_equal(lifo_push(&meta, valbufs + i++), 0);
+	assert_int_equal(lifo_push(&meta, valbufs + i++), 0);
 
-	if (lifo_push(&meta, valbufs + i++))
-	{
-		printf("ERROR: Failed to push into the LIFO.\n");
-		return 1;
-	}
+	assert_ptr_equal(lifo_peek(&meta), valbufs + i - 1);
+	assert_ptr_equal(lifo_pop(&meta), valbufs + --i);
+	assert_ptr_equal(lifo_peek(&meta), valbufs + i - 1);
+	assert_ptr_equal(lifo_pop(&meta), valbufs + --i);
+	assert_ptr_equal(lifo_peek(&meta), valbufs + i - 1);
+	assert_ptr_equal(lifo_pop(&meta), valbufs + --i);
 
-	if (lifo_push(&meta, valbufs + i++))
-	{
-		printf("ERROR: Failed to push into the LIFO.\n");
-		return 1;
-	}
+	assert_int_equal(lifo_push(&meta, valbufs + i++), 0);
 
-	if (lifo_push(&meta, valbufs + i++))
-	{
-		printf("ERROR: Failed to push into the LIFO.\n");
-		return 1;
-	}
+	assert_ptr_equal(lifo_peek(&meta), valbufs + i - 1);
+	assert_ptr_equal(lifo_pop(&meta), valbufs + --i);
 
-	if (lifo_push(&meta, valbufs + i++))
-	{
-		printf("ERROR: Failed to push into the LIFO.\n");
-		return 1;
-	}
+	assert_int_equal(lifo_push(&meta, valbufs + i++), 0);
 
-	if (lifo_peek(&meta) != valbufs + i - 1)
-	{
-		printf("ERROR: Peek returned invalid entry for index %d.\n", i - 1);
-		return 1;
-	}
+	assert_ptr_equal(lifo_peek(&meta), valbufs + i - 1);
+	assert_ptr_equal(lifo_pop(&meta), valbufs + --i);
+	assert_ptr_equal(lifo_peek(&meta), valbufs + i - 1);
+	assert_ptr_equal(lifo_pop(&meta), valbufs + --i);
+	assert_ptr_equal(lifo_peek(&meta), valbufs + i - 1);
+	assert_ptr_equal(lifo_pop(&meta), valbufs + --i);
+	assert_ptr_equal(lifo_peek(&meta), valbufs + i - 1);
+	assert_ptr_equal(lifo_pop(&meta), valbufs + --i);
 
-	if (lifo_pop(&meta) != valbufs + --i)
-	{
-		printf("ERROR: #2 Pop returned invalid entry for index %d.\n", i + 1);
-		return 1;
-	}
+	assert_true(lifo_empty(&meta));
+	assert_int_equal(lifo_size(&meta), 0);
+	assert_int_equal(lifo_size(&meta), i);
 
-	if (lifo_push(&meta, valbufs + i++))
-	{
-		printf("ERROR: Failed to push into the LIFO.\n");
-		return 1;
-	}
-
-	if (lifo_push(&meta, valbufs + i++))
-	{
-		printf("ERROR: Failed to push into the LIFO.\n");
-		return 1;
-	}
-
-	if (lifo_peek(&meta) != valbufs + i - 1)
-	{
-		printf("ERROR: Peek returned invalid entry for index %d.\n", i - 1);
-		return 1;
-	}
-
-	if (lifo_pop(&meta) != valbufs + --i)
-	{
-		printf("ERROR: #3 Pop returned invalid entry for index %d.\n", i + 1);
-		return 1;
-	}
-
-	if (lifo_peek(&meta) != valbufs + i - 1)
-	{
-		printf("ERROR: Peek returned invalid entry for index %d.\n", i - 1);
-		return 1;
-	}
-
-	if (lifo_pop(&meta) != valbufs + --i)
-	{
-		printf("ERROR: #4 Pop returned invalid entry for index %d.\n", i + 1);
-		return 1;
-	}
-
-	if (lifo_peek(&meta) != valbufs + i - 1)
-	{
-		printf("ERROR: Peek returned invalid entry for index %d.\n", i - 1);
-		return 1;
-	}
-
-	if (lifo_pop(&meta) != valbufs + --i)
-	{
-		printf("ERROR: #5 Pop returned invalid entry for index %d.\n", i + 1);
-		return 1;
-	}
-
-	if (lifo_push(&meta, valbufs + i++))
-	{
-		printf("ERROR: Failed to push into the LIFO.\n");
-		return 1;
-	}
-
-	if (lifo_peek(&meta) != valbufs + i - 1)
-	{
-		printf("ERROR: Peek returned invalid entry for index %d.\n", i - 1);
-		return 1;
-	}
-
-	if (lifo_pop(&meta) != valbufs + --i)
-	{
-		printf("ERROR: #6 Pop returned invalid entry for index %d.\n", i + 1);
-		return 1;
-	}
-
-	if (lifo_push(&meta, valbufs + i++))
-	{
-		printf("ERROR: Failed to push into the LIFO.\n");
-		return 1;
-	}
-
-	if (lifo_peek(&meta) != valbufs + i - 1)
-	{
-		printf("ERROR: Peek returned invalid entry for index %d.\n", i - 1);
-		return 1;
-	}
-
-	if (lifo_pop(&meta) != valbufs + --i)
-	{
-		printf("ERROR: #7 Pop returned invalid entry for index %d.\n", i + 1);
-		return 1;
-	}
-
-	if (lifo_peek(&meta) != valbufs + i - 1)
-	{
-		printf("ERROR: Peek returned invalid entry for index %d.\n", i - 1);
-		return 1;
-	}
-
-	if (lifo_pop(&meta) != valbufs + --i)
-	{
-		printf("ERROR: #8 Pop returned invalid entry for index %d.\n", i + 1);
-		return 1;
-	}
-
-	if (lifo_peek(&meta) != valbufs + i - 1)
-	{
-		printf("ERROR: Peek returned invalid entry for index %d.\n", i - 1);
-		return 1;
-	}
-
-	if (lifo_pop(&meta) != valbufs + --i)
-	{
-		printf("ERROR: #9 Pop returned invalid entry for index %d.\n", i + 1);
-		return 1;
-	}
-
-	if (lifo_peek(&meta) != valbufs + i - 1)
-	{
-		printf("ERROR: Peek returned invalid entry for index %d.\n", i - 1);
-		return 1;
-	}
-
-	if (lifo_pop(&meta) != valbufs + --i)
-	{
-		printf("ERROR: #10 Pop returned invalid entry for index %d.\n", i + 1);
-		return 1;
-	}
-
-	if (!lifo_empty(&meta))
-	{
-		printf("ERROR: LIFO not reported as empty.\n");
-		return 1;
-	}
-
-	if (lifo_size(&meta) != i)
-	{
-		printf("ERROR: LIFO size reported as not equal to %d.\n", i);
-		return 1;
-	}
-
-	if (lifo_peek(&meta) != 0)
-	{
-		printf("ERROR: Emtpy LIFO returned an pointer (on peek).\n");
-		return 1;
-	}
-
-	if (lifo_pop(&meta) != 0)
-	{
-		printf("ERROR: Emtpy LIFO returned an pointer (on pop).\n");
-		return 1;
-	}
-
-	printf("Ending test %s.\n", __func__);
-	return 0;
+	assert_null(lifo_peek(&meta));
+	assert_null(lifo_pop(&meta));
 }
+
+/***********************************************************************/
 
 int
 main()
 {
-	printf("Starting LIFO test.\n");
+	const struct CMUnitTest tests[] =
+	{
+		cmocka_unit_test(FT_basic_usage__1),
+		cmocka_unit_test(FT_basic_usage__2),
+		cmocka_unit_test(FT_basic_usage__3),
+		cmocka_unit_test(FT_basic_usage__4),
+	};
 
-
-	if (
-			test_1()
-			|| test_2()
-			|| test_3()
-			|| test_4()
-	   )
-		goto err;
-
-	printf("LIFO test was a SUCCESS!\n");
-	return 0;
-err:
-	printf("LIFO test was a FAILURE!\n");
-	return 1;
+	return cmocka_run_group_tests(tests, NULL, NULL);
 }
+
+/***********************************************************************/

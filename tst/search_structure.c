@@ -19,45 +19,40 @@
 
 #include <assert.h>
 #include <stdbool.h>
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 #include "bitmap.h"
+#include "cmocka-wrapper.h"
 #include "search_structure.h"
 
-enum test_op
-{
-	TEST_OP_INSERT,
-	TEST_OP_INSERT_EXISTING,
-	TEST_OP_REMOVE,
-	TEST_OP_REMOVE_NONEXISTING,
-	TEST_OP_FIND,
-	TEST_OP_FIND_NONEXISTING,
-	_TEST_OP_COUNT
-};
+/***********************************************************************/
 
 static int
-sscmp(const void *a, const void *b)
+sscmp(void const * a, void const * b)
 {
 	unsigned long av = (unsigned long)a,
-				  bv = (unsigned long)b;
+	              bv = (unsigned long)b;
 
 	if (av > bv)
 		return 1;
-	if (av < bv)
+	else if (av < bv)
 		return -1;
-	return 0;
+	else
+		return 0;
 }
 
 static bool
-find_next_existing(const struct bitmap_guard *g, unsigned long *k)
+find_next_existing(struct bitmap_guard const * g, unsigned long * k)
 {
 	unsigned long l = *k;
 
 	while (!bitmap_guard_get(g, *k))
 	{
 		*k = (*k + 1 ) % TEST_ELEMENT_COUNT;
+
 		if (*k == l)
 			return true;
 	}
@@ -66,13 +61,14 @@ find_next_existing(const struct bitmap_guard *g, unsigned long *k)
 }
 
 static bool
-find_next_non_existing(const struct bitmap_guard *g, unsigned long *k)
+find_next_non_existing(struct bitmap_guard const * g, unsigned long * k)
 {
 	unsigned long l = *k;
 
 	while (bitmap_guard_get(g, *k))
 	{
 		*k = (*k + 1 ) % TEST_ELEMENT_COUNT;
+
 		if (*k == l)
 			return true;
 	}
@@ -80,130 +76,96 @@ find_next_non_existing(const struct bitmap_guard *g, unsigned long *k)
 	return false;
 }
 
-int
-main()
+static void
+FT_random_add_remove_finds()
 {
+	enum test_op
+	{
+		TEST_OP_INSERT,
+		TEST_OP_INSERT_EXISTING,
+		TEST_OP_REMOVE,
+		TEST_OP_REMOVE_NONEXISTING,
+		TEST_OP_FIND,
+		TEST_OP_FIND_NONEXISTING,
+		_TEST_OP_COUNT
+	};
 	SEARCH_STRUCTURE ss;
 	SEARCH_STRUCTURE_ELEMENT sse[TEST_ELEMENT_COUNT], dummy;
-	const SEARCH_STRUCTURE_ELEMENT *tmp;
-	unsigned char flags[TEST_ELEMENT_COUNT/8 + 1];
-	unsigned long i, j, k;
+	SEARCH_STRUCTURE_ELEMENT const * tmp;
+	unsigned char flags[TEST_ELEMENT_COUNT/8 + 1], tm;
 	struct bitmap_guard ssf;
 
-	printf("Starting search structure test.\n");
+	tm = clock();
+	printf("Seeding with value %u.\n", tm);
+	srand(tm);
 
 	SEARCH_STRUCTURE_ELEMENT_INITIALIZE(&dummy);
 	SEARCH_STRUCTURE_INITIALIZE(&ss, sscmp);
 	bitmap_guard_initialize(&ssf, flags, sizeof(flags));
 
-	for (i = 0; i < TEST_ELEMENT_COUNT; ++i)
+	for (unsigned long i = 0; i < TEST_ELEMENT_COUNT; ++i)
 	{
 		SEARCH_STRUCTURE_ELEMENT_INITIALIZE(&sse[i]);
 		SEARCH_STRUCTURE_ELEMENT_DEFINE(&sse[i], (void*)i);
 	}
 
-	for (i = 0; i < TEST_ITERATION_COUNT; ++i)
+	for (unsigned long i = 0, j = rand() % TEST_ELEMENT_COUNT;
+			i < TEST_ITERATION_COUNT ;
+			++i, j = rand() % TEST_ELEMENT_COUNT)
 	{
-		j = rand() % _TEST_OP_COUNT;
-		k = rand() % TEST_ELEMENT_COUNT;
-
-		switch (j)
+		switch (rand() % _TEST_OP_COUNT)
 		{
 			case TEST_OP_INSERT:
-				if (find_next_non_existing(&ssf, &k))
+				if (find_next_non_existing(&ssf, &j))
 					break;
-
-				if (SEARCH_STRUCTURE_INSERT(&ss, &sse[k]))
-				{
-					fprintf(stderr, "Failed to insert element #%lu into the search structure.\n", k);
-					return EXIT_FAILURE;
-				}
-
-				printf("insert #%lu.\n", k);
-
-				if (bitmap_guard_set(&ssf, k))
-					abort();
+				assert_false(SEARCH_STRUCTURE_INSERT(&ss, &sse[j]));
+				assert_false(bitmap_guard_set(&ssf, j));
 				break;
 			case TEST_OP_INSERT_EXISTING:
-				if (find_next_existing(&ssf, &k))
+				if (find_next_existing(&ssf, &j))
 					break;
-
-				SEARCH_STRUCTURE_ELEMENT_DEFINE(&dummy, SEARCH_STRUCTURE_ELEMENT_VALUE(&sse[k]));
-
-				if (!SEARCH_STRUCTURE_INSERT(&ss, &dummy))
-				{
-					fprintf(stderr, "Didn't expect to be able to re-insert an exising element #%lu.\n", k);
-					return EXIT_FAILURE;
-				}
-
-				printf("insert-existing #%lu.\n", k);
+				SEARCH_STRUCTURE_ELEMENT_DEFINE(&dummy, SEARCH_STRUCTURE_ELEMENT_VALUE(&sse[j]));
+				assert_true(SEARCH_STRUCTURE_INSERT(&ss, &dummy));
 				break;
 			case TEST_OP_REMOVE:
-				if (find_next_existing(&ssf, &k))
+				if (find_next_existing(&ssf, &j))
 					break;
-
-				if (!(tmp = SEARCH_STRUCTURE_REMOVE(&ss, SEARCH_STRUCTURE_ELEMENT_VALUE(&sse[k]))))
-				{
-					fprintf(stderr, "Failed to remove element #%lu from the search structure.\n", k);
-					return EXIT_FAILURE;
-				}
-
-				if (sscmp(SEARCH_STRUCTURE_ELEMENT_VALUE(tmp), SEARCH_STRUCTURE_ELEMENT_VALUE(&sse[k])))
-				{
-					fprintf(stderr, "Removed element doensn't match the reference element #%lu.\n", k);
-					return EXIT_FAILURE;
-				}
-
-				printf("remove #%lu.\n", k);
-
-				if (!bitmap_guard_clear(&ssf, k))
-					abort();
+				tmp = SEARCH_STRUCTURE_REMOVE(&ss, SEARCH_STRUCTURE_ELEMENT_VALUE(&sse[j]));
+				assert_non_null(tmp);
+				assert_false(sscmp(SEARCH_STRUCTURE_ELEMENT_VALUE(tmp), SEARCH_STRUCTURE_ELEMENT_VALUE(&sse[j])));
+				assert_true(bitmap_guard_clear(&ssf, j));
 				break;
 			case TEST_OP_REMOVE_NONEXISTING:
-				if (find_next_non_existing(&ssf, &k))
+				if (find_next_non_existing(&ssf, &j))
 					break;
-
-				if (SEARCH_STRUCTURE_REMOVE(&ss, SEARCH_STRUCTURE_ELEMENT_VALUE(&sse[k])))
-				{
-					fprintf(stderr, "Didn't expect remove to return anything for non-existing element #%lu.\n", k);
-					return EXIT_FAILURE;
-				}
-
-				printf("remove-nonexisting #%lu.\n", k);
+				assert_null(SEARCH_STRUCTURE_REMOVE(&ss, SEARCH_STRUCTURE_ELEMENT_VALUE(&sse[j])));
 				break;
 			case TEST_OP_FIND:
-				if (find_next_existing(&ssf, &k))
+				if (find_next_existing(&ssf, &j))
 					break;
-
-				if (!(tmp = SEARCH_STRUCTURE_FIND(&ss, SEARCH_STRUCTURE_ELEMENT_VALUE(&sse[k]))))
-				{
-					fprintf(stderr, "Failed to find element #%lu from the search structure.\n", k);
-					return EXIT_FAILURE;
-				}
-
-				if (sscmp(SEARCH_STRUCTURE_ELEMENT_VALUE(tmp), SEARCH_STRUCTURE_ELEMENT_VALUE(&sse[k])))
-				{
-					fprintf(stderr, "Found element doensn't match the reference element #%lu.\n", k);
-					return EXIT_FAILURE;
-				}
-
-				printf("find #%lu.\n", k);
+				tmp = SEARCH_STRUCTURE_FIND(&ss, SEARCH_STRUCTURE_ELEMENT_VALUE(&sse[j]));
+				assert_false(sscmp(SEARCH_STRUCTURE_ELEMENT_VALUE(tmp), SEARCH_STRUCTURE_ELEMENT_VALUE(&sse[j])));
 				break;
 			case TEST_OP_FIND_NONEXISTING:
-				if (find_next_non_existing(&ssf, &k))
+				if (find_next_non_existing(&ssf, &j))
 					break;
-
-				if (SEARCH_STRUCTURE_FIND(&ss, SEARCH_STRUCTURE_ELEMENT_VALUE(&sse[k])))
-				{
-					fprintf(stderr, "Didn't expect to find element #%lu from the search structure.\n", k);
-					return EXIT_FAILURE;
-				}
-
-				printf("find-nonexisting #%lu.\n", k);
+				assert_null(SEARCH_STRUCTURE_FIND(&ss, SEARCH_STRUCTURE_ELEMENT_VALUE(&sse[j])));
 				break;
 		}
 	}
-
-	printf("Search structure test ended OK.\n");
-	return EXIT_SUCCESS;
 }
+
+/***********************************************************************/
+
+int
+main()
+{
+	const struct CMUnitTest tests[] =
+	{
+		cmocka_unit_test(FT_random_add_remove_finds)
+	};
+
+	return cmocka_run_group_tests(tests, NULL, NULL);
+}
+
+/***********************************************************************/

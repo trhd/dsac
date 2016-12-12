@@ -15,124 +15,87 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-VALGRIND_ARGS = [ '--leak-check=full', '-v', '--show-leak-kinds=all', '--error-exitcode=1' ]
+CMOCKA = meson.get_compiler('c').find_library('cmocka')
+TEST_TIMEOUT = 900
 
-test(
-	'avl_tree',
-	executable(
-		'avl_tree',
-		'avl_tree.c',
-		link_with : DSAC_LIB_AVL_TREE,
-		include_directories : DSAC_INCLUDE
-	),
-	valgrind_args : VALGRIND_ARGS
+test_deps = [ CMOCKA, THREADS ]
+test_cflags = [
+	'-DUNIT_TESTING',
+	'-isystem', meson.current_source_dir() + '/system'
+]
+
+if get_option('buildtype') == 'release'
+	test_cflags += [ '-DNDEBUG' ]
+endif
+
+VALGRIND_ARGS = [
+	'--leak-check=full',
+	'--track-origins=yes',
+	'-v',
+	'--show-leak-kinds=all',
+	'--error-exitcode=1',
+	'--max-threads=5000'
+]
+
+TEST_LIB = library(
+	'dsactest',
+	DSAC_LIB_SOURCES + [ 'cmocka-wrapper.c' ],
+	include_directories : DSAC_INCLUDE,
+	c_args : test_cflags,
+	dependencies : test_deps
 )
 
-test(
-	'splay_tree',
-	executable(
-		'splay_tree',
-		'splay_tree.c',
-		link_with : DSAC_LIB_SPLAY_TREE,
-		include_directories : DSAC_INCLUDE
-	),
-	valgrind_args : VALGRIND_ARGS
-)
-
-test(
-	'search_structure-avl',
-	executable(
-		'search_structure-avl',
+test('search_structure-avl',
+	executable('search_structure-avl',
 		'search_structure.c',
-		link_with : DSAC_LIB,
+		link_with : TEST_LIB,
+		dependencies : test_deps,
 		include_directories : DSAC_INCLUDE,
 		c_args : [
 			'-DSEARCH_STRUCTURE_AVL',
 			'-DTEST_ITERATION_COUNT=100000',
 			'-DTEST_ELEMENT_COUNT=100'
-		]
-		),
+		] + test_cflags
+	),
+	timeout : TEST_TIMEOUT,
 	valgrind_args : VALGRIND_ARGS
 )
 
-test(
-	'search_structure-splay',
-	executable(
-		'search_structure-splay',
+test('search_structure-splay',
+	executable('search_structure-splay',
 		'search_structure.c',
-		link_with : DSAC_LIB,
+		link_with : TEST_LIB,
+		dependencies : test_deps,
 		include_directories : DSAC_INCLUDE,
 		c_args : [
 			'-DSEARCH_STRUCTURE_SPLAY',
 			'-DTEST_ITERATION_COUNT=100000',
 			'-DTEST_ELEMENT_COUNT=100'
-		]
-		),
+		] + test_cflags
+	),
+	timeout : TEST_TIMEOUT,
 	valgrind_args : VALGRIND_ARGS
 )
 
-test(
-	'bitmap',
-	executable(
+foreach t : [
+		'avl_tree',
 		'bitmap',
-		'bitmap.c',
-		link_with : DSAC_LIB_BITMAP,
-		include_directories : DSAC_INCLUDE
-	),
-	valgrind_args : VALGRIND_ARGS
-)
-
-test(
-	'linked_list',
-	executable(
-		'linked_list',
-		'linked_list.c',
-		link_with : DSAC_LIB_LINKED_LIST,
-		include_directories : DSAC_INCLUDE
-	),
-	valgrind_args : VALGRIND_ARGS
-)
-
-test(
-	'doubly_linked_list',
-	executable(
 		'doubly_linked_list',
-		'doubly_linked_list.c',
-		link_with : DSAC_LIB_DOUBLY_LINKED_LIST,
-		include_directories : DSAC_INCLUDE
-	),
-	valgrind_args : VALGRIND_ARGS
-)
-
-test(
-	'lifo',
-	executable(
-		'lifo',
-		'lifo.c',
-		link_with : DSAC_LIB_LIFO,
-		include_directories : DSAC_INCLUDE
-	),
-	valgrind_args : VALGRIND_ARGS
-)
-
-test(
-	'fifo',
-	executable(
 		'fifo',
-		'fifo.c',
-		link_with : DSAC_LIB_FIFO,
-		include_directories : DSAC_INCLUDE
-	),
-	valgrind_args : VALGRIND_ARGS
-)
-
-test(
-	'quicksort',
-	executable(
+		'lifo',
+		'linked_list',
 		'quicksort',
-		'quicksort.c',
-		link_with : DSAC_LIB_QUICKSORT,
-		include_directories : DSAC_INCLUDE
-	),
-	valgrind_args : VALGRIND_ARGS
-)
+		'splay_tree'
+		]
+	test(t,
+		executable(t,
+			'@0@.c'.format(t),
+			link_with : TEST_LIB,
+			c_args : test_cflags,
+			dependencies : test_deps,
+			include_directories : DSAC_INCLUDE,
+		),
+		timeout : TEST_TIMEOUT,
+		valgrind_args : VALGRIND_ARGS
+	)
+endforeach
