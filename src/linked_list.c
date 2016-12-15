@@ -195,11 +195,11 @@ linked_list_find(struct linked_list_meta *m, const void *p)
 }
 
 struct linked_list **
-linked_list_find_head(const struct linked_list_meta *m)
+linked_list_find_head(struct linked_list_meta *m)
 {
 	assert(m);
 
-	return (struct linked_list **)&m->head;
+	return &m->head;
 }
 
 int
@@ -247,7 +247,7 @@ linked_list_iterate(const struct linked_list_meta *m,
 	assert(cb);
 
 	int rv;
-	struct linked_list **r = linked_list_find_head(m);
+	struct linked_list **r = linked_list_find_head((struct linked_list_meta *)m);
 
 	while (*r)
 	{

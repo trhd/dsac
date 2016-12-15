@@ -69,7 +69,10 @@ struct linked_list **
 linked_list_find(struct linked_list_meta *meta, const void *data);
 
 struct linked_list **
-linked_list_find_head(const struct linked_list_meta *meta);
+linked_list_find_head(struct linked_list_meta *meta);
+
+struct linked_list **
+linked_list_find_tail(struct linked_list_meta *meta);
 
 struct linked_list **
 linked_list_find_match(struct linked_list_meta *meta, const void *match,
