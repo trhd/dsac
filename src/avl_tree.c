@@ -59,7 +59,7 @@ update_height(struct avl_node *n)
 		return 0;
 
 	if (!n->right && !n->left)
-		return n->height = 1;
+		return n->height = 0;
 	else if (n->right && n->left)
 		return n->height = MAX(n->left->height, n->right->height) + 1;
 	else if (n->right)
