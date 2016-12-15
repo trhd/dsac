@@ -202,6 +202,22 @@ linked_list_find_head(struct linked_list_meta *m)
 	return &m->head;
 }
 
+struct linked_list **
+linked_list_find_tail(struct linked_list_meta *m)
+{
+	assert(m);
+
+	struct linked_list **h = &m->head;
+
+	if (!*h)
+		return 0;
+
+	while ((*h)->next)
+		h = &(*h)->next;
+
+	return h;
+}
+
 int
 linked_list_empty(const struct linked_list_meta *m)
 {
