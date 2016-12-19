@@ -31,6 +31,96 @@ enum direction
 	MAX
 };
 
+#if !defined(NDEBUG) || defined(UNIT_TESTING)
+
+# include <stdio.h>
+
+static int
+verify_inner(struct avl_node const * n)
+{
+	int l = 0, r = 0, d = 0;
+
+	if (n->left)
+	{
+		l = n->left->height;
+		d += verify_inner(n->left);
+	}
+
+	if (n->right)
+	{
+		r = n->right->height;
+		d += verify_inner(n->right);
+	}
+
+	if (l < r - 1 || l > r + 1)
+	{
+		printf("\n%s: l=%d, r=%d ", (char*)n->data, l, r);
+		++d;
+	}
+
+	if (n->height > l + 1 && n->height > r + 1)
+	{
+		printf("Inconsistent heights (l=%d, r=%d, h=%d).\n",
+				l, r, n->height);
+		++d;
+	}
+
+
+	return d;
+}
+
+int
+avl_verify(struct avl_tree const * m)
+{
+	assert(m);
+
+	int rv = 0;
+
+	if (m->root)
+		rv = verify_inner(m->root);
+
+	if (rv)
+	{
+		printf("AVL tree verification FAILED!\n");
+		avl_print(m);
+	}
+
+	return rv;
+}
+
+static void
+print_inner(struct avl_node const * n, int l, char * pf)
+{
+	int i;
+
+	if (l == 0)
+		printf("/==============================\\\n");
+
+	if (n->left)
+		print_inner(n->left, l + 1, "/ ");
+	for (i = 0; i < l; ++i)
+		printf("    ");
+	printf("%s%s(%d)\n", pf, (char*)n->data, n->height);
+	if (n->right)
+		print_inner(n->right, l + 1, "\\ ");
+
+	if (l == 0)
+		printf("\\==============================/\n");
+}
+
+void
+avl_print(struct avl_tree const * m)
+{
+	assert(m);
+
+	if (m->root)
+		print_inner(m->root, 0, "-");
+}
+
+#else
+# define avl_verify(...)
+#endif
+
 void
 avl_initialize(struct avl_tree * t, int (*cmp)(void const *, void const *))
 {
@@ -194,6 +284,8 @@ avl_insert(struct avl_tree * t, struct avl_node * n)
 		t->size++;
 	}
 
+	avl_verify(t);
+
 	return rv;
 }
 
@@ -296,6 +388,8 @@ avl_remove_max(struct avl_tree * m)
 	if (r)
 		--m->size;
 
+	avl_verify(m);
+
 	return r;
 }
 
@@ -309,6 +403,8 @@ avl_find_min(struct avl_tree const * m)
 	if (r)
 		while (r->left)
 			r = r->left;
+
+	avl_verify(m);
 
 	return r;
 }
@@ -400,6 +496,8 @@ avl_remove(struct avl_tree * m, void const * d)
 	if (r)
 		--m->size;
 
+	avl_verify(m);
+
 	return r;
 }
 
@@ -435,91 +533,6 @@ avl_iterate(struct avl_tree const * m, int(*cb)(struct avl_node const *, void *)
 		return avl_iterate_recurse(m->root, cb, a);
 }
 
-#ifndef NDEBUG
-
-#include <stdio.h>
-
-static int
-verify_inner(struct avl_node const * n)
-{
-	int l = 0, r = 0, d = 0;
-
-	if (n->left)
-	{
-		l = n->left->height;
-		d += verify_inner(n->left);
-	}
-
-	if (n->right)
-	{
-		r = n->right->height;
-		d += verify_inner(n->right);
-	}
-
-	if (l < r - 1 || l > r + 1)
-	{
-		printf("\n%s: l=%d, r=%d ", (char*)n->data, l, r);
-		++d;
-	}
-
-	if (n->height > l + 1 && n->height > r + 1)
-	{
-		printf("Inconsistent heights (l=%d, r=%d, h=%d).\n",
-				l, r, n->height);
-		++d;
-	}
-
-
-	return d;
-}
-
-int
-avl_verify(struct avl_tree const * m)
-{
-	assert(m);
-
-	int rv = 0;
-
-	printf("Verifying AVL search tree's integrity: ");
-
-	if (m->root)
-		rv = verify_inner(m->root);
-
-	if (!rv)
-		printf("PASSED\n");
-	else
-		printf("FAILED\n");
-
-	return rv;
-}
-
-static void
-print_inner(struct avl_node const * n, int l, char * pf)
-{
-	int i;
-
-	if (l == 0)
-		printf("/==============================\\\n");
-
-	if (n->left)
-		print_inner(n->left, l + 1, "/ ");
-	for (i = 0; i < l; ++i)
-		printf("    ");
-	printf("%s%s(%d)\n", pf, (char*)n->data, n->height);
-	if (n->right)
-		print_inner(n->right, l + 1, "\\ ");
-
-	if (l == 0)
-		printf("\\==============================/\n");
-}
-
-void
-avl_print(struct avl_tree const * m)
-{
-	assert(m);
-
-	if (m->root)
-		print_inner(m->root, 0, "-");
-}
-
+#ifdef avl_verify
+# undef avl_verify
 #endif
