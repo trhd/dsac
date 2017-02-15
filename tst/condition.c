@@ -140,7 +140,7 @@ UT_condition_wait()
 	struct condition * c = test_malloc(sizeof(struct condition));
 	struct lock * l = test_malloc(sizeof(struct lock));
 	pthread_t t;
-	struct tuple tt = { c, 0, 2000 };
+	struct tuple tt = { c, 0, 450 };
 	void * r;
 
 	assert_false(lock_initialize(l));
@@ -313,7 +313,7 @@ helper__UT_condition_broadcast(struct tuple * t)
 static void
 UT_condition_broadcast()
 {
-	enum { thread_count = 2000 };
+	enum { thread_count = 450 };
 	struct condition * c = test_malloc(sizeof(struct condition));
 	struct lock * l = test_malloc(sizeof(struct lock));
 	pthread_t t[thread_count];
