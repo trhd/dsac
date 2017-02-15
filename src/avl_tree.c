@@ -38,6 +38,9 @@ enum direction
 static int
 verify_inner(struct avl_node const * n)
 {
+	assert(n);
+	debug_flags_assert(n, AVL_NODE_DEBUG_FLAG_SET);
+
 	int l = 0, r = 0, d = 0;
 
 	if (n->left)
@@ -73,6 +76,7 @@ int
 avl_verify(struct avl_tree const * m)
 {
 	assert(m);
+	debug_flags_assert(m, AVL_TREE_DEBUG_FLAG_INITIALIZED);
 
 	int rv = 0;
 
@@ -91,6 +95,9 @@ avl_verify(struct avl_tree const * m)
 static void
 print_inner(struct avl_node const * n, int l, char * pf)
 {
+	assert(n);
+	debug_flags_assert(n, AVL_NODE_DEBUG_FLAG_SET);
+
 	int i;
 
 	if (l == 0)
@@ -112,6 +119,7 @@ void
 avl_print(struct avl_tree const * m)
 {
 	assert(m);
+	debug_flags_assert(m, AVL_TREE_DEBUG_FLAG_INITIALIZED);
 
 	if (m->root)
 		print_inner(m->root, 0, "-");
@@ -130,6 +138,9 @@ avl_initialize(struct avl_tree * t, int (*cmp)(void const *, void const *))
 	t->size = 0;
 	t->compare = cmp;
 	t->root = NULL;
+	debug_flags_initialize(t);
+
+	debug_flags_set(t, AVL_TREE_DEBUG_FLAG_INITIALIZED);
 }
 
 static void
@@ -148,6 +159,8 @@ update_height(struct avl_node * n)
 	if (!n)
 		return 0;
 
+	debug_flags_assert(n, AVL_NODE_DEBUG_FLAG_SET);
+
 	if (!n->right && !n->left)
 		return n->height = 0;
 	else if (n->right && n->left)
@@ -164,6 +177,8 @@ get_balance_factor(struct avl_node const * n)
 	if (!n)
 		return 0;
 
+	debug_flags_assert(n, AVL_NODE_DEBUG_FLAG_SET);
+
 	return update_height(n->left) - update_height(n->right);
 }
 
@@ -171,8 +186,12 @@ static void
 rotate_left(struct avl_node ** p)
 {
 	assert(p);
+	assert(*p);
+	assert((*p)->right);
 
 	struct avl_node * a = *p;
+
+	debug_flags_assert(a, AVL_NODE_DEBUG_FLAG_SET);
 
 	*p = a->right;
 	a->right = (*p)->left;
@@ -187,8 +206,12 @@ static void
 rotate_right(struct avl_node ** p)
 {
 	assert(p);
+	assert(*p);
+	assert((*p)->left);
 
 	struct avl_node * a = *p;
+
+	debug_flags_assert(a, AVL_NODE_DEBUG_FLAG_SET);
 
 	*p = a->left;
 	a->left = (*p)->right;
@@ -204,6 +227,7 @@ balance(struct avl_node ** n)
 {
 	assert(n);
 	assert(*n);
+	debug_flags_assert(*n, AVL_NODE_DEBUG_FLAG_SET);
 
 	struct avl_node ** c;
 	int b = get_balance_factor(*n);
@@ -239,6 +263,8 @@ insert_recurse(struct avl_tree * t,
 	assert(t);
 	assert(r);
 	assert(n);
+	debug_flags_assert(t, AVL_TREE_DEBUG_FLAG_INITIALIZED);
+	debug_flags_assert(n, AVL_NODE_DEBUG_FLAG_SET);
 
 	int c, rv;
 
@@ -271,6 +297,8 @@ avl_insert(struct avl_tree * t, struct avl_node * n)
 {
 	assert(t);
 	assert(n);
+	debug_flags_assert(t, AVL_TREE_DEBUG_FLAG_INITIALIZED);
+	debug_flags_assert(n, AVL_NODE_DEBUG_FLAG_SET);
 
 	int rv;
 
@@ -316,6 +344,7 @@ remove_node(struct avl_node ** r)
 {
 	assert(r);
 	assert(*r);
+	debug_flags_assert(*r, AVL_NODE_DEBUG_FLAG_SET);
 
 	struct avl_node *t = *r, *tt;
 
@@ -347,6 +376,8 @@ remove_leaf_r(struct avl_tree * m, struct avl_node ** r, enum direction const d)
 	assert(m);
 	assert(r);
 	assert(*r);
+	debug_flags_assert(m, AVL_TREE_DEBUG_FLAG_INITIALIZED);
+	debug_flags_assert(*r, AVL_NODE_DEBUG_FLAG_SET);
 
 	struct avl_node * rv;
 
@@ -367,7 +398,7 @@ struct avl_node *
 avl_remove_min(struct avl_tree * m)
 {
 	assert(m);
-	assert(m->size > 0);
+	debug_flags_assert(m, AVL_TREE_DEBUG_FLAG_INITIALIZED);
 
 	struct avl_node * r = remove_leaf_r(m, &m->root, MIN);
 
@@ -381,7 +412,7 @@ struct avl_node *
 avl_remove_max(struct avl_tree * m)
 {
 	assert(m);
-	assert(m->size > 0);
+	debug_flags_assert(m, AVL_TREE_DEBUG_FLAG_INITIALIZED);
 
 	struct avl_node * r = remove_leaf_r(m, &m->root, MAX);
 
@@ -397,6 +428,7 @@ struct avl_node const *
 avl_find_min(struct avl_tree const * m)
 {
 	assert(m);
+	debug_flags_assert(m, AVL_TREE_DEBUG_FLAG_INITIALIZED);
 
 	struct avl_node * r = m->root;
 
@@ -413,6 +445,7 @@ struct avl_node const *
 avl_find_max(struct avl_tree const * m)
 {
 	assert(m);
+	debug_flags_assert(m, AVL_TREE_DEBUG_FLAG_INITIALIZED);
 
 	struct avl_node * r = m->root;
 
@@ -429,6 +462,7 @@ avl_find(struct avl_tree const * m, void const * d)
 	assert(m);
 	assert(m->compare);
 	/** d might be null/zero if pretending pointers to be numbers. */
+	debug_flags_assert(m, AVL_TREE_DEBUG_FLAG_INITIALIZED);
 
 	int cmp;
 	struct avl_node * t = m->root;
@@ -456,6 +490,7 @@ remove_recurse(struct avl_tree const * m, struct avl_node ** r, void const * d)
 	assert(r);
 	assert(*r);
 	/** d might be null/zero if pretending pointers to be numbers. */
+	debug_flags_assert(m, AVL_TREE_DEBUG_FLAG_INITIALIZED);
 
 	int cmp;
 	struct avl_node **t, *rv;
@@ -485,6 +520,7 @@ avl_remove(struct avl_tree * m, void const * d)
 {
 	assert(m);
 	/** d might be null/zero if pretending pointers to be numbers. */
+	debug_flags_assert(m, AVL_TREE_DEBUG_FLAG_INITIALIZED);
 
 	struct avl_node * r;
 
@@ -506,6 +542,7 @@ avl_iterate_recurse(struct avl_node const * n, int (*cb)(struct avl_node const *
 {
 	assert(n);
 	assert(cb);
+	debug_flags_assert(n, AVL_NODE_DEBUG_FLAG_SET);
 
 	int r = 0;
 
@@ -526,6 +563,7 @@ avl_iterate(struct avl_tree const * m, int(*cb)(struct avl_node const *, void *)
 {
 	assert(m);
 	assert(cb);
+	debug_flags_assert(m, AVL_TREE_DEBUG_FLAG_INITIALIZED);
 
 	if (avl_empty(m))
 		return 0;

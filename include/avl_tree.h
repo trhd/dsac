@@ -20,8 +20,19 @@
 #pragma once
 
 #include <assert.h>
+#include "debug_flags.h"
 
-#define AVL_TREE_INITIALIZER(comparison_function) { 0, comparison_function, NULL }
+#if defined(NDEBUG) && !defined(UNIT_TESTING)
+# define AVL_TREE_INITIALIZER(comparison_function) \
+	{ 0, comparison_function, NULL }
+#else
+# define AVL_TREE_INITIALIZER(comparison_function) \
+	{ 0, comparison_function, NULL, {1 << AVL_TREE_DEBUG_FLAG_INITIALIZED} }
+#endif
+
+DEBUG_FLAGS_ENUM(avl_node_debug_flag,
+		AVL_NODE_DEBUG_FLAG_SET,
+		_AVL_NODE_DEBUG_FLAG_COUNT);
 
 struct avl_node
 {
@@ -29,13 +40,19 @@ struct avl_node
 	struct avl_node * right;
 	unsigned short height;
 	void const * data;
+	DEBUG_FLAGS(_AVL_NODE_DEBUG_FLAG_COUNT);
 };
+
+DEBUG_FLAGS_ENUM(avl_tree_debug_flag,
+		AVL_TREE_DEBUG_FLAG_INITIALIZED,
+		_AVL_TREE_DEBUG_FLAG_COUNT);
 
 struct avl_tree
 {
 	unsigned int size;
 	int (*compare)(void const *, void const *);
 	struct avl_node * root;
+	DEBUG_FLAGS(_AVL_TREE_DEBUG_FLAG_COUNT);
 };
 
 void
@@ -69,6 +86,9 @@ static inline void
 avl_set(struct avl_node * n, void const * d)
 {
 	assert(n);
+
+	debug_flags_initialize(n);
+	debug_flags_set(n, AVL_NODE_DEBUG_FLAG_SET);
 	n->data = d;
 }
 
@@ -76,6 +96,8 @@ static inline void const *
 avl_get(struct avl_node const * n)
 {
 	assert(n);
+	debug_flags_assert(n, AVL_NODE_DEBUG_FLAG_SET);
+
 	return n->data;
 }
 
@@ -83,6 +105,8 @@ static inline unsigned int
 avl_size(struct avl_tree const * meta)
 {
 	assert(meta);
+	debug_flags_assert(meta, AVL_TREE_DEBUG_FLAG_INITIALIZED);
+
 	return meta->size;
 }
 
@@ -90,6 +114,7 @@ static inline int
 avl_empty(struct avl_tree const * meta)
 {
 	assert(meta);
+	debug_flags_assert(meta, AVL_TREE_DEBUG_FLAG_INITIALIZED);
 	return avl_size(meta) == 0;
 }
 
