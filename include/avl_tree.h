@@ -115,7 +115,8 @@ avl_empty(struct avl_tree const * meta)
 {
 	assert(meta);
 	debug_flags_assert(meta, AVL_TREE_DEBUG_FLAG_INITIALIZED);
-	return avl_size(meta) == 0;
+
+	return meta->root == NULL;
 }
 
 #if !defined(NDEBUG) || defined(UNIT_TESTING)

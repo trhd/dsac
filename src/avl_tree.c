@@ -101,18 +101,18 @@ print_inner(struct avl_node const * n, int l, char * pf)
 	int i;
 
 	if (l == 0)
-		printf("/==============================\\\n");
+		fprintf(stdout, "/==============================\\\n");
 
 	if (n->left)
 		print_inner(n->left, l + 1, "/ ");
 	for (i = 0; i < l; ++i)
-		printf("    ");
-	printf("%s%s(%d)\n", pf, (char*)n->data, n->height);
+		fprintf(stdout, "    ");
+	fprintf(stdout, "%s%s(%d)\n", pf, (char*)n->data, n->height);
 	if (n->right)
 		print_inner(n->right, l + 1, "\\ ");
 
 	if (l == 0)
-		printf("\\==============================/\n");
+		fprintf(stdout, "\\==============================/\n");
 }
 
 void
@@ -194,7 +194,7 @@ rotate_left(struct avl_node ** p)
 	debug_flags_assert(a, AVL_NODE_DEBUG_FLAG_SET);
 
 	*p = a->right;
-	a->right = (*p)->left;
+	a->right =(*p)->left;
 	(*p)->left = a;
 
 	update_height((*p)->left);
@@ -282,7 +282,7 @@ insert_recurse(struct avl_tree * t,
 	else if (c > 0)
 		rv = insert_recurse(t, &(*r)->right, n);
 	else
-		return ENOTUNIQ;
+		return -ENOTUNIQ;
 
 	if (rv)
 		return rv;
@@ -400,10 +400,16 @@ avl_remove_min(struct avl_tree * m)
 	assert(m);
 	debug_flags_assert(m, AVL_TREE_DEBUG_FLAG_INITIALIZED);
 
-	struct avl_node * r = remove_leaf_r(m, &m->root, MIN);
+	struct avl_node * r;
 
-	if (r)
-		--m->size;
+	if (avl_empty(m))
+		return NULL;
+
+	r = remove_leaf_r(m, &m->root, MIN);
+	assert(r);
+	--m->size;
+
+	avl_verify(m);
 
 	return r;
 }
@@ -414,10 +420,14 @@ avl_remove_max(struct avl_tree * m)
 	assert(m);
 	debug_flags_assert(m, AVL_TREE_DEBUG_FLAG_INITIALIZED);
 
-	struct avl_node * r = remove_leaf_r(m, &m->root, MAX);
+	struct avl_node * r;
 
-	if (r)
-		--m->size;
+	if (avl_empty(m))
+		return NULL;
+
+	r = remove_leaf_r(m, &m->root, MAX);
+	assert(r);
+	--m->size;
 
 	avl_verify(m);
 
