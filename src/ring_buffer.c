@@ -28,6 +28,7 @@ static void
 wrap_read_if_unusable(struct ring_buffer *r)
 {
 	assert(r);
+	debug_flags_assert(r, RING_BUFFER_DEBUG_FLAG_INITIALIZED);
 
 	if (r->size - r->read <= sizeof(size_t))
 		r->read = 0;
@@ -37,6 +38,7 @@ static void
 wrap_write_if_unusable(struct ring_buffer * r)
 {
 	assert(r);
+	debug_flags_assert(r, RING_BUFFER_DEBUG_FLAG_INITIALIZED);
 
 	if (r->size - r->write <= sizeof(size_t))
 		r->write = 0;
@@ -46,6 +48,7 @@ static void
 mark_empty_if_empty(struct ring_buffer * r)
 {
 	assert(r);
+	debug_flags_assert(r, RING_BUFFER_DEBUG_FLAG_INITIALIZED);
 
 	if (r->read == r->write)
 		r->read = RB_IS_EMPTY;
@@ -82,6 +85,7 @@ static void
 mark_nonempty(struct ring_buffer * r)
 {
 	assert(r);
+	debug_flags_assert(r, RING_BUFFER_DEBUG_FLAG_INITIALIZED);
 
 	if (ring_buffer_empty(r))
 		r->read = r->write;
@@ -91,7 +95,9 @@ static void *
 mark_reservation(struct ring_buffer * r, size_t l)
 {
 	assert(r);
+	assert(r->data);
 	assert(l);
+	debug_flags_assert(r, RING_BUFFER_DEBUG_FLAG_INITIALIZED);
 
 	void * rv = (char*)r->data + r->write + sizeof(size_t);
 	*(size_t*)((char*)r->data + r->write) = l;
@@ -108,6 +114,7 @@ reserve_from_the_end(struct ring_buffer * r, size_t l)
 {
 	assert(r);
 	assert(l);
+	debug_flags_assert(r, RING_BUFFER_DEBUG_FLAG_INITIALIZED);
 
 	void * rv;
 
@@ -125,6 +132,8 @@ static size_t
 void_end_of_buffer(struct ring_buffer * r)
 {
 	assert(r);
+	assert(r->data);
+	debug_flags_assert(r, RING_BUFFER_DEBUG_FLAG_INITIALIZED);
 
 	if (r->size - r->write > sizeof(size_t))
 	{
@@ -141,6 +150,9 @@ void_end_of_buffer(struct ring_buffer * r)
 static void
 unvoid_end_of_buffer(struct ring_buffer * r, size_t w)
 {
+	assert(r);
+	debug_flags_assert(r, RING_BUFFER_DEBUG_FLAG_INITIALIZED);
+
 	r->write = w;
 }
 
@@ -149,6 +161,7 @@ reserve_from_between(struct ring_buffer * r, size_t l)
 {
 	assert(r);
 	assert(l);
+	debug_flags_assert(r, RING_BUFFER_DEBUG_FLAG_INITIALIZED);
 	
 	if (r->read - r->write < l)
 		return NULL;
@@ -161,6 +174,7 @@ reserve(struct ring_buffer * r, size_t l)
 {
 	assert(r);
 	assert(l);
+	debug_flags_assert(r, RING_BUFFER_DEBUG_FLAG_INITIALIZED);
 
 	size_t t = 0;
 	void * rv;
@@ -210,7 +224,9 @@ static size_t
 peek_read_length(struct ring_buffer const * r)
 {
 	assert(r);
+	assert(r->data);
 	assert(r->read != r->write || !ring_buffer_empty(r));
+	debug_flags_assert(r, RING_BUFFER_DEBUG_FLAG_INITIALIZED);
 
 	size_t t = *(size_t*)((char*)r->data + r->read);
 
@@ -225,6 +241,7 @@ drop(struct ring_buffer * r)
 {
 	assert(r);
 	assert(!ring_buffer_empty(r));
+	debug_flags_assert(r, RING_BUFFER_DEBUG_FLAG_INITIALIZED);
 
 	size_t l = peek_read_length(r);
 
@@ -260,6 +277,7 @@ peek_from_buffer(struct ring_buffer const * r, void * d, size_t * l)
 	assert(l);
 	assert(*l);
 	assert(*l >= peek_read_length(r));
+	debug_flags_assert(r, RING_BUFFER_DEBUG_FLAG_INITIALIZED);
 
 	*l = peek_read_length(r);
 	memcpy(d, (char*)r->data + r->read + sizeof(size_t), *l);
@@ -273,6 +291,7 @@ read_from_buffer(struct ring_buffer * r, void * d, size_t * l)
 	assert(l);
 	assert(*l);
 	assert(*l >= peek_read_length(r));
+	debug_flags_assert(r, RING_BUFFER_DEBUG_FLAG_INITIALIZED);
 
 	*l = peek_read_length(r);
 	r->read += sizeof(size_t);
