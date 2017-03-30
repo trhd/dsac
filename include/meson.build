@@ -15,9 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with dsac. If not, see <http://www.gnu.org/licenses/>.
 
-DSAC_INCLUDE = include_directories(meson.current_source_dir())
+DSAC_INCLUDE = include_directories('.')
 install_headers(
-	[
+	files([
 		'avl_tree.h',
 		'bitmap.h',
 		'blocking_homogeneous_ring_buffer.h',
@@ -37,5 +37,5 @@ install_headers(
 		'search_structure.h',
 		'search_structure-splay.h',
 		'splay_tree.h'
-	],
+	]),
 )
