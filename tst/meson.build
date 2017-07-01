@@ -1,4 +1,4 @@
-# Copyright (C) 2016 Hemmo Nieminen
+# Copyright (C) 2016-2017 Hemmo Nieminen
 #
 # This file is part of dsac (Data Structures and Alorithms for C).
 #
@@ -29,14 +29,19 @@ if get_option('buildtype') == 'release'
 	test_cflags += [ '-DNDEBUG' ]
 endif
 
-VALGRIND_ARGS = [
-	'--leak-check=full',
-	'--track-origins=yes',
-	'-v',
-	'--show-leak-kinds=all',
-	'--error-exitcode=1',
-	'--max-threads=5000'
-]
+add_test_setup(
+	'valgrind',
+	exe_wrapper : [
+		'valgrind',
+			'--leak-check=full',
+			'--track-origins=yes',
+			'-v',
+			'--show-leak-kinds=all',
+			'--error-exitcode=1',
+			'--max-threads=5000'
+	],
+	timeout_multiplier : 20
+)
 
 TEST_LIB = library(
 	'dsactest',
@@ -57,9 +62,7 @@ test('search_structure-avl',
 			'-DTEST_ITERATION_COUNT=100000',
 			'-DTEST_ELEMENT_COUNT=100'
 		] + test_cflags
-	),
-	timeout : TEST_TIMEOUT,
-	valgrind_args : VALGRIND_ARGS
+	)
 )
 
 test('search_structure-splay',
@@ -73,9 +76,7 @@ test('search_structure-splay',
 			'-DTEST_ITERATION_COUNT=100000',
 			'-DTEST_ELEMENT_COUNT=100'
 		] + test_cflags
-	),
-	timeout : TEST_TIMEOUT,
-	valgrind_args : VALGRIND_ARGS
+	)
 )
 
 foreach t : [
@@ -103,8 +104,6 @@ foreach t : [
 			c_args : test_cflags,
 			dependencies : test_deps,
 			include_directories : DSAC_INCLUDE,
-		),
-		timeout : TEST_TIMEOUT,
-		valgrind_args : VALGRIND_ARGS
+		)
 	)
 endforeach
