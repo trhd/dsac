@@ -37,8 +37,7 @@ add_test_setup(
 			'--track-origins=yes',
 			'-v',
 			'--show-leak-kinds=all',
-			'--error-exitcode=1',
-			'--max-threads=5000'
+			'--error-exitcode=1'
 	],
 	timeout_multiplier : 20
 )
