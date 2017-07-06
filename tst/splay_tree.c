@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016 Hemmo Nieminen
+ * Copyright (C) 2016-2017 Hemmo Nieminen
  *
  * This file is part of dsac (Data Structures and Alorithms for C).
  *
@@ -26,7 +26,7 @@
 #ifndef NDEBUG
 #define SPLAY_PRINT(...) splay_print(__VA_ARGS__)
 #else
-#define SPLAY_PRINT
+#define SPLAY_PRINT(...)
 #endif
 
 static struct splay_node alphabet_nodes[] =
@@ -45,9 +45,7 @@ static size_t ITERATION_COUNTER;
 static void
 assert_verify(struct splay_tree const * t)
 {
-#if !defined(NDEBUG) || defined(UNIT_TESTING)
 	assert_int_equal(splay_verify(t), 0);
-#endif
 }
 
 static int

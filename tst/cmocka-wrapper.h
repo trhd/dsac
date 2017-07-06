@@ -31,13 +31,9 @@
 #include <cmocka.h>
 #include <stdbool.h>
 
-#ifdef UNIT_TESTING
-
-#ifndef NDEBUG
 #undef assert
 static inline void silence_scan_build(long p) { if (!p) exit(1) ; }
 #define assert(e) (mock_assert((long)(e), #e, __FILE__, __LINE__), silence_scan_build((long)(e)))
-#endif
 
 #define abort() do { mock_assert(false, "abort()", __FILE__, __LINE__) ; exit(1) ; } while (false)
 
@@ -60,5 +56,3 @@ int mock_reset_all(void**);
 	will_return(_mock_##function_to_mock, mock_function_return_value);\
 	test;\
 	do_mock_##function_to_mock = false;
-
-#endif

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016 Hemmo Nieminen
+ * Copyright (C) 2016-2017 Hemmo Nieminen
  *
  * This file is part of dsac (Data Structures and Alorithms for C).
  *
@@ -28,7 +28,7 @@ enum constants
 
 struct flag_holder_lite
 {
-	DEBUG_FLAGS(FLAG_HOLDER_SIZE);
+	DEBUG_FLAGS(FLAG_HOLDER_SIZE)
 };
 
 /***********************************************************************/
@@ -276,7 +276,7 @@ ensure_initialization_clears_bits()
 
 	struct
 	{
-		DEBUG_FLAGS(1234);
+		DEBUG_FLAGS(1234)
 	} f;
 	uint8_t buf[sizeof(f)];
 
@@ -290,7 +290,7 @@ ensure_initialization_clears_bits()
 
 /***********************************************************************/
 
-#ifndef NDEBUG
+#if !defined(NDEBUG) || defined(UNIT_TESTING)
 
 #define CHECK_CLEAR(a, b)\
 	assert_false(debug_flags_get((a), (b)))
@@ -324,7 +324,7 @@ set_n_clear()
 {
 	struct foobar
 	{
-		DEBUG_FLAGS(1000);
+		DEBUG_FLAGS(1000)
 	} f __attribute__((unused));
 	int i;
 
@@ -384,10 +384,10 @@ size_check()
 	struct foobar
 	{
 		uint32_t padding;
-		DEBUG_FLAGS(32);
+		DEBUG_FLAGS(32)
 	} foobar;
 
-#ifndef NDEBUG
+#if !defined(NDEBUG) || defined(UNIT_TESTING)
 	assert_int_equal(sizeof(foobar), 8);
 #else
 	assert_int_equal(sizeof(foobar), 4);
@@ -401,8 +401,7 @@ DEBUG_FLAGS_ENUM(test_flag_enum,
 	RELEASED = 0,
 	FOOBAR = 1,
 	KEKE = 2
-);
-
+)
 
 static void
 enum_test()
@@ -411,14 +410,17 @@ enum_test()
 #error DEBUG_FLAGS_ENUM should be defined.
 #endif
 
-#ifndef NDEBUG
+#if !defined(NDEBUG) || defined(UNIT_TESTING)
 	assert_int_equal(INIT, -1);
 	assert_int_equal(RELEASED, 0);
 	assert_int_equal(FOOBAR, 1);
 	assert_int_equal(KEKE, 2);
 #else
 	/** DEBUG_FLAGS_ENUM should expand to nothing. Compile error otherwise. */
-	assert_false(0 DEBUG_FLAGS_ENUM(kekek, INIT, FOOBAR));
+	DEBUG_FLAGS_ENUM(kekek, INIT, FOOBAR)
+	DEBUG_FLAGS_ENUM(kekek, INIT, FOOBAR)
+	DEBUG_FLAGS_ENUM(kekek, INIT, FOOBAR)
+	DEBUG_FLAGS_ENUM(kekek, INIT, FOOBAR)
 #endif
 }
 

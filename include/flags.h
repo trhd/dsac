@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016 Hemmo Nieminen
+ * Copyright (C) 2016-2017 Hemmo Nieminen
  *
  * This file is part of dsac (Data Structures and Alorithms for C).
  *
@@ -84,10 +84,9 @@ _flags_get(const uint8_t *flags, unsigned int idx)
 	(assert((s)), _flags_assert_index_in_range(s, i), _flags_assert((s)->_flags, i))
 
 static inline void
-_flags_assert(const uint8_t *flags, unsigned int idx)
+_flags_assert(const uint8_t * flags __attribute__((unused)), unsigned int idx __attribute__((unused)))
 {
 	assert(flags);
-
 	assert(_flags_get(flags, idx));
 }
 
@@ -97,9 +96,13 @@ _flags_assert(const uint8_t *flags, unsigned int idx)
 static inline void
 _flags_assert_not(const uint8_t *flags, unsigned int idx)
 {
+#if !defined(NDEBUG) || defined(UNIT_TESTING)
 	assert(flags);
-
 	assert(!_flags_get(flags, idx));
+#else
+	(void)sizeof(flags);
+	(void)sizeof(idx);
+#endif
 }
 
 #else

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016 Hemmo Nieminen
+ * Copyright (C) 2016-2017 Hemmo Nieminen
  *
  * This file is part of dsac (Data Structures and Alorithms for C).
  *
@@ -24,30 +24,16 @@
 #include <string.h>
 #include "flags.h"
 
-#if defined(NDEBUG) && !defined(UNIT_TESTING)
-
-# define DEBUG_FLAGS(n)
-# define DEBUG_FLAGS_ENUM(...)
-
-# define debug_flags_initialize(...) ((void)0)
-# define debug_flags_assert(...)     ((void)0)
-# define debug_flags_assert_not(...) ((void)0)
-# define debug_flags_set(...)        ((void)0)
-# define debug_flags_get(...)        ((void)0)
-# define debug_flags_clear(...)      ((void)0)
-# define debug_flags_copy(...)       ((void)0)
-# define debug_flags_compare(...)    ((void)0)
-
-#else /** NDEBUG */
+#if !defined(NDEBUG) || defined(UNIT_TESTING)
 
 # define DEBUG_FLAGS(n)\
-	uint8_t _debug_flags[(n + 7) / 8]
+	uint8_t _debug_flags[(n + 7) / 8];
 
 # define DEBUG_FLAGS_ENUM(name, ...)\
 	enum name \
 	{\
 		__VA_ARGS__\
-	}
+	};
 
 # define _debug_flags_assert_index_in_range(s, i)\
 	assert(sizeof((s)->_debug_flags) >= (size_t)i/8 + 1)
@@ -75,5 +61,19 @@
 
 # define debug_flags_compare(d, s)\
 	(assert(d), assert(s), _flags_compare((d)->_debug_flags, sizeof((d)->_debug_flags), (s)->_debug_flags, sizeof((s)->_debug_flags)))
+
+#else
+
+# define DEBUG_FLAGS(...)
+# define DEBUG_FLAGS_ENUM(...)
+
+# define debug_flags_initialize(s)      do { s = s; } while (0)
+# define debug_flags_assert(s, ...)     do { s = s; } while (0)
+# define debug_flags_assert_not(s, ...) do { s = s; } while (0)
+# define debug_flags_set(s, ...)        do { s = s; } while (0)
+# define debug_flags_get(s, ...)        do { s = s; } while (0)
+# define debug_flags_clear(s, ...)      do { s = s; } while (0)
+# define debug_flags_copy(s, b)         do { a = a; b = b; } while (0)
+# define debug_flags_compare(a, b)      do { a = a; b = b; } while (0)
 
 #endif

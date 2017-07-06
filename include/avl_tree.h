@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016 Hemmo Nieminen
+ * Copyright (C) 2016-2017 Hemmo Nieminen
  *
  * This file is part of dsac (Data Structures and Alorithms for C).
  *
@@ -32,7 +32,7 @@
 
 DEBUG_FLAGS_ENUM(avl_node_debug_flag,
 		AVL_NODE_DEBUG_FLAG_SET,
-		_AVL_NODE_DEBUG_FLAG_COUNT);
+		_AVL_NODE_DEBUG_FLAG_COUNT)
 
 struct avl_node
 {
@@ -40,19 +40,19 @@ struct avl_node
 	struct avl_node * right;
 	unsigned short height;
 	void const * data;
-	DEBUG_FLAGS(_AVL_NODE_DEBUG_FLAG_COUNT);
+	DEBUG_FLAGS(_AVL_NODE_DEBUG_FLAG_COUNT)
 };
 
 DEBUG_FLAGS_ENUM(avl_tree_debug_flag,
 		AVL_TREE_DEBUG_FLAG_INITIALIZED,
-		_AVL_TREE_DEBUG_FLAG_COUNT);
+		_AVL_TREE_DEBUG_FLAG_COUNT)
 
 struct avl_tree
 {
 	unsigned int size;
 	int (*compare)(void const *, void const *);
 	struct avl_node * root;
-	DEBUG_FLAGS(_AVL_TREE_DEBUG_FLAG_COUNT);
+	DEBUG_FLAGS(_AVL_TREE_DEBUG_FLAG_COUNT)
 };
 
 void

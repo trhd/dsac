@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016 Hemmo Nieminen
+ * Copyright (C) 2016-2017 Hemmo Nieminen
  *
  * This file is part of dsac (Data Structures and Alorithms for C).
  *
@@ -124,7 +124,7 @@ splay_is_empty(struct splay_tree const * tree)
 	return splay_size(tree) == 0;
 }
 
-#ifndef NDEBUG
+#if !defined(NDEBUG) || defined(UNIT_TESTING)
 
 int
 splay_verify(struct splay_tree const * tree);

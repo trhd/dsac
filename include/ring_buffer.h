@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016 Hemmo Nieminen
+ * Copyright (C) 2016-2017 Hemmo Nieminen
  *
  * This file is part of dsac (Data Structures and Alorithms for C).
  *
@@ -22,12 +22,10 @@
 #include "debug_flags.h"
 #include <stdbool.h>
 
-DEBUG_FLAGS_ENUM
-(
- ring_buffer_debug_flag,
- RING_BUFFER_DEBUG_FLAG_INITIALIZED,
- _RING_BUFFER_DEBUG_FLAG_COUNT
- );
+DEBUG_FLAGS_ENUM(
+	ring_buffer_debug_flag,
+	RING_BUFFER_DEBUG_FLAG_INITIALIZED,
+	_RING_BUFFER_DEBUG_FLAG_COUNT)
 
 struct ring_buffer
 {
@@ -35,7 +33,7 @@ struct ring_buffer
 	const size_t size;
 	size_t read;
 	size_t write;
-	DEBUG_FLAGS(_RING_BUFFER_DEBUG_FLAG_COUNT);
+	DEBUG_FLAGS(_RING_BUFFER_DEBUG_FLAG_COUNT)
 };
 
 bool
@@ -46,6 +44,7 @@ ring_buffer_uninitialize(struct ring_buffer * ring)
 {
 	debug_flags_assert(ring, RING_BUFFER_DEBUG_FLAG_INITIALIZED);
 	debug_flags_clear(ring, RING_BUFFER_DEBUG_FLAG_INITIALIZED);
+
 	return false;
 }
 

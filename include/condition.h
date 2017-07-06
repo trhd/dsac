@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016 Hemmo Nieminen
+ * Copyright (C) 2016-2017 Hemmo Nieminen
  *
  * This file is part of dsac (Data Structures and Alorithms for C).
  *
@@ -41,13 +41,13 @@
 
 DEBUG_FLAGS_ENUM(condition_debug_flag,
 		CONDITION_DEBUG_FLAG_INITIALIZED,
-		_CONDITION_DEBUG_FLAG_COUNT);
+		_CONDITION_DEBUG_FLAG_COUNT)
 
 struct condition
 {
 	struct lock *lock;
 	pthread_cond_t cond;
-	DEBUG_FLAGS(_CONDITION_DEBUG_FLAG_COUNT);
+	DEBUG_FLAGS(_CONDITION_DEBUG_FLAG_COUNT)
 };
 
 static inline bool

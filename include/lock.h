@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016 Hemmo Nieminen
+ * Copyright (C) 2016-2017 Hemmo Nieminen
  *
  * This file is part of dsac (Data Structures and Alorithms for C).
  *
@@ -38,12 +38,12 @@
 
 DEBUG_FLAGS_ENUM(lock_debug_flag,
 		LOCK_DEBUG_FLAG_INITIALIZED,
-		_LOCK_DEBUG_FLAG_COUNT);
+		_LOCK_DEBUG_FLAG_COUNT)
 
 struct lock
 {
 	pthread_mutex_t mutex;
-	DEBUG_FLAGS(_LOCK_DEBUG_FLAG_COUNT);
+	DEBUG_FLAGS(_LOCK_DEBUG_FLAG_COUNT)
 };
 
 bool lock_initialize(struct lock * lock);

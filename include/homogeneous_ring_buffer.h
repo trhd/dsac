@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016 Hemmo Nieminen
+ * Copyright (C) 2016-2017 Hemmo Nieminen
  *
  * This file is part of dsac (Data Structures and Alorithms for C).
  *
@@ -24,7 +24,7 @@
 
 DEBUG_FLAGS_ENUM(homogeneous_ring_buffer_debug_flag,
 		HOMOGENEOUS_RING_BUFFER_INITIALIZED,
-		_HOMOGENEOUS_RING_BUFFER_DEBUG_FLAG_COUNT);
+		_HOMOGENEOUS_RING_BUFFER_DEBUG_FLAG_COUNT)
 
 struct homogeneous_ring_buffer
 {
@@ -33,7 +33,7 @@ struct homogeneous_ring_buffer
 	size_t element_bytes;
 	void * array;
 	size_t array_size;
-	DEBUG_FLAGS(_HOMOGENEOUS_RING_BUFFER_DEBUG_FLAG_COUNT);
+	DEBUG_FLAGS(_HOMOGENEOUS_RING_BUFFER_DEBUG_FLAG_COUNT)
 };
 
 void

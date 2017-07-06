@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016 Hemmo Nieminen
+ * Copyright (C) 2016-2017 Hemmo Nieminen
  *
  * This file is part of dsac (Data Structures and Alorithms for C).
  *
@@ -521,7 +521,7 @@ splay_iterate(struct splay_tree const * tree, int(*cb)(struct splay_node const *
 		return iteration_recursion(tree->root, cb, arg);
 }
 
-#ifndef NDEBUG
+#if !defined(NDEBUG) || defined(UNIT_TESTING)
 
 #include <stdio.h>
 

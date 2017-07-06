@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016 Hemmo Nieminen
+ * Copyright (C) 2016-2017 Hemmo Nieminen
  *
  * This file is part of dsac (Data Structures and Alorithms for C).
  *
@@ -28,14 +28,14 @@
 DEBUG_FLAGS_ENUM(blocking_ring_buffer_debug_flag,
 		BLOCKING_RING_BUFFER_DEBUG_FLAG_INITIALIZED,
 		BLOCKING_RING_BUFFER_DEBUG_FLAG_DIRTY,
-		_BLOCKING_RING_BUFFER_DEBUG_FLAG_COUNT);
+		_BLOCKING_RING_BUFFER_DEBUG_FLAG_COUNT)
 
 struct blocking_ring_buffer
 {
 	struct ring_buffer buffer;
 	struct condition condition;
 	struct lock lock;
-	DEBUG_FLAGS(_BLOCKING_RING_BUFFER_DEBUG_FLAG_COUNT);
+	DEBUG_FLAGS(_BLOCKING_RING_BUFFER_DEBUG_FLAG_COUNT)
 };
 
 bool
