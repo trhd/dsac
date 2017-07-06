@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016 Hemmo Nieminen
+ * Copyright (C) 2016-2017 Hemmo Nieminen
  *
  * This file is part of dsac (Data Structures and Alorithms for C).
  *
@@ -277,7 +277,7 @@ FT_test_basic_usage()
 
 	assert_false(lock_initialize(l));
 
-	for (int i = 0; i < 1000; ++i)
+	for (volatile int i = 0; i < 1000; ++i)
 	{
 		expect_assert_failure(lock_assert(l));
 		assert_false(lock_acquire(l));

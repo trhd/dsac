@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016 Hemmo Nieminen
+ * Copyright (C) 2016-2017 Hemmo Nieminen
  *
  * This file is part of dsac (Data Structures and Alorithms for C).
  *
@@ -282,7 +282,7 @@ UT_flags_assert()
 {
 
 	struct flag_holder_lite *h = test_malloc(sizeof(struct flag_holder_lite));
-	int i;
+	volatile int i;
 
 	flags_initialize(h);
 

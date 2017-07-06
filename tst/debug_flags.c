@@ -67,7 +67,7 @@ static void
 UT_debug_flags_get()
 {
 	struct flag_holder_lite *h = test_malloc(sizeof(struct flag_holder_lite));
-	int i;
+	volatile int i;
 
 	debug_flags_initialize(h);
 
@@ -214,7 +214,7 @@ UT_debug_flags_assert()
 {
 
 	struct flag_holder_lite *h = test_malloc(sizeof(struct flag_holder_lite));
-	int i;
+	volatile int i;
 
 	debug_flags_initialize(h);
 
