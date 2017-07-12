@@ -73,7 +73,7 @@
 # define debug_flags_set(s, ...)        do { s = s; } while (0)
 # define debug_flags_get(s, ...)        do { s = s; } while (0)
 # define debug_flags_clear(s, ...)      do { s = s; } while (0)
-# define debug_flags_copy(s, b)         do { a = a; b = b; } while (0)
+# define debug_flags_copy(a, b)         do { a = a; b = b; } while (0)
 # define debug_flags_compare(a, b)      do { a = a; b = b; } while (0)
 
 #endif
