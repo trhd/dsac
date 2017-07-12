@@ -1,4 +1,4 @@
-# Copyright (C) 2016 Hemmo Nieminen
+# Copyright (C) 2016-2017 Hemmo Nieminen
 #
 # This file is part of dsac (Data Structures and Alorithms for C).
 #
@@ -18,7 +18,7 @@
 project(
 	'dsac',
 	'c',
-	version : '4.0.0',
+	version : '4.1.0',
 	meson_version : '>=0.31.0',
 	license : 'GPLv2',
 	default_options : [
