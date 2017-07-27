@@ -62,6 +62,34 @@ FT_sort_10()
 /***********************************************************************/
 
 static void
+FT_sort_20()
+{
+	static const long test_data_numbers_sorted[] =
+	{
+		0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9
+	};
+
+	long test_data_numbers_mixed[] =
+	{
+		3, 2, 8, 0, 4, 5, 1, 6, 7, 9,
+		3, 1, 6, 2, 8, 7, 0, 4, 9, 5
+	};
+
+	assert_int_equal(sizeof(long), sizeof(void *));
+	assert_int_equal(sizeof(test_data_numbers_mixed), sizeof(test_data_numbers_sorted));
+
+	quicksort((const void **)test_data_numbers_mixed,
+			sizeof(test_data_numbers_mixed) / sizeof(long),
+			(int(*)(const void *, const void *))cmp_long);
+
+	assert_memory_equal(test_data_numbers_mixed,
+			test_data_numbers_sorted,
+			sizeof(test_data_numbers_mixed));
+}
+
+/***********************************************************************/
+
+static void
 FT_sort_50()
 {
 	static const long test_data_numbers_sorted[] =
@@ -103,6 +131,7 @@ main()
 	const struct CMUnitTest tests[] =
 	{
 		cmocka_unit_test(FT_sort_10),
+		cmocka_unit_test(FT_sort_20),
 		cmocka_unit_test(FT_sort_50)
 	};
 
