@@ -23,19 +23,8 @@
 #include "debug_flags.h"
 #include "lock.h"
 
-#if !defined(NDEBUG) || defined(UNIT_TESTING)
-# define CONDITION_INITIALIZER(lock_arg) \
-	{ \
-		.lock = lock_arg, \
-		.cond = PTHREAD_COND_INITIALIZER, \
-		._debug_flags = { 1 << CONDITION_DEBUG_FLAG_INITIALIZED } \
-	}
-#else
-# define CONDITION_INITIALIZER(lock_arg) \
-	{ \
-		.lock = lock_arg, \
-		.cond = PTHREAD_COND_INITIALIZER \
-	}
+#ifndef NDEBUG
+#include <errno.h>
 #endif
 
 DEBUG_FLAGS_ENUM(condition_debug_flag,
@@ -55,11 +44,23 @@ condition_initialize(struct condition *condition, struct lock *lock)
 	assert(condition);
 	assert(lock);
 
+	pthread_condattr_t attr;
+
+	if (pthread_condattr_init(&attr))
+		return true;
+
+	if (pthread_condattr_setclock(&attr, CLOCK_MONOTONIC))
+		return true;
+
 	condition->lock = lock;
-	pthread_cond_init(&condition->cond, NULL);
+	if (pthread_cond_init(&condition->cond, &attr))
+	{
+		pthread_condattr_destroy(&attr);
+		return true;
+	}
 	debug_flags_set(condition, CONDITION_DEBUG_FLAG_INITIALIZED);
 
-	return false;
+	return pthread_condattr_destroy(&attr);
 }
 
 static inline bool
@@ -81,6 +82,36 @@ condition_wait(struct condition *condition)
 	debug_flags_assert(condition, CONDITION_DEBUG_FLAG_INITIALIZED);
 
 	return pthread_cond_wait(&condition->cond, &condition->lock->mutex);
+}
+
+static inline bool
+condition_timedwait(struct condition * condition, struct timespec const * delta)
+{
+	assert(condition);
+	assert(delta);
+	debug_flags_assert(condition, CONDITION_DEBUG_FLAG_INITIALIZED);
+
+	int e;
+	struct timespec abs;
+
+	e = clock_gettime(CLOCK_MONOTONIC, &abs);
+	assert(!e);
+
+	abs.tv_sec += delta->tv_sec;
+	abs.tv_nsec += delta->tv_nsec;
+	if (abs.tv_nsec < delta->tv_nsec)
+		abs.tv_sec++;
+	assert(abs.tv_sec >= delta->tv_sec);
+
+	e = pthread_cond_timedwait(&condition->cond, &condition->lock->mutex, &abs);
+
+	assert(e != EINVAL);
+	assert(e != EOWNERDEAD);
+	assert(e != EPERM);
+	assert(e != ENOTRECOVERABLE);
+	assert(!e || e == ETIMEDOUT);
+
+	return e;
 }
 
 static inline bool

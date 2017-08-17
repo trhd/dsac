@@ -22,7 +22,8 @@
 
 struct tuple
 {
-	struct condition *cond;
+	struct lock * lock;
+	struct condition * cond;
 	int counter;
 	int iters;
 };
@@ -115,7 +116,7 @@ UT_condition_uninitialize__uninitialized()
 static void *
 helper__UT_condition_wait(struct tuple * t)
 {
-	if (lock_acquire(t->cond->lock))
+	if (lock_acquire(t->lock))
 		return (void*)1;
 
 	for (int i = 0 ; i < t->iters; i++)
@@ -127,7 +128,7 @@ helper__UT_condition_wait(struct tuple * t)
 			return (void*)1;
 	}
 
-	if (lock_release(t->cond->lock))
+	if (lock_release(t->lock))
 		return (void*)1;
 
 	return NULL;
@@ -139,13 +140,13 @@ UT_condition_wait()
 	struct condition * c = test_malloc(sizeof(struct condition));
 	struct lock * l = test_malloc(sizeof(struct lock));
 	pthread_t t;
-	struct tuple tt = { c, 0, 450 };
+	struct tuple tt = { l, c, 0, 450 };
 	void * r;
 
 	assert_false(lock_initialize(l));
 	assert_false(condition_initialize(c, l));
 
-	assert_false(lock_acquire(tt.cond->lock));
+	assert_false(lock_acquire(tt.lock));
 
 	assert_false(pthread_create(&t, 0, (void*(*)(void*))helper__UT_condition_wait, &tt));
 
@@ -190,7 +191,138 @@ UT_condition_wait__uninitialized()
 
 	assert_false(condition_uninitialize(c));
 
+	assert_false(lock_acquire(l));
 	expect_assert_failure(condition_wait(c));
+	assert_false(lock_release(l));
+
+	assert_false(lock_uninitialize(l));
+
+	test_free(c);
+	test_free(l);
+}
+
+/***********************************************************************/
+
+static const struct timespec helper__UT_condition_timedwait__delay = { 1, 1000 * 1000 };
+
+static void *
+helper__UT_condition_timedwait(struct tuple * t)
+{
+	if (lock_acquire(t->lock))
+		return (void*)1;
+
+	for (int i = 0 ; i < t->iters; i++)
+	{
+		if (t->counter++ != i * 2
+				|| condition_signal(t->cond)
+				|| condition_timedwait(t->cond, &helper__UT_condition_timedwait__delay)
+				|| t->counter != 2 * i + 2)
+			return (void*)1;
+	}
+
+	if (lock_release(t->lock))
+		return (void*)1;
+
+	return NULL;
+}
+
+static void
+UT_condition_timedwait()
+{
+	struct condition * c = test_malloc(sizeof(struct condition));
+	struct lock * l = test_malloc(sizeof(struct lock));
+	pthread_t t;
+	struct tuple tt = { l, c, 0, 450 };
+	void * r;
+
+	assert_false(lock_initialize(l));
+	assert_false(condition_initialize(c, l));
+
+	assert_false(lock_acquire(tt.lock));
+
+	assert_false(pthread_create(&t, 0, (void*(*)(void*))helper__UT_condition_timedwait, &tt));
+
+	for (int i = 0; i < tt.iters; i++)
+	{
+		assert_false(condition_timedwait(c, &helper__UT_condition_timedwait__delay));
+		assert_int_equal(tt.counter, 2 * i + 1);
+		tt.counter++;
+		assert_false(condition_signal(c));
+	}
+
+	lock_release(l);
+
+	assert_false(pthread_join(t, &r));
+	assert_null(r);
+
+	assert_false(condition_uninitialize(c));
+	assert_false(lock_uninitialize(l));
+
+	test_free(c);
+	test_free(l);
+}
+
+/***********************************************************************/
+
+static void
+UT_condition_timedwait__expire()
+{
+	struct condition * c = test_malloc(sizeof(struct condition));
+	struct lock * l = test_malloc(sizeof(struct lock));
+	struct timespec delay = { 0, 1000 };
+
+	assert_false(lock_initialize(l));
+	assert_false(condition_initialize(c, l));
+
+	assert_false(lock_acquire(l));
+	assert_true(condition_timedwait(c, &delay));
+	assert_false(lock_release(l));
+
+	assert_false(condition_uninitialize(c));
+	assert_false(lock_uninitialize(l));
+
+	test_free(c);
+	test_free(l);
+}
+
+/***********************************************************************/
+
+static void
+UT_condition_timedwait__NULL()
+{
+	struct lock * l = test_malloc(sizeof(struct lock));
+	struct condition * c = test_malloc(sizeof(struct condition));
+
+	assert_false(lock_initialize(l));
+	assert_false(condition_initialize(c, l));
+
+	expect_assert_failure(condition_timedwait(NULL, NULL));
+	expect_assert_failure(condition_timedwait(NULL, &helper__UT_condition_timedwait__delay));
+	expect_assert_failure(condition_timedwait(c, NULL));
+
+	assert_false(condition_uninitialize(c));
+	assert_false(lock_uninitialize(l));
+
+	test_free(l);
+	test_free(c);
+}
+
+/***********************************************************************/
+
+static void
+UT_condition_timedwait__uninitialized()
+{
+	struct condition * c = test_malloc(sizeof(struct condition));
+	struct lock * l = test_malloc(sizeof(struct lock));
+
+	assert_false(lock_initialize(l));
+	assert_false(condition_initialize(c, l));
+
+	assert_false(condition_uninitialize(c));
+
+	assert_false(lock_acquire(l));
+	expect_assert_failure(condition_timedwait(c, &helper__UT_condition_timedwait__delay));
+	assert_false(lock_release(l));
 
 	assert_false(lock_uninitialize(l));
 
@@ -205,7 +337,7 @@ helper__UT_condition_signal(struct tuple * t)
 {
 	assert(t);
 
-	if (lock_acquire(t->cond->lock))
+	if (lock_acquire(t->lock))
 		return (void*)1;
 
 	t->counter = 1000;
@@ -215,7 +347,7 @@ helper__UT_condition_signal(struct tuple * t)
 	while (t->counter)
 		condition_wait(t->cond);
 
-	if (lock_release(t->cond->lock))
+	if (lock_release(t->lock))
 		return (void*)1;
 
 	return NULL;
@@ -227,7 +359,7 @@ UT_condition_signal()
 	struct condition * c = test_malloc(sizeof(struct condition));
 	struct lock * l = test_malloc(sizeof(struct lock));
 	pthread_t t;
-	struct tuple tt = { c, 0, 0 };
+	struct tuple tt = { l, c, 0, 0 };
 	void * r;
 
 	assert_false(lock_initialize(l));
@@ -235,7 +367,7 @@ UT_condition_signal()
 
 	assert_false(pthread_create(&t, 0, (void*(*)(void*))helper__UT_condition_signal, &tt));
 
-	assert_false(lock_acquire(tt.cond->lock));
+	assert_false(lock_acquire(tt.lock));
 
 	while (!tt.counter)
 		condition_wait(tt.cond);
@@ -291,7 +423,7 @@ helper__UT_condition_broadcast(struct tuple * t)
 {
 	assert(t);
 
-	if (lock_acquire(t->cond->lock))
+	if (lock_acquire(t->lock))
 		return (void*)1;
 
 	t->counter++;
@@ -303,7 +435,7 @@ helper__UT_condition_broadcast(struct tuple * t)
 		if (condition_wait(t->cond))
 			return (void*)1;
 
-	if (lock_release(t->cond->lock))
+	if (lock_release(t->lock))
 		return (void*)1;
 
 	return NULL;
@@ -316,13 +448,13 @@ UT_condition_broadcast()
 	struct condition * c = test_malloc(sizeof(struct condition));
 	struct lock * l = test_malloc(sizeof(struct lock));
 	pthread_t t[thread_count];
-	struct tuple tt = { c, 0, 0 };
+	struct tuple tt = { l, c, 0, 0 };
 	void * r;
 
 	assert_false(lock_initialize(l));
 	assert_false(condition_initialize(c, l));
 
-	assert_false(lock_acquire(tt.cond->lock));
+	assert_false(lock_acquire(tt.lock));
 
 	for (int i = 0 ; i < thread_count ; i++)
 		assert_false(pthread_create(&t[i], 0, (void*(*)(void*))helper__UT_condition_broadcast, &tt));
@@ -379,25 +511,6 @@ UT_condition_broadcast__uninitialized()
 
 /***********************************************************************/
 
-static void
-FT_COND_INITIALIZE()
-{
-	static struct lock static_lock = LOCK_INITIALIZER;
-	static struct condition static_condition = CONDITION_INITIALIZER(&static_lock);
-	struct condition * dynamic_condition = test_malloc(sizeof(struct condition));
-
-	memset(dynamic_condition, 0, sizeof(* dynamic_condition));
-	assert_false(condition_initialize(dynamic_condition, &static_lock));
-
-	assert_memory_equal(dynamic_condition, &static_condition, sizeof(static_condition));
-
-	assert_false(condition_uninitialize(dynamic_condition));
-
-	test_free(dynamic_condition);
-}
-
-/***********************************************************************/
-
 int
 main()
 {
@@ -411,13 +524,16 @@ main()
 		cmocka_unit_test(UT_condition_wait),
 		cmocka_unit_test(UT_condition_wait__NULL),
 		cmocka_unit_test(UT_condition_wait__uninitialized),
+		cmocka_unit_test(UT_condition_timedwait),
+		cmocka_unit_test(UT_condition_timedwait__expire),
+		cmocka_unit_test(UT_condition_timedwait__NULL),
+		cmocka_unit_test(UT_condition_timedwait__uninitialized),
 		cmocka_unit_test(UT_condition_signal),
 		cmocka_unit_test(UT_condition_signal__NULL),
 		cmocka_unit_test(UT_condition_signal__uninitialized),
 		cmocka_unit_test(UT_condition_broadcast),
 		cmocka_unit_test(UT_condition_broadcast__NULL),
-		cmocka_unit_test(UT_condition_broadcast__uninitialized),
-		cmocka_unit_test(FT_COND_INITIALIZE)
+		cmocka_unit_test(UT_condition_broadcast__uninitialized)
 	};
 
 	return cmocka_run_group_tests(tests, NULL, NULL);
