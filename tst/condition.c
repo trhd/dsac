@@ -28,6 +28,8 @@ struct tuple
 	int iters;
 };
 
+static bool valgrind = false;
+
 /***********************************************************************/
 
 static void
@@ -203,7 +205,7 @@ UT_condition_wait__uninitialized()
 
 /***********************************************************************/
 
-static const struct timespec helper__UT_condition_timedwait__delay = { 1, 1000 * 1000 };
+static struct timespec helper__UT_condition_timedwait__delay = { 0, 10 * 1000 * 1000 };
 
 static void *
 helper__UT_condition_timedwait(struct tuple * t)
@@ -234,6 +236,9 @@ UT_condition_timedwait()
 	pthread_t t;
 	struct tuple tt = { l, c, 0, 450 };
 	void * r;
+
+	if (valgrind)
+		helper__UT_condition_timedwait__delay.tv_sec = 3;
 
 	assert_false(lock_initialize(l));
 	assert_false(condition_initialize(c, l));
@@ -269,7 +274,7 @@ UT_condition_timedwait__expire()
 {
 	struct condition * c = test_malloc(sizeof(struct condition));
 	struct lock * l = test_malloc(sizeof(struct lock));
-	struct timespec delay = { 0, 1000 };
+	struct timespec delay = { valgrind ? 3 : 0, 1000 };
 
 	assert_false(lock_initialize(l));
 	assert_false(condition_initialize(c, l));
@@ -314,6 +319,7 @@ UT_condition_timedwait__uninitialized()
 {
 	struct condition * c = test_malloc(sizeof(struct condition));
 	struct lock * l = test_malloc(sizeof(struct lock));
+	struct timespec d = { 0, 10 * 1000 * 1000 };
 
 	assert_false(lock_initialize(l));
 	assert_false(condition_initialize(c, l));
@@ -321,7 +327,7 @@ UT_condition_timedwait__uninitialized()
 	assert_false(condition_uninitialize(c));
 
 	assert_false(lock_acquire(l));
-	expect_assert_failure(condition_timedwait(c, &helper__UT_condition_timedwait__delay));
+	expect_assert_failure(condition_timedwait(c, &d));
 	assert_false(lock_release(l));
 
 	assert_false(lock_uninitialize(l));
@@ -535,6 +541,10 @@ main()
 		cmocka_unit_test(UT_condition_broadcast__NULL),
 		cmocka_unit_test(UT_condition_broadcast__uninitialized)
 	};
+
+	char const * e = getenv("VALGRIND");
+
+	valgrind = e && atoi(e) > 0;
 
 	return cmocka_run_group_tests(tests, NULL, NULL);
 }
