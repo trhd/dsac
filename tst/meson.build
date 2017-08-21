@@ -38,6 +38,7 @@ add_test_setup(
 			'--show-leak-kinds=all',
 			'--error-exitcode=1'
 	],
+	env : [ 'VALGRIND=1' ],
 	timeout_multiplier : 20
 )
 
