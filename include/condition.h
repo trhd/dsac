@@ -98,9 +98,13 @@ condition_timedwait(struct condition * condition, struct timespec const * delta)
 	assert(!e);
 
 	abs.tv_sec += delta->tv_sec;
-	abs.tv_nsec += delta->tv_nsec;
+
+	assert(abs.tv_nsec < 1000 * 1000 * 1000);
+	assert(delta->tv_nsec < 1000 * 1000 * 1000);
+	abs.tv_nsec = (abs.tv_nsec + delta->tv_nsec) % (1000 * 1000 * 1000);
 	if (abs.tv_nsec < delta->tv_nsec)
 		abs.tv_sec++;
+
 	assert(abs.tv_sec >= delta->tv_sec);
 
 	e = pthread_cond_timedwait(&condition->cond, &condition->lock->mutex, &abs);
