@@ -23,7 +23,7 @@
 #include "debug_flags.h"
 #include "lock.h"
 
-#ifndef NDEBUG
+#if !defined(NDEBUG) || defined(UNIT_TESTING)
 #include <errno.h>
 #endif
 
