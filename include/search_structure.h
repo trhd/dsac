@@ -18,39 +18,47 @@
 
 #pragma once
 
-#if defined(SEARCH_STRUCTURE_AVL)
-#include "search_structure-avl.h"
-#elif defined(SEARCH_STRUCTURE_SPLAY)
-#include "search_structure-splay.h"
-#endif
+#define _header(X) #X
+# define header(X) _header(search_structure-X.h)
+#  include header(SEARCH_STRUCTURE_BACKEND)
+# undef header
+#undef _header
 
 #ifndef SEARCH_STRUCTURE_ELEMENT
-#error "Macro SEARCH_STRUCTURE_ELEMENT has not been defined."
+# error "Macro SEARCH_STRUCTURE_ELEMENT has not been defined."
 #endif
+
 #ifndef SEARCH_STRUCTURE_ELEMENT_INITIALIZE
-#error "Macro SEARCH_STRUCTURE_ELEMENT_INITIALIZE has not been defined."
+# error "Macro SEARCH_STRUCTURE_ELEMENT_INITIALIZE has not been defined."
 #endif
+
 
 #ifndef SEARCH_STRUCTURE_ELEMENT_DEFINE
-#error "Macro SEARCH_STRUCTURE_ELEMENT_DEFINE has not been defined."
+# error "Macro SEARCH_STRUCTURE_ELEMENT_DEFINE has not been defined."
 #endif
+
 #ifndef SEARCH_STRUCTURE_ELEMENT_VALUE
-#error "Macro SEARCH_STRUCTURE_ELEMENT_VALUE has not been defined."
+# error "Macro SEARCH_STRUCTURE_ELEMENT_VALUE has not been defined."
 #endif
+
 
 #ifndef SEARCH_STRUCTURE
-#error "Macro SEARCH_STRUCTURE has not been defined."
-#endif
-#ifndef SEARCH_STRUCTURE_INITIALIZE
-#error "Macro SEARCH_STRUCTURE_INITIALIZE has not been defined."
+# error "Macro SEARCH_STRUCTURE has not been defined."
 #endif
 
+#ifndef SEARCH_STRUCTURE_INITIALIZE
+# error "Macro SEARCH_STRUCTURE_INITIALIZE has not been defined."
+#endif
+
+
 #ifndef SEARCH_STRUCTURE_INSERT
-#error "Macro SEARCH_STRUCTURE_INSERT has not been defined."
+# error "Macro SEARCH_STRUCTURE_INSERT has not been defined."
 #endif
+
 #ifndef SEARCH_STRUCTURE_REMOVE
-#error "Macro SEARCH_STRUCTURE_REMOVE has not been defined."
+# error "Macro SEARCH_STRUCTURE_REMOVE has not been defined."
 #endif
+
 #ifndef SEARCH_STRUCTURE_FIND
-#error "Macro SEARCH_STRUCTURE_FIND has not been defined."
+# error "Macro SEARCH_STRUCTURE_FIND has not been defined."
 #endif

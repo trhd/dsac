@@ -57,7 +57,7 @@ test('search_structure-avl',
 		dependencies : test_deps,
 		include_directories : DSAC_INCLUDE,
 		c_args : [
-			'-DSEARCH_STRUCTURE_AVL',
+			'-DSEARCH_STRUCTURE_BACKEND=avl',
 			'-DTEST_ITERATION_COUNT=100000',
 			'-DTEST_ELEMENT_COUNT=100'
 		] + test_cflags
@@ -71,7 +71,7 @@ test('search_structure-splay',
 		dependencies : test_deps,
 		include_directories : DSAC_INCLUDE,
 		c_args : [
-			'-DSEARCH_STRUCTURE_SPLAY',
+			'-DSEARCH_STRUCTURE_BACKEND=splay',
 			'-DTEST_ITERATION_COUNT=100000',
 			'-DTEST_ELEMENT_COUNT=100'
 		] + test_cflags
