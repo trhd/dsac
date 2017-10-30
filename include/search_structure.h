@@ -59,6 +59,14 @@
 # error "Macro SEARCH_STRUCTURE_REMOVE has not been defined."
 #endif
 
+#ifndef SEARCH_STRUCTURE_REMOVE_ANY
+# error "Macro SEARCH_STRUCTURE_REMOVE_ANY has not been defined."
+#endif
+
 #ifndef SEARCH_STRUCTURE_FIND
 # error "Macro SEARCH_STRUCTURE_FIND has not been defined."
+#endif
+
+#ifndef SEARCH_STRUCTURE_FIND_ANY
+# error "Macro SEARCH_STRUCTURE_FIND_ANY has not been defined."
 #endif

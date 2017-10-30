@@ -31,4 +31,6 @@
 
 #define SEARCH_STRUCTURE_INSERT splay_insert
 #define SEARCH_STRUCTURE_REMOVE splay_remove
+#define SEARCH_STRUCTURE_REMOVE_ANY splay_remove_any
 #define SEARCH_STRUCTURE_FIND splay_find
+#define SEARCH_STRUCTURE_FIND_ANY splay_find_any

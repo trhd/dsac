@@ -84,8 +84,12 @@ FT_random_add_remove_finds()
 		TEST_OP_INSERT_EXISTING,
 		TEST_OP_REMOVE,
 		TEST_OP_REMOVE_NONEXISTING,
+		TEST_OP_REMOVE_ANY,
+		TEST_OP_REMOVE_ANY_NONEXISTING,
 		TEST_OP_FIND,
 		TEST_OP_FIND_NONEXISTING,
+		TEST_OP_FIND_ANY,
+		TEST_OP_FIND_ANY_NONEXISTING,
 		_TEST_OP_COUNT
 	};
 	SEARCH_STRUCTURE ss;
@@ -138,6 +142,43 @@ FT_random_add_remove_finds()
 				if (find_next_non_existing(&ssf, &j))
 					break;
 				assert_null(SEARCH_STRUCTURE_REMOVE(&ss, SEARCH_STRUCTURE_ELEMENT_VALUE(&sse[j])));
+				break;
+			case TEST_OP_REMOVE_ANY:
+				if (find_next_existing(&ssf, &j))
+					break;
+				tmp = SEARCH_STRUCTURE_REMOVE_ANY(&ss);
+				assert_non_null(tmp);
+				for (j = 0 ; j < TEST_ELEMENT_COUNT ; j++)
+				{
+					if (!sscmp(SEARCH_STRUCTURE_ELEMENT_VALUE(tmp), SEARCH_STRUCTURE_ELEMENT_VALUE(&sse[j])))
+						break;
+				}
+				assert_true(j < TEST_ELEMENT_COUNT);
+				assert_true(bitmap_guard_clear(&ssf, j));
+				break;
+			case TEST_OP_REMOVE_ANY_NONEXISTING:
+				if (!find_next_existing(&ssf, &j))
+					break;
+				tmp = SEARCH_STRUCTURE_REMOVE_ANY(&ss);
+				assert_null(tmp);
+				break;
+			case TEST_OP_FIND_ANY:
+				if (find_next_existing(&ssf, &j))
+					break;
+				tmp = SEARCH_STRUCTURE_FIND_ANY(&ss);
+				assert_non_null(tmp);
+				for (j = 0 ; j < TEST_ELEMENT_COUNT ; j++)
+				{
+					if (!sscmp(SEARCH_STRUCTURE_ELEMENT_VALUE(tmp), SEARCH_STRUCTURE_ELEMENT_VALUE(&sse[j])))
+						break;
+				}
+				assert_true(j < TEST_ELEMENT_COUNT);
+				break;
+			case TEST_OP_FIND_ANY_NONEXISTING:
+				if (!find_next_existing(&ssf, &j))
+					break;
+				tmp = SEARCH_STRUCTURE_FIND_ANY(&ss);
+				assert_null(tmp);
 				break;
 			case TEST_OP_FIND:
 				if (find_next_existing(&ssf, &j))

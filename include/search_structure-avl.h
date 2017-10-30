@@ -30,4 +30,6 @@
 
 #define SEARCH_STRUCTURE_INSERT avl_insert
 #define SEARCH_STRUCTURE_REMOVE avl_remove
+#define SEARCH_STRUCTURE_REMOVE_ANY avl_remove_any
 #define SEARCH_STRUCTURE_FIND avl_find
+#define SEARCH_STRUCTURE_FIND_ANY avl_find_any
