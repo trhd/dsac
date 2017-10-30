@@ -64,6 +64,9 @@ struct avl_node *
 avl_remove(struct avl_tree *, void const *);
 
 struct avl_node *
+avl_remove_any(struct avl_tree *);
+
+struct avl_node *
 avl_remove_min(struct avl_tree *);
 
 struct avl_node *
@@ -71,6 +74,9 @@ avl_remove_max(struct avl_tree *);
 
 struct avl_node const *
 avl_find(struct avl_tree const *, void const *);
+
+struct avl_node const *
+avl_find_any(struct avl_tree const *);
 
 struct avl_node const *
 avl_find_min(struct avl_tree const *);

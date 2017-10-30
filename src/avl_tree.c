@@ -492,6 +492,15 @@ avl_find(struct avl_tree const * m, void const * d)
 	return NULL;
 }
 
+struct avl_node const *
+avl_find_any(struct avl_tree const * m)
+{
+	assert(m);
+	debug_flags_assert(m, AVL_TREE_DEBUG_FLAG_INITIALIZED);
+
+	return m->root;
+}
+
 static struct avl_node *
 remove_recurse(struct avl_tree const * m, struct avl_node ** r, void const * d)
 {
@@ -544,6 +553,18 @@ avl_remove(struct avl_tree * m, void const * d)
 	avl_verify(m);
 
 	return r;
+}
+
+struct avl_node *
+avl_remove_any(struct avl_tree * m)
+{
+	assert(m);
+	debug_flags_assert(m, AVL_TREE_DEBUG_FLAG_INITIALIZED);
+
+	if (!m->root)
+		return NULL;
+
+	return avl_remove(m, avl_get(m->root));
 }
 
 static int

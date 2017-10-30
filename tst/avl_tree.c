@@ -207,6 +207,21 @@ UT_avl_remove()
 }
 
 /***********************************************************************/
+
+static void
+UT_avl_remove__empty()
+{
+	struct avl_tree * t = test_malloc(sizeof(struct avl_tree));
+
+	avl_initialize(t, (int(*)(void const *, void const *))strcmp);
+
+	assert_null(avl_remove(t, "foobar"));
+
+	test_free(t);
+}
+
+/***********************************************************************/
+
 static void
 UT_avl_remove__NULL()
 {
@@ -240,6 +255,91 @@ UT_avl_remove__uninitialized_tree()
 	assert_null(avl_remove(t, n));
 
 	test_free(n);
+	test_free(t);
+}
+
+/***********************************************************************/
+
+static void
+UT_avl_remove_any()
+{
+	enum { node_count = 10 };
+	struct avl_tree * t = test_malloc(sizeof(struct avl_tree));
+	struct avl_node * n = test_malloc(node_count * sizeof(struct avl_node));
+	char * b = test_malloc(node_count * 2);
+
+	avl_initialize(t, (int(*)(void const *, void const *))strcmp);
+
+	for (int i = 0 ; i < node_count ; i++)
+	{
+		b[2 * i] = 'a' + i;
+		b[2 * i + 1] = '\0';
+		avl_set(&n[i], b + 2 * i);
+	}
+
+	for (int i = 0 ; i < node_count ; i++)
+	{
+		assert_int_equal(avl_size(t), 0);
+		assert_false(avl_insert(t, &n[i]));
+		assert_int_equal(avl_size(t), 1);
+		assert_ptr_equal(avl_remove_any(t), &n[i]);
+		assert_null(avl_remove_any(t));
+		assert_null(avl_remove(t, avl_get(&n[i])));
+		assert_int_equal(avl_size(t), 0);
+	}
+
+	for (int i = 0 ; i < node_count ; i++)
+	{
+		assert_int_equal(avl_size(t), i);
+		assert_false(avl_insert(t, &n[i]));
+		assert_int_equal(avl_size(t), i + 1);
+	}
+
+	for (int i = 0 ; i < node_count ; i++)
+	{
+		assert_int_equal(avl_size(t), node_count - i);
+		assert_non_null(avl_remove_any(t));
+		assert_int_equal(avl_size(t), node_count - i - 1);
+	}
+
+	test_free(n);
+	test_free(t);
+	test_free(b);
+}
+
+/***********************************************************************/
+
+static void
+UT_avl_remove_any__empty()
+{
+	struct avl_tree * t = test_malloc(sizeof(struct avl_tree));
+
+	avl_initialize(t, (int(*)(void const *, void const *))strcmp);
+
+	assert_null(avl_remove_any(t));
+
+	test_free(t);
+}
+
+/***********************************************************************/
+
+static void
+UT_avl_remove_any__NULL()
+{
+	expect_assert_failure(avl_remove_any(NULL));
+}
+
+/***********************************************************************/
+
+static void
+UT_avl_remove_any__uninitialized_tree()
+{
+	struct avl_tree * t = test_malloc(sizeof(struct avl_tree));
+
+	memset(t, 0, sizeof(*t));
+
+	expect_assert_failure(avl_remove_any(t));
+
 	test_free(t);
 }
 
@@ -867,6 +967,88 @@ UT_avl_find__NULL()
 
 /***********************************************************************/
 
+static void
+UT_avl_find_any()
+{
+	enum { node_count = 26 };
+	struct avl_tree * t = test_malloc(sizeof(struct avl_tree));
+	struct avl_node * n = test_malloc(node_count * sizeof(struct avl_node));
+	char * buf = test_malloc(2 * node_count);
+
+	avl_initialize(t, (int(*)(void const *, void const *))strcmp);
+
+	for (int i = 0 ; i < node_count ; i++)
+	{
+		buf[2 * i] = 'a' + i;
+		buf[2 * i + 1] = '\0';
+		avl_set(&n[i], &buf[2 * i]);
+	}
+
+	for (int i = 0 ; i < node_count ; i++)
+	{
+		assert_null(avl_find_any(t));
+		assert_false(avl_insert(t, &n[i]));
+		assert_ptr_equal(avl_find_any(t), &n[i]);
+		assert_ptr_equal(avl_remove_any(t), &n[i]);
+	}
+
+	for (int i = 0 ; i < node_count ; i++)
+	{
+		assert_false(avl_insert(t, &n[i]));
+		assert_non_null(avl_find_any(t));
+	}
+
+	for (int i = 0 ; i < node_count ; i++)
+	{
+		struct avl_node const * n = avl_find_any(t);
+		assert_non_null(n);
+		assert_non_null(avl_remove(t, avl_get(n)));
+	}
+
+	test_free(n);
+	test_free(t);
+	test_free(buf);
+}
+
+/***********************************************************************/
+
+static void
+UT_avl_find_any__uninitialized_tree()
+{
+	struct avl_tree * t = test_malloc(sizeof(struct avl_tree));
+
+	memset(t, 0, sizeof(*t));
+
+	expect_assert_failure(avl_find_any(t));
+
+	test_free(t);
+}
+
+/***********************************************************************/
+
+static void
+UT_avl_find_any__empty()
+{
+	struct avl_tree * t = test_malloc(sizeof(struct avl_tree));
+
+	avl_initialize(t, (int(*)(void const *, void const *))strcmp);
+
+	assert_null(avl_find(t, "foobar"));
+
+	test_free(t);
+}
+
+/***********************************************************************/
+
+static void
+UT_avl_find_any__NULL()
+{
+	expect_assert_failure(avl_find(NULL, NULL));
+	expect_assert_failure(avl_find(NULL, (void*)0x1337));
+}
+
+/***********************************************************************/
+
 static int
 _assert_preorder(struct avl_node const * n, void * p)
 {
@@ -1487,8 +1669,14 @@ main()
 		cmocka_unit_test(UT_avl_insert__uninitialized_node),
 
 		cmocka_unit_test(UT_avl_remove),
+		cmocka_unit_test(UT_avl_remove__empty),
 		cmocka_unit_test(UT_avl_remove__NULL),
 		cmocka_unit_test(UT_avl_remove__uninitialized_tree),
+
+		cmocka_unit_test(UT_avl_remove_any),
+		cmocka_unit_test(UT_avl_remove_any__empty),
+		cmocka_unit_test(UT_avl_remove_any__NULL),
+		cmocka_unit_test(UT_avl_remove_any__uninitialized_tree),
 
 		cmocka_unit_test(UT_avl_set),
 		cmocka_unit_test(UT_avl_set__NULL),
@@ -1528,6 +1716,11 @@ main()
 		cmocka_unit_test(UT_avl_find__uninitialized_tree),
 		cmocka_unit_test(UT_avl_find__empty),
 		cmocka_unit_test(UT_avl_find__NULL),
+
+		cmocka_unit_test(UT_avl_find_any),
+		cmocka_unit_test(UT_avl_find_any__uninitialized_tree),
+		cmocka_unit_test(UT_avl_find_any__empty),
+		cmocka_unit_test(UT_avl_find_any__NULL),
 
 		cmocka_unit_test(UT_avl_iterate),
 		cmocka_unit_test(UT_avl_iterate__uninitialized_tree),
