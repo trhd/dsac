@@ -19,5 +19,16 @@
 
 #include <sys/types.h>
 
+/**
+ * Sort an array of (data) pointers with the quicksort algorithm.
+ *
+ * Arguments:
+ *
+ *  data:     The array of pointers to be sorted.
+ *  size:     The number of pointer in data.
+ *  compare:  The comparison function used for sorting the pointers from the
+ *             data argument. Consider providing an inlinable function here to
+ *             improve the algorithm's performance.
+ */
 void quicksort(const void **data, size_t size,
 		int (*compare)(const void *, const void *));
