@@ -39,10 +39,10 @@
 #endif
 
 #ifndef SEARCH_STRUCTURE
-#error "Macro SEARCH_STRUCTURE_META has not been defined."
+#error "Macro SEARCH_STRUCTURE has not been defined."
 #endif
 #ifndef SEARCH_STRUCTURE_INITIALIZE
-#error "Macro SEARCH_STRUCTURE_META_INITIALIZE has not been defined."
+#error "Macro SEARCH_STRUCTURE_INITIALIZE has not been defined."
 #endif
 
 #ifndef SEARCH_STRUCTURE_INSERT
