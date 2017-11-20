@@ -31,8 +31,7 @@
 #include <stdbool.h>
 
 #undef assert
-static inline void silence_scan_build(long p) { if (!p) exit(1) ; }
-#define assert(e) (mock_assert((long)(e), #e, __FILE__, __LINE__), silence_scan_build((long)(e)))
+#define assert(e) (mock_assert((long)(e), #e, __FILE__, __LINE__))
 
 #define abort() do { mock_assert(false, "abort()", __FILE__, __LINE__) ; exit(1) ; } while (false)
 

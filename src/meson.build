@@ -29,6 +29,7 @@ DSAC_LIB_SOURCES = files(
 		'linked_list.c',
 		'lock.c',
 		'ring_buffer.c',
+		'radix_tree.c',
 		'quicksort.c',
 		'splay_tree.c'
 	)

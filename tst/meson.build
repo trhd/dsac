@@ -94,6 +94,7 @@ foreach t : [
 		'lock',
 		'quicksort',
 		'ring_buffer',
+		'radix_tree',
 		'splay_tree'
 		]
 	test(t,
