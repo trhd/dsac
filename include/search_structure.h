@@ -70,3 +70,15 @@
 #ifndef SEARCH_STRUCTURE_FIND_ANY
 # error "Macro SEARCH_STRUCTURE_FIND_ANY has not been defined."
 #endif
+
+#ifndef SEARCH_STRUCTURE_GET_ENTRY_COUNT
+# error "Macro SEARCH_STRUCTURE_GET_ENTRY_COUNT has not been defined."
+#endif
+
+#ifndef SEARCH_STRUCTURE_ITERATE
+# error "Macro SEARCH_STRUCTURE_ITERATE has not been defined."
+#endif
+
+#ifndef SEARCH_STRUCTURE_IS_EMPTY
+# error "Macro SEARCH_STRUCTURE_IS_EMPTY has not been defined."
+#endif

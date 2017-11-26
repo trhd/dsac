@@ -43,6 +43,8 @@ sscmp(void const * a, void const * b)
 		return 0;
 }
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 static bool
 find_next_existing(struct bitmap_guard const * g, unsigned long * k)
 {
@@ -58,6 +60,8 @@ find_next_existing(struct bitmap_guard const * g, unsigned long * k)
 
 	return false;
 }
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 static bool
 find_next_non_existing(struct bitmap_guard const * g, unsigned long * k)
@@ -75,8 +79,69 @@ find_next_non_existing(struct bitmap_guard const * g, unsigned long * k)
 	return false;
 }
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+static unsigned long
+count_entries(struct bitmap_guard const * g)
+{
+	assert(g);
+
+	unsigned long rv = 0;
+
+	for (unsigned long i = 0 ; i < TEST_ELEMENT_COUNT ; i++)
+	{
+		if (bitmap_guard_get(g, i))
+			rv++;
+	}
+
+	return rv;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+struct iteratiron_assertion_arguments
+{
+	struct bitmap_guard copy;
+	unsigned int count;
+};
+
+static int
+_iteration_assertion(SEARCH_STRUCTURE_ELEMENT const * e, void * p)
+{
+	assert(e);
+	assert(p);
+
+	struct iteratiron_assertion_arguments * args = (struct iteratiron_assertion_arguments *)p;
+	unsigned long i = (unsigned long)SEARCH_STRUCTURE_ELEMENT_VALUE(e);
+
+	assert_true(bitmap_guard_clear(&args->copy, i));
+	args->count++;
+
+	return 0;
+}
+
 static void
-FT_random_add_remove_finds()
+assert_iteration_correctness(SEARCH_STRUCTURE const * ss, unsigned char * flags, size_t flags_length)
+{
+	assert(ss);
+	assert(flags);
+	assert(flags_length);
+
+	unsigned char buf[flags_length];
+	struct iteratiron_assertion_arguments args;
+
+	args.count = 0;
+	bitmap_guard_initialize(&args.copy, buf, sizeof(buf));
+	memcpy(buf, flags, flags_length);
+
+	assert_false(SEARCH_STRUCTURE_ITERATE(ss, _iteration_assertion, &args));
+	assert_int_equal(args.count, SEARCH_STRUCTURE_GET_ENTRY_COUNT(ss));
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+static void
+FT_random_operations()
 {
 	enum test_op
 	{
@@ -90,6 +155,9 @@ FT_random_add_remove_finds()
 		TEST_OP_FIND_NONEXISTING,
 		TEST_OP_FIND_ANY,
 		TEST_OP_FIND_ANY_NONEXISTING,
+		TEST_OP_ITERATE,
+		TEST_OP_GET_ENTRY_COUNT,
+		TEST_OP_IS_EMPTY,
 		_TEST_OP_COUNT
 	};
 	SEARCH_STRUCTURE ss;
@@ -191,6 +259,19 @@ FT_random_add_remove_finds()
 					break;
 				assert_null(SEARCH_STRUCTURE_FIND(&ss, SEARCH_STRUCTURE_ELEMENT_VALUE(&sse[j])));
 				break;
+			case TEST_OP_ITERATE:
+				assert_iteration_correctness(&ss, flags, sizeof(flags));
+				break;
+			case TEST_OP_GET_ENTRY_COUNT:
+				assert_int_equal(count_entries(&ssf), SEARCH_STRUCTURE_GET_ENTRY_COUNT(&ss));
+				break;
+			case TEST_OP_IS_EMPTY:
+				j = 0;
+				if (find_next_existing(&ssf, &j))
+					assert_true(SEARCH_STRUCTURE_IS_EMPTY(&ss));
+				else
+					assert_false(SEARCH_STRUCTURE_IS_EMPTY(&ss));
+				break;
 		}
 	}
 }
@@ -202,7 +283,7 @@ main()
 {
 	const struct CMUnitTest tests[] =
 	{
-		cmocka_unit_test(FT_random_add_remove_finds)
+		cmocka_unit_test(FT_random_operations)
 	};
 
 	return cmocka_run_group_tests(tests, NULL, NULL);

@@ -21,16 +21,26 @@
 #include "splay_tree.h"
 
 #define SEARCH_STRUCTURE_ELEMENT struct splay_node
+
 #define SEARCH_STRUCTURE_ELEMENT_INITIALIZE(...)
 
 #define SEARCH_STRUCTURE_ELEMENT_DEFINE splay_set
 #define SEARCH_STRUCTURE_ELEMENT_VALUE splay_get
 
 #define SEARCH_STRUCTURE struct splay_tree
+
 #define SEARCH_STRUCTURE_INITIALIZE splay_initialize
 
 #define SEARCH_STRUCTURE_INSERT splay_insert
+
 #define SEARCH_STRUCTURE_REMOVE splay_remove
 #define SEARCH_STRUCTURE_REMOVE_ANY splay_remove_any
+
 #define SEARCH_STRUCTURE_FIND splay_find
 #define SEARCH_STRUCTURE_FIND_ANY splay_find_any
+
+#define SEARCH_STRUCTURE_GET_ENTRY_COUNT splay_size
+
+#define SEARCH_STRUCTURE_ITERATE splay_iterate
+
+#define SEARCH_STRUCTURE_IS_EMPTY splay_is_empty

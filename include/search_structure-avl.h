@@ -20,16 +20,26 @@
 #include "avl_tree.h"
 
 #define SEARCH_STRUCTURE_ELEMENT struct avl_node
+
 #define SEARCH_STRUCTURE_ELEMENT_INITIALIZE(...)
 
 #define SEARCH_STRUCTURE_ELEMENT_DEFINE avl_set
 #define SEARCH_STRUCTURE_ELEMENT_VALUE avl_get
 
 #define SEARCH_STRUCTURE struct avl_tree
+
 #define SEARCH_STRUCTURE_INITIALIZE avl_initialize
 
 #define SEARCH_STRUCTURE_INSERT avl_insert
+
 #define SEARCH_STRUCTURE_REMOVE avl_remove
 #define SEARCH_STRUCTURE_REMOVE_ANY avl_remove_any
+
 #define SEARCH_STRUCTURE_FIND avl_find
 #define SEARCH_STRUCTURE_FIND_ANY avl_find_any
+
+# define SEARCH_STRUCTURE_GET_ENTRY_COUNT avl_size
+
+# define SEARCH_STRUCTURE_ITERATE avl_iterate
+
+# define SEARCH_STRUCTURE_IS_EMPTY avl_empty
