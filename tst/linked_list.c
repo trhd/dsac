@@ -112,11 +112,9 @@ FT_basic_usage__1()
 		assert_null(linked_list_find_match(&llmeta, data_bufs[i], (int(*)(const void *, const void *))strcmp));
 
 		if (i % 2)
-			assert_false(linked_list_insert_front(&llmeta, &ll_bufs[i]));
+			linked_list_insert_front(&llmeta, &ll_bufs[i]);
 		else
-			assert_false(linked_list_insert_back(&llmeta, &ll_bufs[i]));
-		assert_true(linked_list_insert_front(&llmeta, &ll_bufs[i]));
-		assert_true(linked_list_insert_back(&llmeta, &ll_bufs[i]));
+			linked_list_insert_back(&llmeta, &ll_bufs[i]);
 
 		assert_false(linked_list_empty(&llmeta));
 		assert_false(linked_list_size(&llmeta) <= 0);
@@ -160,9 +158,9 @@ FT_basic_usage__2()
 	for (int i = 0; i < bufs_len; ++i)
 	{
 		if (i % 2)
-			assert_false(linked_list_insert_front(&llmeta, &ll_bufs[i]));
+			linked_list_insert_front(&llmeta, &ll_bufs[i]);
 		else
-			assert_false(linked_list_insert_back(&llmeta, &ll_bufs[i]));
+			linked_list_insert_back(&llmeta, &ll_bufs[i]);
 	}
 
 	assert_iteration_functionality(&llmeta);
@@ -221,9 +219,9 @@ FT_basic_usage__3()
 	for (int i = 0; i < bufs_len; ++i)
 	{
 		if (i % 2)
-			assert_false(linked_list_insert_back(&llmeta, &ll_bufs[i]));
+			linked_list_insert_back(&llmeta, &ll_bufs[i]);
 		else
-			assert_false(linked_list_insert_front(&llmeta, &ll_bufs[i]));
+			linked_list_insert_front(&llmeta, &ll_bufs[i]);
 	}
 
 	assert_int_equal(linked_list_size(&llmeta), bufs_len);
@@ -421,68 +419,50 @@ FT_basic_usage__4()
 	assert_int_equal(linked_list_size(&llmeta), 0);
 	assert_null(*linked_list_find_head(&llmeta));
 
-	assert_false(linked_list_insert_back(&llmeta, &ll_bufs[5]));
+	linked_list_insert_back(&llmeta, &ll_bufs[5]);
 
 	assert_iteration_functionality(&llmeta);
 
-	assert_true(linked_list_insert_front(&llmeta, &ll_bufs[5]));
-	assert_true(linked_list_insert_back(&llmeta, &ll_bufs[5]));
 
-	assert_false(linked_list_insert_front(&llmeta, &ll_bufs[8]));
+	linked_list_insert_front(&llmeta, &ll_bufs[8]);
 
 	assert_iteration_functionality(&llmeta);
 
-	assert_true(linked_list_insert_front(&llmeta, &ll_bufs[8]));
-	assert_true(linked_list_insert_back(&llmeta, &ll_bufs[8]));
 
-	assert_false(linked_list_insert_back(&llmeta, &ll_bufs[2]));
+	linked_list_insert_back(&llmeta, &ll_bufs[2]);
 
 	assert_iteration_functionality(&llmeta);
 
-	assert_true(linked_list_insert_front(&llmeta, &ll_bufs[2]));
-	assert_true(linked_list_insert_back(&llmeta, &ll_bufs[2]));
 
-	assert_false(linked_list_insert_front(&llmeta, &ll_bufs[6]));
+	linked_list_insert_front(&llmeta, &ll_bufs[6]);
 
 	assert_iteration_functionality(&llmeta);
 
-	assert_true(linked_list_insert_front(&llmeta, &ll_bufs[6]));
-	assert_true(linked_list_insert_back(&llmeta, &ll_bufs[6]));
 
-	assert_false(linked_list_insert_back(&llmeta, &ll_bufs[7]));
+	linked_list_insert_back(&llmeta, &ll_bufs[7]);
 
 	assert_iteration_functionality(&llmeta);
 
-	assert_true(linked_list_insert_front(&llmeta, &ll_bufs[7]));
-	assert_true(linked_list_insert_back(&llmeta, &ll_bufs[7]));
 
-	assert_false(linked_list_insert_front(&llmeta, &ll_bufs[3]));
+	linked_list_insert_front(&llmeta, &ll_bufs[3]);
 
 	assert_iteration_functionality(&llmeta);
 
-	assert_true(linked_list_insert_front(&llmeta, &ll_bufs[3]));
-	assert_true(linked_list_insert_back(&llmeta, &ll_bufs[3]));
 
-	assert_false(linked_list_insert_back(&llmeta, &ll_bufs[1]));
+	linked_list_insert_back(&llmeta, &ll_bufs[1]);
 
 	assert_iteration_functionality(&llmeta);
 
-	assert_true(linked_list_insert_front(&llmeta, &ll_bufs[1]));
-	assert_true(linked_list_insert_back(&llmeta, &ll_bufs[1]));
 
-	assert_false(linked_list_insert_front(&llmeta, &ll_bufs[4]));
+	linked_list_insert_front(&llmeta, &ll_bufs[4]);
 
 	assert_iteration_functionality(&llmeta);
 
-	assert_true(linked_list_insert_front(&llmeta, &ll_bufs[4]));
-	assert_true(linked_list_insert_back(&llmeta, &ll_bufs[4]));
 
-	assert_false(linked_list_insert_back(&llmeta, &ll_bufs[9]));
+	linked_list_insert_back(&llmeta, &ll_bufs[9]);
 
 	assert_iteration_functionality(&llmeta);
 
-	assert_true(linked_list_insert_front(&llmeta, &ll_bufs[9]));
-	assert_true(linked_list_insert_back(&llmeta, &ll_bufs[9]));
 
 	assert_false(linked_list_empty(&llmeta));
 	assert_non_null(*linked_list_find_head(&llmeta));
@@ -664,50 +644,32 @@ FT_basic_usage__5()
 	assert_int_equal(linked_list_size(&llmeta), 0);
 	assert_null(*linked_list_find_head(&llmeta));
 
-	assert_false(linked_list_insert_back(&llmeta, &ll_bufs[5]));
+	linked_list_insert_back(&llmeta, &ll_bufs[5]);
 	assert_iteration_functionality(&llmeta);
-	assert_true(linked_list_insert_front(&llmeta, &ll_bufs[5]));
-	assert_true(linked_list_insert_back(&llmeta, &ll_bufs[5]));
 
-	assert_false(linked_list_insert_front(&llmeta, &ll_bufs[8]));
+	linked_list_insert_front(&llmeta, &ll_bufs[8]);
 	assert_iteration_functionality(&llmeta);
-	assert_true(linked_list_insert_front(&llmeta, &ll_bufs[8]));
-	assert_true(linked_list_insert_back(&llmeta, &ll_bufs[8]));
 
-	assert_false(linked_list_insert_back(&llmeta, &ll_bufs[2]));
+	linked_list_insert_back(&llmeta, &ll_bufs[2]);
 	assert_iteration_functionality(&llmeta);
-	assert_true(linked_list_insert_front(&llmeta, &ll_bufs[2]));
-	assert_true(linked_list_insert_back(&llmeta, &ll_bufs[2]));
 
-	assert_false(linked_list_insert_front(&llmeta, &ll_bufs[6]));
+	linked_list_insert_front(&llmeta, &ll_bufs[6]);
 	assert_iteration_functionality(&llmeta);
-	assert_true(linked_list_insert_front(&llmeta, &ll_bufs[6]));
-	assert_true(linked_list_insert_back(&llmeta, &ll_bufs[6]));
 
-	assert_false(linked_list_insert_back(&llmeta, &ll_bufs[7]));
+	linked_list_insert_back(&llmeta, &ll_bufs[7]);
 	assert_iteration_functionality(&llmeta);
-	assert_true(linked_list_insert_front(&llmeta, &ll_bufs[7]));
-	assert_true(linked_list_insert_back(&llmeta, &ll_bufs[7]));
 
-	assert_false(linked_list_insert_front(&llmeta, &ll_bufs[3]));
+	linked_list_insert_front(&llmeta, &ll_bufs[3]);
 	assert_iteration_functionality(&llmeta);
-	assert_true(linked_list_insert_front(&llmeta, &ll_bufs[3]));
-	assert_true(linked_list_insert_back(&llmeta, &ll_bufs[3]));
 
-	assert_false(linked_list_insert_back(&llmeta, &ll_bufs[1]));
+	linked_list_insert_back(&llmeta, &ll_bufs[1]);
 	assert_iteration_functionality(&llmeta);
-	assert_true(linked_list_insert_front(&llmeta, &ll_bufs[1]));
-	assert_true(linked_list_insert_back(&llmeta, &ll_bufs[1]));
 
-	assert_false(linked_list_insert_front(&llmeta, &ll_bufs[4]));
+	linked_list_insert_front(&llmeta, &ll_bufs[4]);
 	assert_iteration_functionality(&llmeta);
-	assert_true(linked_list_insert_front(&llmeta, &ll_bufs[4]));
-	assert_true(linked_list_insert_back(&llmeta, &ll_bufs[4]));
 
-	assert_false(linked_list_insert_back(&llmeta, &ll_bufs[9]));
+	linked_list_insert_back(&llmeta, &ll_bufs[9]);
 	assert_iteration_functionality(&llmeta);
-	assert_true(linked_list_insert_front(&llmeta, &ll_bufs[9]));
-	assert_true(linked_list_insert_back(&llmeta, &ll_bufs[9]));
 
 	assert_false(linked_list_empty(&llmeta));
 	assert_int_equal(linked_list_size(&llmeta), 9);

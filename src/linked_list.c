@@ -20,13 +20,33 @@
 #include <errno.h>
 #include "linked_list.h"
 
+static void
+assert_unique_pointer(struct linked_list_meta * m, struct linked_list * n)
+{
+	assert(m);
+	assert(n);
+
+	struct linked_list * nn = m->head;
+
+	while (nn)
+	{
+		assert(nn != n);
+		nn = nn->next;
+	}
+}
+
 void
 linked_list_initialize(struct linked_list_meta *m)
 {
 	assert(m);
 
+#ifdef LINKED_LIST_CONFIG_SIZE_CACHE
 	m->size = 0;
+#endif
 	m->head = 0;
+#ifdef LINKED_LIST_CONFIG_TAIL_POINTER
+	m->tail = 0;
+#endif
 }
 
 void
@@ -54,51 +74,64 @@ linked_list_next(const struct linked_list *f)
 	return (struct linked_list **)&f->next;
 }
 
-int
+void
 linked_list_insert_front(struct linked_list_meta *m, struct linked_list *n)
 {
 	assert(m);
 	assert(n);
-
-	if (linked_list_find(m, linked_list_get(n)))
-		return EEXIST;
+	assert_unique_pointer(m, n);
 
 	n->next = m->head;
 	m->head = n;
+
+#ifdef LINKED_LIST_CONFIG_SIZE_CACHE
 	++m->size;
+#endif
+
+#ifdef LINKED_LIST_CONFIG_TAIL_POINTER
+	if (!n->next)
+		m->tail = n;
+#endif
 
 	assert(n != n->next);
-
-	return 0;
 }
 
-int
+void
 linked_list_insert_back(struct linked_list_meta *m, struct linked_list *n)
 {
 	assert(m);
 	assert(n);
 
-	struct linked_list **h = &m->head;
+	struct linked_list **h;
+
+#if LINKED_LIST_CONFIG_TAIL_POINTER
+	h = &m->tail;
+#else
+	h = &m->head;
 
 	while (*h)
-	{
-		if (*h == n)
-			return EEXIST;
-
 		h = &(*h)->next;
-	}
+#endif
 
 	*h = n;
 	n->next = 0;
+#if LINKED_LIST_CONFIG_SIZE_CACHE
 	++m->size;
+#endif
 
 	assert(n != n->next);
-
-	return 0;
 }
 
+/**
+ * FIXME: Would be better if the unused argument wouldn't need to be
+ * passed in the first place.
+ */
 struct linked_list *
+#if LINKED_LIST_CONFIG_SIZE_CACHE
 linked_list_detach(struct linked_list_meta *m, struct linked_list **e)
+#else
+linked_list_detach(struct linked_list_meta *m __attribute__((unused)), struct linked_list **e)
+#endif
 {
 	assert(e);
 	assert(*e);
@@ -107,7 +140,9 @@ linked_list_detach(struct linked_list_meta *m, struct linked_list **e)
 
 	*e = t->next;
 	t->next = 0;
+#if LINKED_LIST_CONFIG_SIZE_CACHE
 	--m->size;
+#endif
 
 	return t;
 }
@@ -230,7 +265,16 @@ linked_list_size(const struct linked_list_meta *m)
 {
 	assert(m);
 
+#if LINKED_LIST_CONFIG_SIZE_CACHE
 	return m->size;
+#else
+	unsigned int rv = 0;
+
+	for (struct linked_list * n = m->head ; n ; n = n->next)
+		rv++;
+
+	return rv;
+#endif
 }
 
 struct linked_list **

@@ -16,18 +16,33 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * Configuration:
+ *
+ * - Define LINKED_LIST_CONFIG_SIZE_CACHE to cache the size of the linked
+ *   list and to avoid traversing the list when querying its size.
+ *
+ * - Define LINKED_LIST_CONFIG_TAIL_POINTER to store a direct pointer to
+ *   the tail of the linked list for constant time access to the tail.
+ */
+
 #pragma once
 
 struct linked_list
 {
-	struct linked_list *next;
+	struct linked_list * next;
 	void const *data;
 };
 
 struct linked_list_meta
 {
 	struct linked_list * head;
+#ifdef LINKED_LIST_CONFIG_TAIL_POINTER
+	struct linked_list * tail;
+#endif
+#ifdef LINKED_LIST_CONFIG_SIZE_CACHE
 	unsigned int size;
+#endif
 };
 
 void
@@ -42,10 +57,10 @@ linked_list_get(const struct linked_list *from);
 struct linked_list **
 linked_list_next(const struct linked_list *from);
 
-int
+void
 linked_list_insert_front(struct linked_list_meta *meta, struct linked_list *entry);
 
-int
+void
 linked_list_insert_back(struct linked_list_meta *meta, struct linked_list *entry);
 
 struct linked_list *
