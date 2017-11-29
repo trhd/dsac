@@ -257,7 +257,7 @@ linked_list_empty(const struct linked_list_meta *m)
 {
 	assert(m);
 
-	return linked_list_size(m) == 0;
+	return m->head ? 0 : 1;
 }
 
 unsigned int
