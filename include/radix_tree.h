@@ -16,6 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * Configuration:
+ * - RADIX_TREE_CONFIG_NO_CACHED_KEY_LENGTH:
+ *     Define this to remove a per "node" key lengt variable. Disasbling
+ *     this saves memory with large radix trees but introduces overhead
+ *     when using it.
+ * - RADIX_TREE_CONFIG_ITERATION_PREALLOCATION:
+ *     The amount of memory the tree will allocate in the beginning of
+ *     radix_tree_iterate(). A large initial buffer can waste memory but
+ *     saves the routine from memore reallocations when less memory is
+ *     needed. Defaults to 50 bytes.
+ */
 #pragma once
 
 #include <stdbool.h>
@@ -62,4 +74,15 @@ int
 radix_tree_iterate(
 		struct radix_tree * tree,
 		int (*callback_function) (char const * key, void * value, void * argument),
-		void * argument);
+		void * argument
+		);
+
+
+#if !defined(NDEBUG) || defined(UNIT_TESTING)
+
+void
+radix_tree_dump(
+		struct radix_tree const * tree
+		);
+
+#endif

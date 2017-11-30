@@ -7,6 +7,10 @@
 # define SEARCH_STRUCTURE_BACKEND splay
 #endif
 
+#ifndef RADIX_TREE_CONFIG_ITERATION_PREALLOCATION
+# define RADIX_TREE_CONFIG_ITERATION_PREALLOCATION 50
+#endif
+
 #include "search_structure.h"
 
 #ifdef assert
@@ -27,6 +31,9 @@ struct radix_node
 {
 	SEARCH_STRUCTURE appendixes;
 	char * key;
+#ifndef RADIX_TREE_CONFIG_NO_CACHED_KEY_LENGTH
+	size_t key_len;
+#endif
 	void * value;
 	DEBUG_FLAGS(_RADIX_NODE_DEBUG_FLAGS_COUNT)
 };
@@ -73,6 +80,7 @@ struct iteration_arguments
 	void * callback_argument;
 	char * base;
 	size_t baselen;
+	size_t base_buflen;
 	void * (*memrealloc) (void *, size_t);
 };
 
@@ -197,7 +205,7 @@ radix_tree_uninitialize(struct radix_tree ** t)
 }
 
 void
-radix_node_initialize(struct radix_node * n, char * k, void * v)
+radix_node_initialize(struct radix_node * n, char * k, size_t kl, void * v)
 {
 	assert(n);
 	assert(k);
@@ -205,6 +213,9 @@ radix_node_initialize(struct radix_node * n, char * k, void * v)
 
 	debug_flags_initialize(n);
 	n->key = k;
+#ifndef RADIX_TREE_CONFIG_NO_CACHED_KEY_LENGTH
+	n->key_len = kl;
+#endif
 	n->value = v;
 	SEARCH_STRUCTURE_INITIALIZE(&n->appendixes, keycmp);
 
@@ -244,7 +255,7 @@ new_node_init(struct radix_tree const * t, struct radix_node * n, char const * k
 		return ENOMEM;
 
 	strcpy(kc, k);
-	radix_node_initialize(n, kc, v);
+	radix_node_initialize(n, kc, l, v);
 
 	return 0;
 }
@@ -326,7 +337,11 @@ fork_existing_key(struct argument_holder * args, SEARCH_STRUCTURE_ELEMENT * n, u
 {
 	assert(args);
 	assert(n);
+#ifndef RADIX_TREE_CONFIG_NO_CACHED_KEY_LENGTH
+	assert((unsigned long)i < getnode(n)->key_len);
+#else
 	assert((unsigned long)i < strlen(getnode(n)->key));
+#endif
 
 	struct radix_node * o = getnode(n);
 	struct radix_node_combo * c = get_new_combo(args->tree, o->key + i, o->value);
@@ -335,6 +350,9 @@ fork_existing_key(struct argument_holder * args, SEARCH_STRUCTURE_ELEMENT * n, u
 		return out_of_memory_error(args);
 
 	swap_appendixes(&c->node.appendixes, &o->appendixes);
+#ifndef RADIX_TREE_CONFIG_NO_CACHED_KEY_LENGTH
+	o->key_len = i;
+#endif
 	o->key[i] = '\0';
 	o->value = NULL;
 	SEARCH_STRUCTURE_INSERT_FAILSAFE(&o->appendixes, &c->element);
@@ -353,24 +371,32 @@ find_by_key(SEARCH_STRUCTURE * ss, char const * k)
 		return SEARCH_STRUCTURE_FIND_ANY(ss);
 	else
 	{
-		radix_node_initialize(&n, (char*)k, (void*)1);
+		radix_node_initialize(&n, (char*)k, strlen(k), (void*)1);
 		return SEARCH_STRUCTURE_FIND(ss, &n);
 	}
 }
 
 static void
-shift_key(char * k, unsigned int s)
+shift_key(struct radix_node * n, unsigned int s)
 {
-	assert(k);
+	assert(n);
 	assert(s);
+	assert(n->key_len - s > 0);
 
-	int j = strlen(k) - s,
+#ifndef RADIX_TREE_CONFIG_NO_CACHED_KEY_LENGTH
+	int j = n->key_len - s,
+#else
+	int j = strlen(n->key) - s,
+#endif
 	    i = -1;
 
 	while (++i < j)
-		k[i] = k[i + s];
+		n->key[i] = n->key[i + s];
 
-	k[i] = '\0';
+	n->key[i] = '\0';
+#ifndef RADIX_TREE_CONFIG_NO_CACHED_KEY_LENGTH
+	n->key_len -= s;
+#endif
 }
 
 static bool
@@ -412,7 +438,11 @@ inject_into_existing_key(struct radix_tree * t, struct argument_holder * args,
 	assert(t);
 	assert(args);
 	assert(e);
+#ifndef RADIX_TREE_CONFIG_NO_CACHED_KEY_LENGTH
+	assert(getnode(e)->key_len > (unsigned long)i);
+#else
 	assert(strlen(getnode(e)->key) > (unsigned long)i);
+#endif
 
 	struct radix_node_combo * c = get_new_combo(args->tree, args->key, args->value);
 
@@ -422,8 +452,12 @@ inject_into_existing_key(struct radix_tree * t, struct argument_holder * args,
 		return out_of_memory_error(args);
 	}
 
-	shift_key(getnode(e)->key, i);
+	shift_key(getnode(e), i);
+#ifndef RADIX_TREE_CONFIG_NO_CACHED_KEY_LENGTH
+	getnode(e)->key = t->memrealloc(getnode(e)->key, getnode(e)->key_len + 1);
+#else
 	getnode(e)->key = t->memrealloc(getnode(e)->key, strlen(getnode(e)->key) + 1);
+#endif
 	SEARCH_STRUCTURE_INSERT_FAILSAFE(&c->node.appendixes, &c->element);
 	swap_node_contents(&c->node, getnode(e));
 
@@ -615,6 +649,9 @@ remove_node(struct radix_tree * t, struct radix_node * n)
 
 	strcat(n->key, getnode(e)->key);
 	n->value = getnode(e)->value;
+#ifndef RADIX_TREE_CONFIG_NO_CACHED_KEY_LENGTH
+	n->key_len += getnode(e)->key_len;
+#endif
 
 	swap_appendixes(&n->appendixes, &getnode(e)->appendixes);
 
@@ -642,14 +679,20 @@ remove_nonvalue_node(struct argument_holder * args, SEARCH_STRUCTURE_ELEMENT * e
 
 	struct radix_node * p = getnode(e);
 	SEARCH_STRUCTURE_ELEMENT * r = SEARCH_STRUCTURE_REMOVE_ANY(&p->appendixes);
+#ifndef RADIX_TREE_CONFIG_NO_CACHED_KEY_LENGTH
+	char * k = args->tree->memrealloc(p->key, p->key_len + getnode_const(r)->key_len + 1);
+#else
 	char * k = args->tree->memrealloc(p->key, strlen(p->key) + strlen(getnode_const(r)->key) + 1);
+#endif
 
 	if (!k)
 		return out_of_memory_error(args);
 
 	p->key = k;
 	strcat(p->key, getnode_const(r)->key);
-
+#ifndef RADIX_TREE_CONFIG_NO_CACHED_KEY_LENGTH
+	p->key_len += getnode_const(r)->key_len;
+#endif
 	p->value = getnode(r)->value;
 
 	swap_appendixes(&p->appendixes, &getnode(r)->appendixes);
@@ -721,19 +764,28 @@ radix_tree_find(struct radix_tree * t, char const * k)
 static int
 iteration_recursion(SEARCH_STRUCTURE_ELEMENT const * e, void * pa)
 {
-	assert(pa);
 	assert(e);
+	assert(pa);
 
 	struct iteration_arguments * args = (struct iteration_arguments *)pa;
 	int rv = 0;
 
+#ifndef RADIX_TREE_CONFIG_NO_CACHED_KEY_LENGTH
+	args->baselen += getnode_const(e)->key_len;
+#else
 	args->baselen += strlen(getnode_const(e)->key);
-	args->base = args->memrealloc(args->base, args->baselen);
+#endif
 
-	if (!args->base)
+	if (args->base_buflen < args->baselen + 1)
 	{
-		errno = ENOMEM;
-		return -1;
+		args->base_buflen = args->baselen + 1;
+		args->base = args->memrealloc(args->base, args->base_buflen);
+
+		if (!args->base)
+		{
+			errno = ENOMEM;
+			return -1;
+		}
 	}
 
 	strcat(args->base, getnode_const(e)->key);
@@ -744,7 +796,12 @@ iteration_recursion(SEARCH_STRUCTURE_ELEMENT const * e, void * pa)
 	if (!rv)
 		rv = SEARCH_STRUCTURE_ITERATE(&getnode_const(e)->appendixes, iteration_recursion, args);
 
-	args->base[strlen(args->base) - strlen(getnode_const(e)->key)] = '\0';
+#ifndef RADIX_TREE_CONFIG_NO_CACHED_KEY_LENGTH
+	args->baselen -= getnode_const(e)->key_len;
+#else
+	args->baselen -= strlen(getnode_const(e)->key);
+#endif
+	args->base[args->baselen] = '\0';
 
 	return rv;
 }
@@ -755,10 +812,16 @@ radix_tree_iterate(struct radix_tree * t, int (*f) (char const *, void *, void *
 	assert(t);
 	assert(f);
 
-	struct iteration_arguments args = { f, a, NULL, 1, t->memrealloc };
-	int rv;
-
-	args.base = t->memalloc(1);
+	int rv, e;
+	struct iteration_arguments args =
+	{
+		f,
+		a,
+		t->memalloc(RADIX_TREE_CONFIG_ITERATION_PREALLOCATION),
+		0,
+		RADIX_TREE_CONFIG_ITERATION_PREALLOCATION,
+		t->memrealloc
+	};
 
 	if (!args.base)
 	{
@@ -769,8 +832,10 @@ radix_tree_iterate(struct radix_tree * t, int (*f) (char const *, void *, void *
 	args.base[0] = '\0';
 
 	rv = SEARCH_STRUCTURE_ITERATE(&t->keys, iteration_recursion, &args);
+	e = errno;
 
 	t->memfree(args.base);
 
+	errno = e;
 	return rv;
 }

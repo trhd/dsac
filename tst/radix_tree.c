@@ -172,13 +172,11 @@ UT_radix_tree_insert()
 {
 	enum { node_count = 20, char_count = 20 };
 	struct radix_tree * t = radix_tree_initialize(malloc_wrapper, free_wrapper, realloc_wrapper);
-	char keys[node_count][char_count][2*char_count + 1], vals[node_count][char_count][2*char_count + 1] = {{{0}}};
+	char keys[node_count][char_count][2*char_count + 1] = {{{0}}},
+	     vals[node_count][char_count][2*char_count + 1] = {{{0}}};
 
 	for (int i = 0 ; i < node_count ; i++)
 	{
-		keys[i][0][0] = '\0';
-		vals[i][0][0] = '\0';
-
 		for (int j = 0 ; j < char_count ; j++)
 		{
 			for (int k = 0 ; k <= j ; k++)
@@ -665,6 +663,31 @@ FT_basic_usage()
 
 /***********************************************************************/
 
+static void
+UT_radix_tree_dump()
+{
+	/**
+	 * FIXME: make a better test
+	 */
+	struct radix_tree * t = radix_tree_initialize(malloc_wrapper, free_wrapper, realloc_wrapper);
+
+	FIXED_STRINGS_assert_inserts(t);
+
+	radix_tree_dump(t);
+
+	radix_tree_uninitialize(&t);
+}
+
+/***********************************************************************/
+
+static void
+UT_radix_tree_dump__NULL()
+{
+	expect_assert_failure(radix_tree_dump(NULL));
+}
+
+/***********************************************************************/
+
 int
 main()
 {
@@ -696,6 +719,10 @@ main()
 		cmocka_unit_test(UT_radix_tree_iterate),
 		cmocka_unit_test(UT_radix_tree_iterate__error),
 		cmocka_unit_test(UT_radix_tree_iterate__NULL),
+
+		cmocka_unit_test(UT_radix_tree_dump),
+		cmocka_unit_test(UT_radix_tree_dump__NULL),
+
 
 		cmocka_unit_test(FT_basic_usage)
 	};
