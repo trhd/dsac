@@ -52,7 +52,7 @@ TEST_LIB = library(
 
 test('search_structure-avl',
 	executable('search_structure-avl',
-		'search_structure.c',
+		'test_search_structure.c',
 		link_with : TEST_LIB,
 		dependencies : test_deps,
 		include_directories : DSAC_INCLUDE,
@@ -66,7 +66,7 @@ test('search_structure-avl',
 
 test('search_structure-splay',
 	executable('search_structure-splay',
-		'search_structure.c',
+		'test_search_structure.c',
 		link_with : TEST_LIB,
 		dependencies : test_deps,
 		include_directories : DSAC_INCLUDE,
