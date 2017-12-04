@@ -44,7 +44,7 @@ linked_list_initialize(struct linked_list_meta *m)
 	m->size = 0;
 #endif
 	m->head = 0;
-#ifdef LINKED_LIST_CONFIG_TAIL_POINTER
+#ifndef LINKED_LIST_CONFIG_NO_TAIL_POINTER
 	m->tail = 0;
 #endif
 }
@@ -84,13 +84,13 @@ linked_list_insert_front(struct linked_list_meta *m, struct linked_list *n)
 	n->next = m->head;
 	m->head = n;
 
-#ifdef LINKED_LIST_CONFIG_SIZE_CACHE
-	++m->size;
+#ifndef LINKED_LIST_CONFIG_NO_TAIL_POINTER
+	if (!m->tail)
+		m->tail = n;
 #endif
 
-#ifdef LINKED_LIST_CONFIG_TAIL_POINTER
-	if (!n->next)
-		m->tail = n;
+#ifdef LINKED_LIST_CONFIG_SIZE_CACHE
+	++m->size;
 #endif
 
 	assert(n != n->next);
@@ -102,19 +102,36 @@ linked_list_insert_back(struct linked_list_meta *m, struct linked_list *n)
 	assert(m);
 	assert(n);
 
-	struct linked_list **h;
+	struct linked_list *h;
 
-#if LINKED_LIST_CONFIG_TAIL_POINTER
-	h = &m->tail;
+	n->next = 0;
+
+#ifndef LINKED_LIST_CONFIG_NO_TAIL_POINTER
+	h = m->tail;
+
+	if (!h)
+		m->tail = m->head = n;
+	else
+	{
+		m->tail = h->next = n;
+
+		if (!m->head)
+			m->head = n;
+	}
 #else
-	h = &m->head;
+	h = m->head;
 
-	while (*h)
-		h = &(*h)->next;
+	if (!h)
+		m->head = n;
+	else
+	{
+		while (h->next)
+			h = h->next;
+
+		h->next = n;
+	}
 #endif
 
-	*h = n;
-	n->next = 0;
 #if LINKED_LIST_CONFIG_SIZE_CACHE
 	++m->size;
 #endif

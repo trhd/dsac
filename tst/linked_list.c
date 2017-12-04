@@ -161,6 +161,8 @@ FT_basic_usage__2()
 			linked_list_insert_front(&llmeta, &ll_bufs[i]);
 		else
 			linked_list_insert_back(&llmeta, &ll_bufs[i]);
+
+		assert_int_equal(linked_list_size(&llmeta), i + 1);
 	}
 
 	assert_iteration_functionality(&llmeta);

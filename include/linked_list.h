@@ -19,11 +19,14 @@
 /**
  * Configuration:
  *
- * - Define LINKED_LIST_CONFIG_SIZE_CACHE to cache the size of the linked
- *   list and to avoid traversing the list when querying its size.
+ * - LINKED_LIST_CONFIG_NO_SIZE_CACHE: This macro can be used to disable
+ *   the cached size of the linked list. This save a little memory but
+ *   will introduce overhead when determining the size of the linked list.
  *
- * - Define LINKED_LIST_CONFIG_TAIL_POINTER to store a direct pointer to
- *   the tail of the linked list for constant time access to the tail.
+ * - LINKED_LIST_CONFIG_NO_TAIL_POINTER: This macro can be used to disable
+ *   the use of a tail pointer in the linked list in addition to the
+ *   normal head pointer. This will decrease memory usage but will
+ *   disallow constant time access to the tail of the linked list.
  */
 
 #pragma once
@@ -37,7 +40,7 @@ struct linked_list
 struct linked_list_meta
 {
 	struct linked_list * head;
-#ifdef LINKED_LIST_CONFIG_TAIL_POINTER
+#ifndef LINKED_LIST_CONFIG_NO_TAIL_POINTER
 	struct linked_list * tail;
 #endif
 #ifdef LINKED_LIST_CONFIG_SIZE_CACHE
