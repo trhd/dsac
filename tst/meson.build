@@ -94,6 +94,7 @@ foreach t : [
 		[['test_linked_list.c', meson.source_root() + '/src/linked_list.c'], 'linked_list__size', ['-DLINKED_LIST_CONFIG_SIZE_CACHE']],
 		[['test_linked_list.c', meson.source_root() + '/src/linked_list.c'], 'linked_list__notail', ['-DLINKED_LIST_CONFIG_NO_TAIL_POINTER']],
 		[['test_linked_list.c', meson.source_root() + '/src/linked_list.c'], 'linked_list__size_notail', ['-DLINKED_LIST_CONFIG_SIZE_CACHE', '-DLINKED_LIST_CONFIG_NO_TAIL_POINTER']],
+		[['test_typed_linked_list.c'], 'typed_linked_list', []],
 		[['test_lock.c'], 'lock', []],
 		[['test_quicksort.c'], 'quicksort', []],
 		[['test_ring_buffer.c'], 'ring_buffer', []],
