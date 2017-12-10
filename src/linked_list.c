@@ -20,6 +20,10 @@
 #include <errno.h>
 #include "linked_list.h"
 
+#if defined(NDEBUG) && !defined(UNIT_TESTING)
+# define assert_unique_pointer(...)
+#else
+
 static void
 assert_unique_pointer(struct linked_list_meta * m, struct linked_list * n)
 {
@@ -34,6 +38,8 @@ assert_unique_pointer(struct linked_list_meta * m, struct linked_list * n)
 		nn = nn->next;
 	}
 }
+
+#endif
 
 void
 linked_list_initialize(struct linked_list_meta *m)
