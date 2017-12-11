@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <errno.h>
+#include <stdlib.h>
 #include "debug_flags.h"
 #include "radix_tree.h"
 
@@ -13,7 +14,7 @@
 
 #include "search_structure.h"
 
-#ifdef assert
+#if !defined(NDEBUG) || defined(UNIT_TESTING)
 # define SEARCH_STRUCTURE_INSERT_FAILSAFE(...) (assert(!SEARCH_STRUCTURE_INSERT(__VA_ARGS__)))
 #else
 # define SEARCH_STRUCTURE_INSERT_FAILSAFE(...) (SEARCH_STRUCTURE_INSERT(__VA_ARGS__))
@@ -100,6 +101,18 @@ keycmp(void const * va, void const * vb)
 		return 0;
 }
 
+static struct radix_node *
+getnode(SEARCH_STRUCTURE_ELEMENT * e)
+{
+	return ((struct radix_node *)SEARCH_STRUCTURE_ELEMENT_VALUE(e));
+}
+
+static struct radix_node const *
+getnode_const(SEARCH_STRUCTURE_ELEMENT const * e)
+{
+	return ((struct radix_node const *)SEARCH_STRUCTURE_ELEMENT_VALUE(e));
+}
+
 #if !defined(NDEBUG) || defined(UNIT_TESTING)
 
 #include <stdio.h>
@@ -138,6 +151,32 @@ radix_tree_dump(struct radix_tree const * t)
 	assert(!SEARCH_STRUCTURE_ITERATE(&t->keys, _radix_tree_dump, &sib));
 	printf(")\n");
 }
+
+
+static int
+integrity_assertion_recursion(SEARCH_STRUCTURE_ELEMENT const * e, void * pa __attribute__((unused)))
+{
+	assert(e);
+
+	if (!getnode_const(e)->value)
+		assert(SEARCH_STRUCTURE_GET_ENTRY_COUNT(&getnode_const(e)->appendixes) > 1);
+
+	SEARCH_STRUCTURE_ITERATE(&getnode_const(e)->appendixes, integrity_assertion_recursion, NULL);
+
+	return 0;
+}
+
+static void
+assert_integrity(struct radix_tree const * t)
+{
+	assert(t);
+
+	SEARCH_STRUCTURE_ITERATE(&t->keys, integrity_assertion_recursion, NULL);
+}
+
+#else
+
+#define assert_integrity(...)
 
 #endif
 
@@ -222,18 +261,6 @@ radix_node_initialize(struct radix_node * n, char * k, size_t kl, void * v)
 	debug_flags_set(n, RADIX_NODE_DEBUG_FLAGS_INITIALIZED);
 }
 
-static struct radix_node *
-getnode(SEARCH_STRUCTURE_ELEMENT * e)
-{
-	return ((struct radix_node *)SEARCH_STRUCTURE_ELEMENT_VALUE(e));
-}
-
-static struct radix_node const *
-getnode_const(SEARCH_STRUCTURE_ELEMENT const * e)
-{
-	return ((struct radix_node const *)SEARCH_STRUCTURE_ELEMENT_VALUE(e));
-}
-
 static void
 swap_node_contents(struct radix_node * a, struct radix_node * b)
 {
@@ -312,26 +339,6 @@ get_new_combo(struct radix_tree const * t, char const * k , void * v)
 	return NULL;
 }
 
-static void
-clean_tree(struct radix_tree * t, char const * k)
-{
-	assert(t);
-	assert(k);
-
-	// FIXME: TBI
-}
-
-static bool
-out_of_memory_error(struct argument_holder * args)
-{
-	assert(args);
-
-	if (args)
-		clean_tree(args->tree, args->original_key);
-	errno = ENOMEM;
-	return true;
-}
-
 static bool
 fork_existing_key(struct argument_holder * args, SEARCH_STRUCTURE_ELEMENT * n, unsigned int i)
 {
@@ -347,7 +354,10 @@ fork_existing_key(struct argument_holder * args, SEARCH_STRUCTURE_ELEMENT * n, u
 	struct radix_node_combo * c = get_new_combo(args->tree, o->key + i, o->value);
 
 	if (!c)
-		return out_of_memory_error(args);
+	{
+		errno = ENOMEM;
+		return true;
+	}
 
 	swap_appendixes(&c->node.appendixes, &o->appendixes);
 #ifndef RADIX_TREE_CONFIG_NO_CACHED_KEY_LENGTH
@@ -410,7 +420,7 @@ create_leaf(struct argument_holder * args, SEARCH_STRUCTURE * ss)
 	if (!c)
 	{
 		assert(errno = ENOMEM);
-		return out_of_memory_error(args);
+		return true;
 	}
 
 	// FIXME: This lookup shouldn't be needed as we already sought for
@@ -422,17 +432,7 @@ create_leaf(struct argument_holder * args, SEARCH_STRUCTURE * ss)
 }
 
 static bool
-key_exists_error(struct argument_holder * args)
-{
-	assert(args);
-
-	clean_tree(args->tree, args->original_key);
-	errno = EEXIST;
-	return true;
-}
-
-static bool
-inject_into_existing_key(struct radix_tree * t, struct argument_holder * args,
+create_new_branch(struct radix_tree * t, struct argument_holder * args,
 		SEARCH_STRUCTURE_ELEMENT * e, int i)
 {
 	assert(t);
@@ -449,7 +449,7 @@ inject_into_existing_key(struct radix_tree * t, struct argument_holder * args,
 	if (!c)
 	{
 		assert(errno == ENOMEM);
-		return out_of_memory_error(args);
+		return true;
 	}
 
 	shift_key(getnode(e), i);
@@ -458,6 +458,15 @@ inject_into_existing_key(struct radix_tree * t, struct argument_holder * args,
 #else
 	getnode(e)->key = t->memrealloc(getnode(e)->key, strlen(getnode(e)->key) + 1);
 #endif
+	if (!getnode_const(e)->key)
+	{
+		/**
+		 * Should never happen as we are reducing the amount of memory we
+		 * are using, but nevertheless, this should be handled better.
+		 * FIXME.
+		 */
+		abort();
+	}
 	SEARCH_STRUCTURE_INSERT_FAILSAFE(&c->node.appendixes, &c->element);
 	swap_node_contents(&c->node, getnode(e));
 
@@ -479,42 +488,108 @@ find_difference_index(char const * a, const char * b)
 	return i;
 }
 
+static bool
+remove_nonvalue_node(struct argument_holder * args, SEARCH_STRUCTURE_ELEMENT * e)
+{
+	assert(args);
+	assert(e);
+
+	assert(SEARCH_STRUCTURE_GET_ENTRY_COUNT(&getnode_const(e)->appendixes) == 1);
+
+	struct radix_node * p = getnode(e);
+	SEARCH_STRUCTURE_ELEMENT * r = SEARCH_STRUCTURE_REMOVE_ANY(&p->appendixes);
+#ifndef RADIX_TREE_CONFIG_NO_CACHED_KEY_LENGTH
+	char * k = args->tree->memrealloc(p->key, p->key_len + getnode_const(r)->key_len + 1);
+#else
+	char * k = args->tree->memrealloc(p->key, strlen(p->key) + strlen(getnode_const(r)->key) + 1);
+#endif
+
+	if (!k)
+	{
+		errno = ENOMEM;
+		return true;
+	}
+
+	p->key = k;
+	strcat(p->key, getnode_const(r)->key);
+#ifndef RADIX_TREE_CONFIG_NO_CACHED_KEY_LENGTH
+	p->key_len += getnode_const(r)->key_len;
+#endif
+	p->value = getnode(r)->value;
+
+	swap_appendixes(&p->appendixes, &getnode(r)->appendixes);
+
+	args->tree->memfree(getnode(r)->key);
+	args->tree->memfree((struct radix_node_combo *)r);
+
+	return false;
+}
+
+
 bool
 radix_tree_insert(struct radix_tree * t, char const * k, void * v)
 {
 	assert(t);
+	assert(k);
 	assert(v);
 	debug_flags_assert(t, RADIX_TREE_DEBUG_FLAGS_INITIALIZED);
 
 	struct argument_holder args = {t, k, k, v};
+	SEARCH_STRUCTURE_ELEMENT const * fork = NULL;
+	bool rv = true;
 	SEARCH_STRUCTURE * ss = &t->keys;
 
 	while (true)
 	{
-		const SEARCH_STRUCTURE_ELEMENT * cur = find_by_key(ss, args.key);
+		SEARCH_STRUCTURE_ELEMENT const * cur = find_by_key(ss, args.key);
 		unsigned int i;
 
 		if (!cur)
-			return create_leaf(&args, ss);
+		{
+			rv = create_leaf(&args, ss);
+			break;
+		}
 
 		i = find_difference_index(args.key, getnode_const(cur)->key);
 
 		if (args.key[i] == '\0')
 		{
 			if (getnode_const(cur)->key[i] == '\0')
-				return key_exists_error(&args);
-
-			return inject_into_existing_key(t, &args, (SEARCH_STRUCTURE_ELEMENT *)cur, i);
+			{
+				errno = EEXIST;
+				/**
+				 * Not possible that we have made a fork during insertion
+				 * and end up with EEXIST.
+				 */
+				assert(!fork);
+			}
+			else
+				rv = create_new_branch(t, &args, (SEARCH_STRUCTURE_ELEMENT *)cur, i);
+			break;
 		}
 		else if (getnode_const(cur)->key[i] != '\0')
 		{
+			assert(!fork);
+
 			if (fork_existing_key(&args, (SEARCH_STRUCTURE_ELEMENT *)cur, i))
-				return true;
+				break;
+
+			fork = cur;
 		}
 
 		ss = &getnode((SEARCH_STRUCTURE_ELEMENT *)cur)->appendixes;
 		args.key += i;
 	}
+
+	if (rv && fork)
+	{
+		int e = errno;
+		remove_nonvalue_node(&args, (SEARCH_STRUCTURE_ELEMENT *)fork);
+		errno = e;
+	}
+
+	assert_integrity(t);
+	return rv;
 }
 
 static unsigned int
@@ -589,7 +664,7 @@ remove_leaf_node(struct radix_tree * t, SEARCH_STRUCTURE * ss, SEARCH_STRUCTURE_
 
 	/** FIXME: Redoing the lookup (we already have the correct element). */
 
-#ifdef assert
+#if !defined(NDEBUG) || defined(UNIT_TESTING)
 	assert(e == SEARCH_STRUCTURE_REMOVE(ss, SEARCH_STRUCTURE_ELEMENT_VALUE(e)));
 #else
 	SEARCH_STRUCTURE_REMOVE(ss, SEARCH_STRUCTURE_ELEMENT_VALUE(e));
@@ -669,41 +744,6 @@ get_node_child_count(struct radix_node const * n)
 	return SEARCH_STRUCTURE_GET_ENTRY_COUNT(&n->appendixes);
 }
 
-static bool
-remove_nonvalue_node(struct argument_holder * args, SEARCH_STRUCTURE_ELEMENT * e)
-{
-	assert(args);
-	assert(e);
-
-	assert(SEARCH_STRUCTURE_GET_ENTRY_COUNT(&getnode_const(e)->appendixes) == 1);
-
-	struct radix_node * p = getnode(e);
-	SEARCH_STRUCTURE_ELEMENT * r = SEARCH_STRUCTURE_REMOVE_ANY(&p->appendixes);
-#ifndef RADIX_TREE_CONFIG_NO_CACHED_KEY_LENGTH
-	char * k = args->tree->memrealloc(p->key, p->key_len + getnode_const(r)->key_len + 1);
-#else
-	char * k = args->tree->memrealloc(p->key, strlen(p->key) + strlen(getnode_const(r)->key) + 1);
-#endif
-
-	if (!k)
-		return out_of_memory_error(args);
-
-	p->key = k;
-	strcat(p->key, getnode_const(r)->key);
-#ifndef RADIX_TREE_CONFIG_NO_CACHED_KEY_LENGTH
-	p->key_len += getnode_const(r)->key_len;
-#endif
-	p->value = getnode(r)->value;
-
-	swap_appendixes(&p->appendixes, &getnode(r)->appendixes);
-
-	args->tree->memfree(getnode(r)->key);
-	args->tree->memfree((struct radix_node_combo *)r);
-
-	return false;
-}
-
-
 void *
 radix_tree_remove(struct radix_tree * t, char const * k)
 {
@@ -735,6 +775,7 @@ radix_tree_remove(struct radix_tree * t, char const * k)
 	if (rv)
 		t->size--;
 
+	assert_integrity(t);
 	return rv;
 }
 

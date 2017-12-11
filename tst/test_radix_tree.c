@@ -91,14 +91,22 @@ FIXED_STRINGS_assert_removals(struct radix_tree * t)
 	}
 }
 
+static bool do_mock_malloc_wrapper = false;
+
 static inline void *
 malloc_wrapper(size_t z)
 {
 	assert(z);
-	void * rv = test_malloc(z);
+
+	if (do_mock_malloc_wrapper)
+		return (void*)mock();
+
+	void * rv = malloc(z);
+
 #ifdef DEBUG_MEMORY_ALLOCATIONS
 	printf("malloc: %p\n", rv);
 #endif
+
 	return rv;
 }
 
@@ -106,19 +114,28 @@ static inline void
 free_wrapper(void * p)
 {
 	assert(p);
+
 #ifdef DEBUG_MEMORY_ALLOCATIONS
 	printf("free: %p\n", p);
 #endif
-	test_free(p);
+
+	free(p);
 }
+
+static bool do_mock_realloc_wrapper = false;
 
 static inline void *
 realloc_wrapper(void * p, size_t z)
 {
-	void * rv = test_realloc(p, z);
+	if (do_mock_realloc_wrapper)
+		return (void*)mock();
+
+	void * rv = realloc(p, z);
+
 #ifdef DEBUG_MEMORY_ALLOCATIONS
 	printf("realloc: %p - %p\n", p, rv);
 #endif
+
 	return rv;
 }
 
@@ -237,6 +254,40 @@ UT_radix_tree_insert()
 
 	radix_tree_uninitialize(&t);
 	assert_null(t);
+}
+
+/***********************************************************************/
+static void
+UT_radix_tree_insert__ENOMEM()
+{
+
+	enum { node_count = 10 };
+	struct radix_tree * t = radix_tree_initialize(malloc_wrapper, free_wrapper, realloc_wrapper);
+
+	assert_false(radix_tree_insert(t, "foobar", "bar"));
+
+	MOCK(malloc, NULL, assert_true(radix_tree_insert(t, "foozar", "bar")));
+
+	MOCK(malloc, test_malloc(100),
+			MOCK(malloc, NULL, assert_true(radix_tree_insert(t, "foozar", "bar"))
+				)
+		);
+
+	MOCK(malloc, test_malloc(100),
+			MOCK(malloc, test_malloc(100),
+				MOCK(malloc, NULL, assert_true(radix_tree_insert(t, "foozar", "bar")))
+				)
+		);
+
+	MOCK(malloc, test_malloc(100),
+			MOCK(malloc, test_malloc(100),
+				MOCK(malloc, test_malloc(100),
+					MOCK(malloc, NULL, assert_true(radix_tree_insert(t, "foozar", "bar")))
+					)
+				)
+		);
+
+	radix_tree_uninitialize(&t);
 }
 
 /***********************************************************************/
@@ -613,11 +664,11 @@ FT_basic_usage()
 	enum { node_count = 10 };
 	struct radix_tree * t = radix_tree_initialize(malloc_wrapper, free_wrapper, realloc_wrapper);
 
-	radix_tree_insert(t, "f", "bar");
-	radix_tree_insert(t, "foo", "bar2");
-	radix_tree_insert(t, "foobar", "bar3");
-	radix_tree_insert(t, "foozar", "bar4");
-	radix_tree_insert(t, "fo", "bar5");
+	assert_false(radix_tree_insert(t, "f", "bar"));
+	assert_false(radix_tree_insert(t, "foo", "bar2"));
+	assert_false(radix_tree_insert(t, "foobar", "bar3"));
+	assert_false(radix_tree_insert(t, "foozar", "bar4"));
+	assert_false(radix_tree_insert(t, "fo", "bar5"));
 
 	assert_int_equal(radix_tree_get_key_count(t), 5);
 
@@ -641,9 +692,9 @@ FT_basic_usage()
 	assert_null(radix_tree_find(t, "foozar"));
 	assert_null(radix_tree_find(t, "foo"));
 
-	radix_tree_insert(t, "foobar", "bar3");
+	assert_false(radix_tree_insert(t, "foobar", "bar3"));
 	assert_string_equal(radix_tree_find(t, "foobar"), "bar3");
-	radix_tree_insert(t, "foozar", "bar4");
+	assert_false(radix_tree_insert(t, "foozar", "bar4"));
 	assert_string_equal(radix_tree_find(t, "foozar"), "bar4");
 
 	assert_int_equal(radix_tree_get_key_count(t), 2);
@@ -700,6 +751,7 @@ main()
 		cmocka_unit_test(UT_radix_tree_uninitialize__NULL),
 
 		cmocka_unit_test(UT_radix_tree_insert),
+		cmocka_unit_test(UT_radix_tree_insert__ENOMEM),
 		cmocka_unit_test(UT_radix_tree_insert__FIXED_STRINGS),
 		cmocka_unit_test(UT_radix_tree_insert__NULL),
 		cmocka_unit_test(UT_radix_tree_insert__double),
