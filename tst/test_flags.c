@@ -97,6 +97,7 @@ holder_is_all_clear(const struct flag_holder *f)
 	return true;
 }
 
+void * null_ptr = NULL;
 
 /***********************************************************************/
 
@@ -105,7 +106,7 @@ UT_flags_initialize()
 {
 	struct flag_holder_lite *h = test_malloc(sizeof(struct flag_holder_lite));
 
-	expect_assert_failure(flags_initialize((struct flag_holder_lite *)NULL));
+	expect_assert_failure(flags_initialize((struct flag_holder_lite *)null_ptr));
 	flags_initialize(h);
 
 	test_free(h);
@@ -120,7 +121,7 @@ UT_flags_set()
 
 	flags_initialize(h);
 
-	expect_assert_failure(flags_get((struct flag_holder_lite *)NULL, 1));
+	expect_assert_failure(flags_get((struct flag_holder_lite *)null_ptr, 1));
 	assert_false(flags_get(h, 1));
 
 	expect_assert_failure(flags_get(h, sizeof(h->_flags) * 8 + 1));
@@ -139,7 +140,7 @@ UT_flags_get()
 	flags_initialize(h);
 
 	expect_assert_failure(flags_set(h, sizeof(h->_flags) * 8 + 1));
-	expect_assert_failure(flags_set((struct flag_holder_lite *)NULL, 1));
+	expect_assert_failure(flags_set((struct flag_holder_lite *)null_ptr, 1));
 
 	for (i = 0; i < FLAG_HOLDER_SIZE; i += 2)
 		flags_set(h, i);
@@ -168,7 +169,7 @@ UT_flags_clear()
 	for (i = 0; i < FLAG_HOLDER_SIZE; i += 2)
 		flags_set(h, i);
 
-	expect_assert_failure(flags_clear((struct flag_holder_lite *)NULL, 1));
+	expect_assert_failure(flags_clear((struct flag_holder_lite *)null_ptr, 1));
 	expect_assert_failure(flags_clear(h, sizeof(h->_flags) * 8 + 1));
 
 	for (i = 0; i < FLAG_HOLDER_SIZE; i++)
@@ -200,9 +201,9 @@ UT_flags_copy()
 	flags_initialize(h);
 	flags_initialize(hh);
 
-	expect_assert_failure(flags_copy(h, (struct flag_holder_lite *)NULL));
-	expect_assert_failure(flags_copy((struct flag_holder_lite *)NULL, h));
-	expect_assert_failure(flags_copy((struct flag_holder_lite *)NULL, (struct flag_holder_lite *)NULL));
+	expect_assert_failure(flags_copy(h, (struct flag_holder_lite *)null_ptr));
+	expect_assert_failure(flags_copy((struct flag_holder_lite *)null_ptr, h));
+	expect_assert_failure(flags_copy((struct flag_holder_lite *)null_ptr, (struct flag_holder_lite *)null_ptr));
 
 	assert_false(flags_compare(h, hh));
 
@@ -230,9 +231,9 @@ UT_flags_compare()
 	flags_initialize(h);
 	flags_initialize(hh);
 
-	expect_assert_failure(flags_compare(h, (struct flag_holder_lite *)NULL));
-	expect_assert_failure(flags_compare((struct flag_holder_lite *)NULL, h));
-	expect_assert_failure(flags_compare((struct flag_holder_lite *)NULL, (struct flag_holder_lite *)NULL));
+	expect_assert_failure(flags_compare(h, (struct flag_holder_lite *)null_ptr));
+	expect_assert_failure(flags_compare((struct flag_holder_lite *)null_ptr, h));
+	expect_assert_failure(flags_compare((struct flag_holder_lite *)null_ptr, (struct flag_holder_lite *)null_ptr));
 
 	for (i = 0; i < FLAG_HOLDER_SIZE; i++)
 	{
@@ -286,7 +287,7 @@ UT_flags_assert()
 	flags_initialize(h);
 
 	expect_assert_failure(flags_assert(h, sizeof(h->_flags) * 8 + 1));
-	expect_assert_failure(flags_assert((struct flag_holder_lite *)NULL, 1));
+	expect_assert_failure(flags_assert((struct flag_holder_lite *)null_ptr, 1));
 
 	for (i = 0; i < FLAG_HOLDER_SIZE; i += 2)
 		flags_set(h, i);
@@ -315,7 +316,7 @@ UT_flags_assert_not()
 	flags_initialize(h);
 
 	expect_assert_failure(flags_assert_not(h, sizeof(h->_flags) * 8 + 1));
-	expect_assert_failure(flags_assert_not((struct flag_holder_lite *)NULL, 1));
+	expect_assert_failure(flags_assert_not((struct flag_holder_lite *)null_ptr, 1));
 
 	for (i = 0; i < FLAG_HOLDER_SIZE; i += 2)
 		flags_set(h, i);

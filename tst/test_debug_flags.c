@@ -30,6 +30,8 @@ struct flag_holder_lite
 	DEBUG_FLAGS(FLAG_HOLDER_SIZE)
 };
 
+void * null_ptr = NULL;
+
 /***********************************************************************/
 
 static void
@@ -37,7 +39,7 @@ UT_debug_flags_initialize()
 {
 	struct flag_holder_lite *h = test_malloc(sizeof(struct flag_holder_lite));
 
-	expect_assert_failure(debug_flags_initialize((struct flag_holder_lite *)NULL));
+	expect_assert_failure(debug_flags_initialize((struct flag_holder_lite *)null_ptr));
 	debug_flags_initialize(h);
 
 	test_free(h);
@@ -52,7 +54,7 @@ UT_debug_flags_set()
 
 	debug_flags_initialize(h);
 
-	expect_assert_failure(debug_flags_get((struct flag_holder_lite *)NULL, 1));
+	expect_assert_failure(debug_flags_get((struct flag_holder_lite *)null_ptr, 1));
 	assert_false(debug_flags_get(h, 1));
 
 	expect_assert_failure(debug_flags_get(h, sizeof(h->_debug_flags) * 8 + 1));
@@ -71,7 +73,7 @@ UT_debug_flags_get()
 	debug_flags_initialize(h);
 
 	expect_assert_failure(debug_flags_set(h, sizeof(h->_debug_flags) * 8 + 1));
-	expect_assert_failure(debug_flags_set((struct flag_holder_lite *)NULL, 1));
+	expect_assert_failure(debug_flags_set((struct flag_holder_lite *)null_ptr, 1));
 
 	for (i = 0; i < FLAG_HOLDER_SIZE; i += 2)
 		debug_flags_set(h, i);
@@ -100,7 +102,7 @@ UT_debug_flags_clear()
 	for (i = 0; i < FLAG_HOLDER_SIZE; i += 2)
 		debug_flags_set(h, i);
 
-	expect_assert_failure(debug_flags_clear((struct flag_holder_lite *)NULL, 1));
+	expect_assert_failure(debug_flags_clear((struct flag_holder_lite *)null_ptr, 1));
 	expect_assert_failure(debug_flags_clear(h, sizeof(h->_debug_flags) * 8 + 1));
 
 	for (i = 0; i < FLAG_HOLDER_SIZE; i++)
@@ -132,9 +134,9 @@ UT_debug_flags_copy()
 	debug_flags_initialize(h);
 	debug_flags_initialize(hh);
 
-	expect_assert_failure(debug_flags_copy(h, (struct flag_holder_lite *)NULL));
-	expect_assert_failure(debug_flags_copy((struct flag_holder_lite *)NULL, h));
-	expect_assert_failure(debug_flags_copy((struct flag_holder_lite *)NULL, (struct flag_holder_lite *)NULL));
+	expect_assert_failure(debug_flags_copy(h, (struct flag_holder_lite *)null_ptr));
+	expect_assert_failure(debug_flags_copy((struct flag_holder_lite *)null_ptr, h));
+	expect_assert_failure(debug_flags_copy((struct flag_holder_lite *)null_ptr, (struct flag_holder_lite *)null_ptr));
 
 	assert_false(debug_flags_compare(h, hh));
 
@@ -162,9 +164,9 @@ UT_debug_flags_compare()
 	debug_flags_initialize(h);
 	debug_flags_initialize(hh);
 
-	expect_assert_failure(debug_flags_compare(h, (struct flag_holder_lite *)NULL));
-	expect_assert_failure(debug_flags_compare((struct flag_holder_lite *)NULL, h));
-	expect_assert_failure(debug_flags_compare((struct flag_holder_lite *)NULL, (struct flag_holder_lite *)NULL));
+	expect_assert_failure(debug_flags_compare(h, (struct flag_holder_lite *)null_ptr));
+	expect_assert_failure(debug_flags_compare((struct flag_holder_lite *)null_ptr, h));
+	expect_assert_failure(debug_flags_compare((struct flag_holder_lite *)null_ptr, (struct flag_holder_lite *)null_ptr));
 
 	for (i = 0; i < FLAG_HOLDER_SIZE; i++)
 	{
@@ -218,7 +220,7 @@ UT_debug_flags_assert()
 	debug_flags_initialize(h);
 
 	expect_assert_failure(debug_flags_assert(h, sizeof(h->_debug_flags) * 8 + 1));
-	expect_assert_failure(debug_flags_assert((struct flag_holder_lite *)NULL, 1));
+	expect_assert_failure(debug_flags_assert((struct flag_holder_lite *)null_ptr, 1));
 
 	for (i = 0; i < FLAG_HOLDER_SIZE; i += 2)
 		debug_flags_set(h, i);
@@ -247,7 +249,7 @@ UT_debug_flags_assert_not()
 	debug_flags_initialize(h);
 
 	expect_assert_failure(debug_flags_assert_not(h, sizeof(h->_debug_flags) * 8 + 1));
-	expect_assert_failure(debug_flags_assert_not((struct flag_holder_lite *)NULL, 1));
+	expect_assert_failure(debug_flags_assert_not((struct flag_holder_lite *)null_ptr, 1));
 
 	for (i = 0; i < FLAG_HOLDER_SIZE; i += 2)
 		debug_flags_set(h, i);
