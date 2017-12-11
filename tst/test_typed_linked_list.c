@@ -95,6 +95,8 @@ FT_basic_usage()
 	char * charbuf = test_malloc(sizeof(char) * char_count);
 	uint_list_t * uintnodebuf = test_malloc(sizeof(uint_list_t) * uint_count);
 	unsigned int * uintbuf = test_malloc(sizeof(unsigned int) * uint_count);
+	char_list_t ** c, * C, * tc;
+	uint_list_t ** u, * U, * tu;
 
 	assert_non_null(uint_list);
 	assert_non_null(char_list);
@@ -134,30 +136,32 @@ FT_basic_usage()
 	assert_false(uint_list_iterate(uint_list, uint_iterator, NULL));
 	assert_false(char_list_iterate(char_list, char_iterator, NULL));
 
-	uint_list_t ** u = uint_list_find(uint_list, &uintbuf[10]);
+	u = uint_list_find(uint_list, &uintbuf[10]);
 	assert_int_equal(*uint_list_get(*u), 10);
 	u = uint_list_next(*u);
 	u = uint_list_next(*u);
 	assert_int_equal(*uint_list_get(*u), 12);
-	assert_ptr_equal(uint_list_detach(uint_list, u), *u);
+	tu = *u;
+	assert_ptr_equal(uint_list_detach(uint_list, u), tu);
 
 	u = uint_list_find_match(uint_list, &uintbuf[7], uint_cmp);
 	assert_int_equal(*uint_list_get(*u), 7);
 
-	uint_list_t * U = uint_list_remove(uint_list, &uintbuf[11]);
+	U = uint_list_remove(uint_list, &uintbuf[11]);
 	assert_int_equal(*uint_list_get(U), 11);
 
-	char_list_t ** c = char_list_find(char_list, &charbuf[10]);
+	c = char_list_find(char_list, &charbuf[10]);
 	assert_int_equal(*char_list_get(*c), 'a' + 10);
 	c = char_list_next(*c);
 	c = char_list_next(*c);
 	assert_int_equal(*char_list_get(*c), 'a' + 8);
-	assert_ptr_equal(char_list_detach(char_list, c), *c);
+	tc = *c;
+	assert_ptr_equal(char_list_detach(char_list, c), tc);
 
 	c = char_list_find_match(char_list, "d", char_cmp);
 	assert_int_equal(*char_list_get(*c), 'd');
 
-	char_list_t * C = char_list_remove(char_list, &charbuf[11]);
+	C = char_list_remove(char_list, &charbuf[11]);
 	assert_int_equal(*char_list_get(C), 'a' + 11);
 
 	assert_int_equal(*char_list_get(char_list_remove_match(char_list, "d", char_cmp)), 'd');
