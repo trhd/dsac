@@ -36,5 +36,5 @@ install_headers(
 		'search_structure.h',
 		'search_structure-splay.h',
 		'splay_tree.h'
-	]),
+	])
 )

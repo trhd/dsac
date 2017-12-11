@@ -15,7 +15,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 CMOCKA = meson.get_compiler('c').find_library('cmocka')
-TEST_TIMEOUT = 900
 
 test_deps = [ CMOCKA, THREADS ]
 test_cflags = [
@@ -44,7 +43,7 @@ add_test_setup(
 
 TEST_LIB = library(
 	'dsactest',
-	DSAC_LIB_SOURCES + [ 'cmocka-wrapper.c' ],
+	DSAC_LIB_SOURCES + files('cmocka-wrapper.c'),
 	include_directories : DSAC_INCLUDE,
 	c_args : test_cflags,
 	dependencies : test_deps
@@ -79,33 +78,137 @@ test('search_structure-splay',
 )
 
 foreach t : [
-		[['test_avl_tree.c'], 'avl_tree', []],
-		[['test_bitmap.c'], 'bitmap', []],
-		[['test_debug_flags.c'], 'debug_flags', []],
-		[['test_blocking_ring_buffer.c'], 'blocking_ring_buffer', []],
-		[['test_blocking_homogeneous_ring_buffer.c'], 'blocking_homogeneous_ring_buffer', []],
-		[['test_doubly_linked_list.c'], 'doubly_linked_list', []],
-		[['test_condition.c'], 'condition', []],
-		[['test_fifo.c'], 'fifo', []],
-		[['test_flags.c'], 'flags', []],
-		[['test_homogeneous_ring_buffer.c'], 'homogeneous_ring_buffer', []],
-		[['test_lifo.c'], 'lifo', []],
-		[['test_linked_list.c', meson.source_root() + '/src/linked_list.c'], 'linked_list', []],
-		[['test_linked_list.c', meson.source_root() + '/src/linked_list.c'], 'linked_list__size', ['-DLINKED_LIST_CONFIG_SIZE_CACHE']],
-		[['test_linked_list.c', meson.source_root() + '/src/linked_list.c'], 'linked_list__notail', ['-DLINKED_LIST_CONFIG_NO_TAIL_POINTER']],
-		[['test_linked_list.c', meson.source_root() + '/src/linked_list.c'], 'linked_list__size_notail', ['-DLINKED_LIST_CONFIG_SIZE_CACHE', '-DLINKED_LIST_CONFIG_NO_TAIL_POINTER']],
-		[['test_typed_linked_list.c'], 'typed_linked_list', []],
-		[['test_lock.c'], 'lock', []],
-		[['test_quicksort.c'], 'quicksort', []],
-		[['test_ring_buffer.c'], 'ring_buffer', []],
-		[['test_radix_tree.c', meson.source_root() + '/src/radix_tree.c'], 'radix_tree', []],
-		[['test_radix_tree.c', meson.source_root() + '/src/radix_tree.c'], 'radix_tree__no_cached_key_length', ['-DRADIX_TREE_CONFIG_NO_CAHED_KEY_LENGHT']],
-		[['test_radix_tree.c', meson.source_root() + '/src/radix_tree.c'], 'radix_tree__prealloc_one', ['-DRADIX_TREE_CONFIG_ITERATION_PREALLOCATION=1']],
-		[['test_radix_tree.c', meson.source_root() + '/src/radix_tree.c'], 'radix_tree__prealloc_one__no_cached_key_length', ['-DRADIX_TREE_CONFIG_NO_CAHED_KEY_LENGHT', '-DRADIX_TREE_CONFIG_ITERATION_PREALLOCATION=1']],
-		[['test_radix_tree.c', meson.source_root() + '/src/radix_tree.c'], 'radix_tree__prealloc_thousand', ['-DRADIX_TREE_CONFIG_ITERATION_PREALLOCATION=1000']],
-		[['test_radix_tree.c', meson.source_root() + '/src/radix_tree.c'], 'radix_tree__prealloc_thousand__no_cached_key_length', ['-DRADIX_TREE_CONFIG_NO_CAHED_KEY_LENGHT', '-DRADIX_TREE_CONFIG_ITERATION_PREALLOCATION=1000']],
-		[['test_splay_tree.c', meson.source_root() + '/src/radix_tree.c'], 'splay_tree', []]
+		[
+			['test_avl_tree.c'],
+			'avl_tree',
+			[]
+		],
+		[
+			['test_bitmap.c'],
+			'bitmap',
+			[]
+		],
+		[
+			['test_debug_flags.c'],
+			'debug_flags',
+			[]
+		],
+		[
+			['test_blocking_ring_buffer.c'],
+			'blocking_ring_buffer',
+			[]
+		],
+		[
+			['test_blocking_homogeneous_ring_buffer.c'],
+			'blocking_homogeneous_ring_buffer',
+			[]
+		],
+		[
+			['test_doubly_linked_list.c'],
+			'doubly_linked_list',
+			[]
+		],
+		[
+			['test_condition.c'],
+			'condition',
+			[]
+		],
+		[
+			['test_fifo.c'],
+			'fifo',
+			[]
+		],
+		[
+			['test_flags.c'],
+			'flags',
+			[]
+		],
+		[
+			['test_homogeneous_ring_buffer.c'],
+			'homogeneous_ring_buffer',
+			[]
+		],
+		[
+			['test_lifo.c'],
+			'lifo',
+			[]
+		],
+		[
+			['test_linked_list.c', meson.source_root() + '/src/linked_list.c'],
+			'linked_list',
+			[]
+		],
+		[
+			['test_linked_list.c', meson.source_root() + '/src/linked_list.c'],
+			'linked_list__size',
+			['-DLINKED_LIST_CONFIG_SIZE_CACHE']
+		],
+		[
+			['test_linked_list.c', meson.source_root() + '/src/linked_list.c'],
+			'linked_list__notail',
+			['-DLINKED_LIST_CONFIG_NO_TAIL_POINTER']
+		],
+		[
+			['test_linked_list.c', meson.source_root() + '/src/linked_list.c'],
+			'linked_list__size_notail',
+			['-DLINKED_LIST_CONFIG_SIZE_CACHE', '-DLINKED_LIST_CONFIG_NO_TAIL_POINTER']
+		],
+		[
+			['test_typed_linked_list.c'],
+			'typed_linked_list',
+			[]
+		],
+		[
+			['test_lock.c'],
+			'lock',
+			[]
+		],
+		[
+			['test_quicksort.c'],
+			'quicksort',
+			[]
+		],
+		[
+			['test_ring_buffer.c'],
+			'ring_buffer',
+			[]
+		],
+		[
+			['test_radix_tree.c', meson.source_root() + '/src/radix_tree.c'],
+			'radix_tree',
+			[]
+		],
+		[
+			['test_radix_tree.c', meson.source_root() + '/src/radix_tree.c'],
+			'radix_tree__no_cached_key_length',
+			['-DRADIX_TREE_CONFIG_NO_CAHED_KEY_LENGHT']
+		],
+		[
+			['test_radix_tree.c', meson.source_root() + '/src/radix_tree.c'],
+			'radix_tree__prealloc_one',
+			['-DRADIX_TREE_CONFIG_ITERATION_PREALLOCATION=1']
+		],
+		[
+			['test_radix_tree.c', meson.source_root() + '/src/radix_tree.c'],
+			'radix_tree__prealloc_one__no_cached_key_length',
+			['-DRADIX_TREE_CONFIG_NO_CAHED_KEY_LENGHT', '-DRADIX_TREE_CONFIG_ITERATION_PREALLOCATION=1']
+		],
+		[
+			['test_radix_tree.c', meson.source_root() + '/src/radix_tree.c'],
+			'radix_tree__prealloc_thousand',
+			['-DRADIX_TREE_CONFIG_ITERATION_PREALLOCATION=1000']
+		],
+		[
+			['test_radix_tree.c', meson.source_root() + '/src/radix_tree.c'],
+			'radix_tree__prealloc_thousand__no_cached_key_length',
+			['-DRADIX_TREE_CONFIG_NO_CAHED_KEY_LENGHT', '-DRADIX_TREE_CONFIG_ITERATION_PREALLOCATION=1000']
+		],
+		[
+			['test_splay_tree.c', meson.source_root() + '/src/radix_tree.c'],
+			'splay_tree',
+			[]
 		]
+	]
 	test(t.get(1),
 		executable(t.get(1),
 			t.get(0),
