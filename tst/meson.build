@@ -164,6 +164,11 @@ foreach t : [
 			[]
 		],
 		[
+			['test_mergesort.c'],
+			'mergesort',
+			[]
+		],
+		[
 			['test_quicksort.c'],
 			'quicksort',
 			[]

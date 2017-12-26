@@ -28,6 +28,7 @@ DSAC_LIB_SOURCES = files(
 		'homogeneous_ring_buffer.c',
 		'linked_list.c',
 		'lock.c',
+		'mergesort.c',
 		'ring_buffer.c',
 		'radix_tree.c',
 		'quicksort.c',
