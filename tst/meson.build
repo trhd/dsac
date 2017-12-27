@@ -174,6 +174,11 @@ foreach t : [
 			[]
 		],
 		[
+			['test_sorting_algorithms.c'],
+			'sorting_algorithms',
+			[]
+		],
+		[
 			['test_ring_buffer.c'],
 			'ring_buffer',
 			[]
