@@ -27,7 +27,7 @@ ptrcpy(void const ** to, void const ** from, unsigned int count)
 }
 
 void
-mergesort(void const ** data, unsigned int size, int (*cmp) (void const *, void const *))
+mergesort(void const ** data, unsigned int const size, int (* const cmp) (void const *, void const *))
 {
 	assert(data);
 	assert(size);
@@ -57,7 +57,7 @@ mergesort(void const ** data, unsigned int size, int (*cmp) (void const *, void 
 		}
 
 		if (cmp(tmp[i], data[j]) < 0)
-				data[k++] = tmp[i++];
+			data[k++] = tmp[i++];
 		else
 			data[k++] = data[j++];
 	}

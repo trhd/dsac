@@ -29,5 +29,5 @@
  *            data argument. Consider providing an inlinable function here to
  *            improve the algorithm's performance.
  */
-void mergesort(void const ** data, unsigned int size,
-		int (*compare)(void const *, void const *));
+void mergesort(void const ** data, unsigned int const size,
+		int (* const compare)(void const *, void const *));
