@@ -1,6 +1,6 @@
 /**
  * dsac -- Data Structures and Alorithms for C
- * Copyright (C) 2016-2017 Hemmo Nieminen
+ * Copyright (C) 2016-2018 Hemmo Nieminen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 /**
  * Configuration:
  * - RADIX_TREE_CONFIG_NO_CACHED_KEY_LENGTH:
- *     Define this to remove a per "node" key lengt variable. Disasbling
+ *     Define this to remove a per "node" key length variable. Disabling
  *     this saves memory with large radix trees but introduces overhead
  *     when using it.
  * - RADIX_TREE_CONFIG_ITERATION_PREALLOCATION:
