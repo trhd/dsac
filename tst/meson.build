@@ -1,5 +1,5 @@
 # dsac -- Data Structures and Alorithms for C
-# Copyright (C) 2016-2017 Hemmo Nieminen
+# Copyright (C) 2016-2018 Hemmo Nieminen
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-CMOCKA = meson.get_compiler('c').find_library('cmocka')
+CMOCKA = dependency('cmocka')
 
 test_deps = [ CMOCKA, THREADS ]
 test_cflags = [
