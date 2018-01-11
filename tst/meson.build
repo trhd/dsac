@@ -134,22 +134,22 @@ foreach t : [
 			[]
 		],
 		[
-			['test_linked_list.c', meson.source_root() + '/src/linked_list.c'],
+			['test_linked_list.c', '../src/linked_list.c'],
 			'linked_list',
 			[]
 		],
 		[
-			['test_linked_list.c', meson.source_root() + '/src/linked_list.c'],
+			['test_linked_list.c', '../src/linked_list.c'],
 			'linked_list__size',
 			['-DLINKED_LIST_CONFIG_SIZE_CACHE']
 		],
 		[
-			['test_linked_list.c', meson.source_root() + '/src/linked_list.c'],
+			['test_linked_list.c', '../src/linked_list.c'],
 			'linked_list__notail',
 			['-DLINKED_LIST_CONFIG_NO_TAIL_POINTER']
 		],
 		[
-			['test_linked_list.c', meson.source_root() + '/src/linked_list.c'],
+			['test_linked_list.c', '../src/linked_list.c'],
 			'linked_list__size_notail',
 			['-DLINKED_LIST_CONFIG_SIZE_CACHE', '-DLINKED_LIST_CONFIG_NO_TAIL_POINTER']
 		],
@@ -184,37 +184,37 @@ foreach t : [
 			[]
 		],
 		[
-			['test_radix_tree.c', meson.source_root() + '/src/radix_tree.c'],
+			['test_radix_tree.c', '../src/radix_tree.c'],
 			'radix_tree',
 			[]
 		],
 		[
-			['test_radix_tree.c', meson.source_root() + '/src/radix_tree.c'],
+			['test_radix_tree.c', '../src/radix_tree.c'],
 			'radix_tree__no_cached_key_length',
 			['-DRADIX_TREE_CONFIG_NO_CAHED_KEY_LENGHT']
 		],
 		[
-			['test_radix_tree.c', meson.source_root() + '/src/radix_tree.c'],
+			['test_radix_tree.c', '../src/radix_tree.c'],
 			'radix_tree__prealloc_one',
 			['-DRADIX_TREE_CONFIG_ITERATION_PREALLOCATION=1']
 		],
 		[
-			['test_radix_tree.c', meson.source_root() + '/src/radix_tree.c'],
+			['test_radix_tree.c', '../src/radix_tree.c'],
 			'radix_tree__prealloc_one__no_cached_key_length',
 			['-DRADIX_TREE_CONFIG_NO_CAHED_KEY_LENGHT', '-DRADIX_TREE_CONFIG_ITERATION_PREALLOCATION=1']
 		],
 		[
-			['test_radix_tree.c', meson.source_root() + '/src/radix_tree.c'],
+			['test_radix_tree.c', '../src/radix_tree.c'],
 			'radix_tree__prealloc_thousand',
 			['-DRADIX_TREE_CONFIG_ITERATION_PREALLOCATION=1000']
 		],
 		[
-			['test_radix_tree.c', meson.source_root() + '/src/radix_tree.c'],
+			['test_radix_tree.c', '../src/radix_tree.c'],
 			'radix_tree__prealloc_thousand__no_cached_key_length',
 			['-DRADIX_TREE_CONFIG_NO_CAHED_KEY_LENGHT', '-DRADIX_TREE_CONFIG_ITERATION_PREALLOCATION=1000']
 		],
 		[
-			['test_splay_tree.c', meson.source_root() + '/src/radix_tree.c'],
+			['test_splay_tree.c', '../src/radix_tree.c'],
 			'splay_tree',
 			[]
 		]
