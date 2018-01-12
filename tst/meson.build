@@ -14,12 +14,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-CMOCKA = dependency('cmocka')
+_cmocka = dependency('cmocka')
 
-test_deps = [ CMOCKA, THREADS ]
-test_cflags = [
+_test_cflags = [
 	'-DUNIT_TESTING',
-	'-D_GNU_SOURCE',
 	'-isystem', meson.current_source_dir() + '/system'
 ]
 
@@ -37,39 +35,53 @@ add_test_setup(
 	timeout_multiplier : 20
 )
 
-TEST_LIB = library(
-	'dsactest',
-	DSAC_LIB_SOURCES + files('cmocka-wrapper.c'),
-	include_directories : DSAC_INCLUDE,
-	c_args : test_cflags,
-	dependencies : test_deps
-)
+_test_deps = [
+	_threads,
+	_cmocka,
+	declare_dependency(
+		link_with : [
+			static_library(
+				'dsac_test_lib_gnu',
+				_all_sources_gnu,
+				include_directories : dsac_include,
+				c_args : _test_cflags + [ '-D_GNU_SOURCE' ],
+				dependencies : [_cmocka, _threads]
+			),
+			static_library(
+				'dsac_test_lib',
+				_all_sources + files('cmocka-wrapper.c'),
+				include_directories : dsac_include,
+				c_args : _test_cflags,
+				dependencies : [_cmocka, _threads]
+			)
+		],
+		include_directories : dsac_include
+	)
+]
 
 test('search_structure-avl',
 	executable('search_structure-avl',
 		'test_search_structure.c',
-		link_with : TEST_LIB,
-		dependencies : test_deps,
-		include_directories : DSAC_INCLUDE,
+		dependencies : _test_deps,
+		include_directories : dsac_include,
 		c_args : [
 			'-DSEARCH_STRUCTURE_BACKEND=avl',
 			'-DTEST_ITERATION_COUNT=100000',
 			'-DTEST_ELEMENT_COUNT=100'
-		] + test_cflags
+		] + _test_cflags
 	)
 )
 
 test('search_structure-splay',
 	executable('search_structure-splay',
 		'test_search_structure.c',
-		link_with : TEST_LIB,
-		dependencies : test_deps,
-		include_directories : DSAC_INCLUDE,
+		dependencies : _test_deps,
+		include_directories : dsac_include,
 		c_args : [
 			'-DSEARCH_STRUCTURE_BACKEND=splay',
 			'-DTEST_ITERATION_COUNT=100000',
 			'-DTEST_ELEMENT_COUNT=100'
-		] + test_cflags
+		] + _test_cflags
 	)
 )
 
@@ -77,7 +89,7 @@ foreach t : [
 		[
 			['test_avl_tree.c'],
 			'avl_tree',
-			[]
+			['-D_GNU_SOURCE']
 		],
 		[
 			['test_bitmap.c'],
@@ -92,12 +104,12 @@ foreach t : [
 		[
 			['test_blocking_ring_buffer.c'],
 			'blocking_ring_buffer',
-			[]
+			['-D_GNU_SOURCE']
 		],
 		[
 			['test_blocking_homogeneous_ring_buffer.c'],
 			'blocking_homogeneous_ring_buffer',
-			[]
+			['-D_GNU_SOURCE']
 		],
 		[
 			['test_doubly_linked_list.c'],
@@ -107,7 +119,7 @@ foreach t : [
 		[
 			['test_condition.c'],
 			'condition',
-			[]
+			['-D_GNU_SOURCE']
 		],
 		[
 			['test_fifo.c'],
@@ -157,7 +169,7 @@ foreach t : [
 		[
 			['test_lock.c'],
 			'lock',
-			[]
+			['-D_GNU_SOURCE']
 		],
 		[
 			['test_mergesort.c'],
@@ -218,10 +230,9 @@ foreach t : [
 	test(t.get(1),
 		executable(t.get(1),
 			t.get(0),
-			link_with : TEST_LIB,
-			c_args : test_cflags + t.get(2),
-			dependencies : test_deps,
-			include_directories : DSAC_INCLUDE,
+			dependencies : _test_deps,
+			c_args : _test_cflags + t.get(2),
+			include_directories : dsac_include,
 		)
 	)
 endforeach

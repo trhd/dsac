@@ -14,30 +14,205 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-DSAC_LIB_SOURCES = files(
+_threads = dependency('threads')
+_all_deps = []
+_all_sources = []
+_all_sources_gnu = []
+
+_header_only = declare_dependency(
+	include_directories : dsac_include
+)
+
+_header_only_gnu = declare_dependency(
+	include_directories : dsac_include,
+	compile_args : '-D_GNU_SOURCE'
+)
+
+flags = _header_only
+debug_flags = _header_only
+refcount = _header_only
+
+condition = _header_only_gnu
+
+avl_tree = declare_dependency(
+	link_with : static_library(
+		'avl_tree',
 		'avl_tree.c',
-		'bitmap.c',
-		'blocking_ring_buffer.c',
-		'blocking_homogeneous_ring_buffer.c',
-		'doubly_linked_list.c',
-		'homogeneous_ring_buffer.c',
-		'linked_list.c',
+		include_directories : dsac_include,
+		c_args : '-D_GNU_SOURCE'
+	),
+	include_directories : dsac_include,
+	version : meson.project_version()
+)
+_all_deps += avl_tree
+_all_sources_gnu += files('avl_tree.c')
+
+search_structure_avl = avl_tree
+
+lock = declare_dependency(
+	include_directories : dsac_include,
+	link_with : static_library(
+		'lock',
 		'lock.c',
-		'mergesort.c',
-		'ring_buffer.c',
-		'radix_tree.c',
-		'quicksort.c',
-		'splay_tree.c'
-	)
+		include_directories : dsac_include,
+		dependencies : _threads,
+		c_args : '-D_GNU_SOURCE'
+	),
+	dependencies : _threads,
+	version : meson.project_version()
+)
+_all_deps += lock
+_all_sources_gnu += files('lock.c')
 
-THREADS = dependency('threads')
+bitmap = declare_dependency(
+	include_directories : dsac_include,
+	link_with : static_library(
+		'bitmap',
+		'bitmap.c',
+		include_directories : dsac_include
+	),
+	version : meson.project_version()
+)
 
-DSAC_LIB = library(
-	'dsac',
-	DSAC_LIB_SOURCES,
-	include_directories : DSAC_INCLUDE,
+_all_deps += bitmap
+_all_sources += files('bitmap.c')
+
+blocking_ring_buffer = declare_dependency(
+	include_directories : dsac_include,
+	link_with : static_library(
+		'blocking_ring_buffer',
+		'blocking_ring_buffer.c',
+		c_args : '-D_GNU_SOURCE',
+		include_directories : dsac_include,
+		dependencies : [lock, condition]
+	),
 	version : meson.project_version(),
-	dependencies : THREADS,
-	c_args : '-D_GNU_SOURCE',
+)
+_all_deps += blocking_ring_buffer
+_all_sources_gnu += files('blocking_ring_buffer.c')
+
+blocking_homogeneous_ring_buffer = declare_dependency(
+	include_directories : dsac_include,
+	link_with : static_library(
+		'blocking_homogeneous_ring_buffer',
+		'blocking_homogeneous_ring_buffer.c',
+		include_directories : dsac_include,
+		dependencies : [lock, condition],
+		c_args : '-D_GNU_SOURCE'
+	),
+	version : meson.project_version()
+)
+_all_deps += blocking_homogeneous_ring_buffer
+_all_sources_gnu += files('blocking_homogeneous_ring_buffer.c')
+
+doubly_linked_list = declare_dependency(
+	include_directories : dsac_include,
+	link_with : static_library(
+		'doubly_linked_list',
+		'doubly_linked_list.c',
+		include_directories : dsac_include
+	),
+	version : meson.project_version()
+)
+_all_deps += doubly_linked_list
+_all_sources += files('doubly_linked_list.c')
+
+fifo = doubly_linked_list
+
+lifo = doubly_linked_list
+
+homogeneous_ring_buffer = declare_dependency(
+	include_directories : dsac_include,
+	link_with : static_library(
+		'homogeneous_ring_buffer',
+		'homogeneous_ring_buffer.c',
+		include_directories : dsac_include
+	),
+	version : meson.project_version()
+)
+_all_deps += homogeneous_ring_buffer
+_all_sources += files('homogeneous_ring_buffer.c')
+
+linked_list = declare_dependency(
+	include_directories : dsac_include,
+	link_with : static_library(
+		'linked_list',
+		'linked_list.c',
+		include_directories : dsac_include
+	),
+	version : meson.project_version()
+)
+_all_deps += linked_list
+_all_sources += files('linked_list.c')
+
+typed_linked_list = linked_list
+
+mergesort = declare_dependency(
+	include_directories : dsac_include,
+	link_with : static_library(
+		'mergesort',
+		'mergesort.c',
+		include_directories : dsac_include
+	),
+	version : meson.project_version()
+)
+_all_deps += mergesort
+_all_sources += files('mergesort.c')
+
+ring_buffer = declare_dependency(
+	include_directories : dsac_include,
+	link_with : static_library(
+		'ring_buffer',
+		'ring_buffer.c',
+		include_directories : dsac_include
+	),
+	version : meson.project_version()
+)
+_all_deps += ring_buffer
+_all_sources += files('ring_buffer.c')
+
+radix_tree = declare_dependency(
+	include_directories : dsac_include,
+	link_with : static_library(
+		'radix_tree',
+		'radix_tree.c',
+		include_directories : dsac_include
+	),
+	version : meson.project_version()
+)
+_all_deps += radix_tree
+_all_sources += files('radix_tree.c')
+
+quicksort = declare_dependency(
+	include_directories : dsac_include,
+	link_with : static_library(
+		'quicksort',
+		'quicksort.c',
+		include_directories : dsac_include
+	),
+	version : meson.project_version()
+)
+_all_deps += quicksort
+_all_sources += files('quicksort.c')
+
+splay_tree = declare_dependency(
+	include_directories : dsac_include,
+	link_with : static_library(
+		'splay_tree',
+		'splay_tree.c',
+		include_directories : dsac_include
+	),
+	version : meson.project_version()
+)
+_all_deps += splay_tree
+_all_sources += files('splay_tree.c')
+
+search_structure_splay = splay_tree
+
+dsac_lib_all = library(
+	'dsac',
+	[],
+	dependencies : _all_deps,
+	version : meson.project_version(),
 	install : true
 )
