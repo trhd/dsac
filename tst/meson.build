@@ -23,10 +23,6 @@ test_cflags = [
 	'-isystem', meson.current_source_dir() + '/system'
 ]
 
-if get_option('buildtype') == 'release'
-	test_cflags += [ '-DNDEBUG' ]
-endif
-
 add_test_setup(
 	'valgrind',
 	exe_wrapper : [

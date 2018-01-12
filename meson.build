@@ -18,13 +18,14 @@ project(
 	'dsac',
 	'c',
 	version : '6.0.0',
-	meson_version : '>=0.31.0',
+	meson_version : '>=0.45.0',
 	license : 'GPLv3',
 	default_options : [
 		'werror=true',
 		'warning_level=3',
 		'stdsplit=false',
-		'c_std=c11'
+		'c_std=c11',
+		'b_ndebug=if-release'
 	]
 )
 

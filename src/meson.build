@@ -1,5 +1,5 @@
 # dsac -- Data Structures and Alorithms for C
-# Copyright (C) 2016-2017 Hemmo Nieminen
+# Copyright (C) 2016-2018 Hemmo Nieminen
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,11 +13,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-cflags = [ '-D_GNU_SOURCE' ]
-if get_option('buildtype') == 'release'
-	cflags += [ '-DNDEBUG' ]
-endif
 
 DSAC_LIB_SOURCES = files(
 		'avl_tree.c',
@@ -43,6 +38,6 @@ DSAC_LIB = library(
 	include_directories : DSAC_INCLUDE,
 	version : meson.project_version(),
 	dependencies : THREADS,
-	c_args : cflags,
+	c_args : '-D_GNU_SOURCE',
 	install : true
 )
