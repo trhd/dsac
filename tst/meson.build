@@ -162,6 +162,11 @@ foreach t : [
 			['-DLINKED_LIST_CONFIG_SIZE_CACHE', '-DLINKED_LIST_CONFIG_NO_TAIL_POINTER']
 		],
 		[
+			['test_refcount.c'],
+			'refcount',
+			[]
+		],
+		[
 			['test_typed_linked_list.c'],
 			'typed_linked_list',
 			[]
