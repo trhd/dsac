@@ -137,6 +137,11 @@ foreach t : [
 			[]
 		],
 		[
+			['test_typed_ring_buffer.c'],
+			'typed_ring_buffer',
+			[]
+		],
+		[
 			['test_lifo.c'],
 			'lifo',
 			[]

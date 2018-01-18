@@ -28,6 +28,7 @@ install_headers(
 		'fifo.h',
 		'flags.h',
 		'homogeneous_ring_buffer.h',
+		'typed_ring_buffer.h',
 		'lifo.h',
 		'linked_list.h',
 		'lock.h',

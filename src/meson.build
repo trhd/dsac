@@ -118,7 +118,7 @@ _all_deps += doubly_linked_list
 _all_sources += files('doubly_linked_list.c')
 
 fifo = doubly_linked_list
-
+typed_fifo = fifo
 lifo = doubly_linked_list
 
 homogeneous_ring_buffer = declare_dependency(
@@ -132,6 +132,8 @@ homogeneous_ring_buffer = declare_dependency(
 )
 _all_deps += homogeneous_ring_buffer
 _all_sources += files('homogeneous_ring_buffer.c')
+
+typed_ring_buffer = homogeneous_ring_buffer
 
 linked_list = declare_dependency(
 	include_directories : dsac_include,
