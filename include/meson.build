@@ -31,6 +31,7 @@ install_headers(
 		'typed_ring_buffer.h',
 		'lifo.h',
 		'linked_list.h',
+		'typed_linked_list.h',
 		'lock.h',
 		'quicksort.h',
 		'ring_buffer.h',
