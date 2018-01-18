@@ -1,6 +1,6 @@
 /**
  * dsac -- Data Structures and Alorithms for C
- * Copyright (C) 2016-2017 Hemmo Nieminen
+ * Copyright (C) 2016-2018 Hemmo Nieminen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -75,7 +75,10 @@ blocking_ring_buffer_write(struct blocking_ring_buffer * r, void const * d,
 			break;
 
 	rv = condition_signal(&r->condition) || rv;
-	return lock_release(&r->lock) || rv;
+
+	lock_release(&r->lock);
+
+	return rv;
 }
 
 bool
@@ -95,7 +98,9 @@ blocking_ring_buffer_write_try(struct blocking_ring_buffer * r,
 
 	rv = ring_buffer_write(&r->buffer, d, l);
 
-	return lock_release(&r->lock) || rv;
+	lock_release(&r->lock);
+
+	return rv;
 }
 
 bool
@@ -115,7 +120,10 @@ blocking_ring_buffer_overwrite(struct blocking_ring_buffer * r, void const * d,
 	ring_buffer_overwrite(&r->buffer, d, l);
 
 	rv = condition_signal(&r->condition);
-	return lock_release(&r->lock) || rv;
+
+	lock_release(&r->lock);
+
+	return rv;
 }
 
 bool
@@ -136,7 +144,10 @@ blocking_ring_buffer_read(struct blocking_ring_buffer * r, void * d, size_t * l)
 			break;
 
 	rv = condition_signal(&r->condition);
-	return lock_release(&r->lock) || rv;
+
+	lock_release(&r->lock);
+
+	return rv;
 }
 
 bool
@@ -155,7 +166,9 @@ blocking_ring_buffer_read_try(struct blocking_ring_buffer * r, void * d,
 
 	rv = ring_buffer_read(&r->buffer, d, l);
 
-	return lock_release(&r->lock) || rv;
+	lock_release(&r->lock);
+
+	return rv;
 }
 
 bool
@@ -176,7 +189,10 @@ blocking_ring_buffer_peek(struct blocking_ring_buffer * r, void * d, size_t * l)
 			break;
 
 	rv = condition_signal(&r->condition);
-	return lock_release(&r->lock) || rv;
+
+	lock_release(&r->lock);
+
+	return rv;
 }
 
 bool
@@ -195,7 +211,9 @@ blocking_ring_buffer_peek_try(struct blocking_ring_buffer * r, void * d,
 
 	rv = ring_buffer_peek(&r->buffer, d, l);
 
-	return lock_release(&r->lock) || rv;
+	lock_release(&r->lock);
+
+	return rv;
 }
 
 int
@@ -211,7 +229,9 @@ blocking_ring_buffer_empty(struct blocking_ring_buffer const * r)
 
 	rv = ring_buffer_empty(&r->buffer) ? 1 : 0;
 
-	return lock_release(&((struct blocking_ring_buffer *)r)->lock) ? -1 : rv;
+	lock_release(&((struct blocking_ring_buffer *)r)->lock);
+
+	return rv;
 }
 
 void *
@@ -247,7 +267,7 @@ blocking_ring_buffer_write_allocate_try(struct blocking_ring_buffer * r,
 	assert(l < r->buffer.size - sizeof(size_t));
 
 	void * rv;
-	
+
 	if (lock_acquire(&r->lock))
 		return NULL;
 
@@ -262,7 +282,7 @@ blocking_ring_buffer_write_allocate_try(struct blocking_ring_buffer * r,
 	return rv;
 }
 
-bool
+void
 blocking_ring_buffer_write_flush(struct blocking_ring_buffer * r)
 {
 	assert(r);
@@ -271,5 +291,5 @@ blocking_ring_buffer_write_flush(struct blocking_ring_buffer * r)
 	debug_flags_assert(r, BLOCKING_RING_BUFFER_DEBUG_FLAG_DIRTY);
 	debug_flags_clear(r, BLOCKING_RING_BUFFER_DEBUG_FLAG_DIRTY);
 
-	return lock_release(&r->lock);;
+	lock_release(&r->lock);
 }

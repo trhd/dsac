@@ -1,6 +1,6 @@
 /**
  * dsac -- Data Structures and Alorithms for C
- * Copyright (C) 2016-2017 Hemmo Nieminen
+ * Copyright (C) 2016-2018 Hemmo Nieminen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,7 +70,10 @@ blocking_homogeneous_ring_buffer_write(struct blocking_homogeneous_ring_buffer *
 			break;
 
 	rv = condition_signal(&r->condition) || rv;
-	return lock_release(&r->lock) || rv;
+
+	lock_release(&r->lock);
+
+	return rv;
 }
 
 bool
@@ -88,7 +91,9 @@ blocking_homogeneous_ring_buffer_write_try(struct blocking_homogeneous_ring_buff
 
 	rv = homogeneous_ring_buffer_write(&r->buffer, d);
 
-	return lock_release(&r->lock) || rv;
+	lock_release(&r->lock);
+
+	return rv;
 }
 
 bool
@@ -107,7 +112,10 @@ blocking_homogeneous_ring_buffer_overwrite(struct blocking_homogeneous_ring_buff
 	homogeneous_ring_buffer_overwrite(&r->buffer, d);
 
 	rv = condition_signal(&r->condition);
-	return lock_release(&r->lock) || rv;
+
+	lock_release(&r->lock);
+
+	return rv;
 }
 
 void *
@@ -137,7 +145,7 @@ blocking_homogeneous_ring_buffer_write_allocate_try(struct blocking_homogeneous_
 	debug_flags_assert(r, BLOCKING_HOMOGENEOUS_RING_BUFFER_DEBUG_FLAG_INITIALIZED);
 
 	void * rv;
-	
+
 	if (lock_acquire(&r->lock))
 		return NULL;
 
@@ -152,7 +160,7 @@ blocking_homogeneous_ring_buffer_write_allocate_try(struct blocking_homogeneous_
 	return rv;
 }
 
-bool
+void
 blocking_homogeneous_ring_buffer_write_flush(struct blocking_homogeneous_ring_buffer * r)
 {
 	assert(r);
@@ -161,7 +169,7 @@ blocking_homogeneous_ring_buffer_write_flush(struct blocking_homogeneous_ring_bu
 	debug_flags_assert(r, BLOCKING_HOMOGENEOUS_RING_BUFFER_DEBUG_FLAG_DIRTY);
 	debug_flags_clear(r, BLOCKING_HOMOGENEOUS_RING_BUFFER_DEBUG_FLAG_DIRTY);
 
-	return lock_release(&r->lock);;
+	lock_release(&r->lock);
 }
 
 bool
@@ -181,7 +189,10 @@ blocking_homogeneous_ring_buffer_read(struct blocking_homogeneous_ring_buffer * 
 			break;
 
 	rv = condition_signal(&r->condition);
-	return lock_release(&r->lock) || rv;
+
+	lock_release(&r->lock);
+
+	return rv;
 }
 
 bool
@@ -199,7 +210,9 @@ blocking_homogeneous_ring_buffer_read_try(struct blocking_homogeneous_ring_buffe
 
 	rv = homogeneous_ring_buffer_read(&r->buffer, d);
 
-	return lock_release(&r->lock) || rv;
+	lock_release(&r->lock);
+
+	return rv;
 }
 
 bool
@@ -220,7 +233,10 @@ blocking_homogeneous_ring_buffer_peek(struct blocking_homogeneous_ring_buffer * 
 			break;
 
 	rv = condition_signal(&r->condition);
-	return lock_release(&r->lock) || rv;
+
+	lock_release(&r->lock);
+
+	return rv;
 }
 
 bool
@@ -238,7 +254,9 @@ blocking_homogeneous_ring_buffer_peek_try(struct blocking_homogeneous_ring_buffe
 
 	rv = homogeneous_ring_buffer_peek(&r->buffer, d);
 
-	return lock_release(&r->lock) || rv;
+	lock_release(&r->lock);
+
+	return rv;
 }
 
 int
@@ -254,5 +272,7 @@ blocking_homogeneous_ring_buffer_empty(struct blocking_homogeneous_ring_buffer c
 
 	rv = homogeneous_ring_buffer_empty(&r->buffer) ? 1 : 0;
 
-	return lock_release(&((struct blocking_homogeneous_ring_buffer *)r)->lock) ? -1 : rv;
+	lock_release(&((struct blocking_homogeneous_ring_buffer *)r)->lock);
+
+	return rv;
 }

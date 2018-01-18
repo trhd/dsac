@@ -1,6 +1,6 @@
 /**
  * dsac -- Data Structures and Alorithms for C
- * Copyright (C) 2016-2017 Hemmo Nieminen
+ * Copyright (C) 2016-2018 Hemmo Nieminen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -130,8 +130,7 @@ helper__UT_condition_wait(struct tuple * t)
 			return (void*)1;
 	}
 
-	if (lock_release(t->lock))
-		return (void*)1;
+	lock_release(t->lock);
 
 	return NULL;
 }
@@ -195,7 +194,7 @@ UT_condition_wait__uninitialized()
 
 	assert_false(lock_acquire(l));
 	expect_assert_failure(condition_wait(c));
-	assert_false(lock_release(l));
+	lock_release(l);
 
 	assert_false(lock_uninitialize(l));
 
@@ -222,8 +221,7 @@ helper__UT_condition_timedwait(struct tuple * t)
 			return (void*)1;
 	}
 
-	if (lock_release(t->lock))
-		return (void*)1;
+	lock_release(t->lock);
 
 	return NULL;
 }
@@ -281,7 +279,7 @@ UT_condition_timedwait__expire()
 
 	assert_false(lock_acquire(l));
 	assert_true(condition_timedwait(c, &delay));
-	assert_false(lock_release(l));
+	lock_release(l);
 
 	assert_false(condition_uninitialize(c));
 	assert_false(lock_uninitialize(l));
@@ -328,7 +326,7 @@ UT_condition_timedwait__uninitialized()
 
 	assert_false(lock_acquire(l));
 	expect_assert_failure(condition_timedwait(c, &d));
-	assert_false(lock_release(l));
+	lock_release(l);
 
 	assert_false(lock_uninitialize(l));
 
@@ -353,8 +351,7 @@ helper__UT_condition_signal(struct tuple * t)
 	while (t->counter)
 		condition_wait(t->cond);
 
-	if (lock_release(t->lock))
-		return (void*)1;
+	lock_release(t->lock);
 
 	return NULL;
 }
@@ -381,7 +378,7 @@ UT_condition_signal()
 	tt.counter = 0;
 	assert_false(condition_signal(tt.cond));
 
-	assert_false(lock_release(l));
+	lock_release(l);
 
 	assert_false(pthread_join(t, &r));
 	assert_null(r);
@@ -441,8 +438,7 @@ helper__UT_condition_broadcast(struct tuple * t)
 		if (condition_wait(t->cond))
 			return (void*)1;
 
-	if (lock_release(t->lock))
-		return (void*)1;
+	lock_release(t->lock);
 
 	return NULL;
 }
@@ -471,7 +467,7 @@ UT_condition_broadcast()
 	tt.counter = 0;
 	assert_false(condition_broadcast(c));
 
-	assert_false(lock_release(l));
+	lock_release(l);
 
 	for (int i = 0 ; i < thread_count ; i++)
 	{

@@ -1,6 +1,6 @@
 /**
  * dsac -- Data Structures and Alorithms for C
- * Copyright (C) 2016-2017 Hemmo Nieminen
+ * Copyright (C) 2016-2018 Hemmo Nieminen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -92,7 +92,7 @@ UT_lock_acquire()
 	assert_false(lock_acquire(l));
 	expect_assert_failure(lock_acquire(l));
 
-	assert_false(lock_release(l));
+	lock_release(l);
 	assert_false(lock_uninitialize(l));
 
 	test_free(l);
@@ -131,15 +131,15 @@ UT_lock_acquire_try()
 
 	assert_false(lock_acquire_try(l));
 	assert_true(lock_acquire_try(l));
-	assert_false(lock_release(l));
+	lock_release(l);
 
 	assert_false(lock_acquire(l));
 	assert_true(lock_acquire_try(l));
-	assert_false(lock_release(l));
+	lock_release(l);
 
 	assert_false(lock_acquire_try(l));
 	expect_assert_failure(lock_acquire(l));
-	assert_false(lock_release(l));
+	lock_release(l);
 
 	assert_false(lock_uninitialize(l));
 
@@ -178,12 +178,12 @@ UT_lock_release()
 	struct lock *l = test_malloc(sizeof(struct lock));
 	assert_false(lock_initialize(l));
 
-	assert_true(lock_release(l));
+	expect_assert_failure(lock_release(l));
 
 	assert_false(lock_acquire(l));
-	assert_false(lock_release(l));
+	lock_release(l);
 
-	assert_true(lock_release(l));
+	expect_assert_failure(lock_release(l));
 
 	assert_false(lock_uninitialize(l));
 
@@ -203,7 +203,7 @@ UT_lock_release__uninitialized()
 	assert_false(lock_acquire(l));
 	assert_true(lock_uninitialize(l));
 
-	assert_false(lock_release(l));
+	lock_release(l);
 
 	assert_false(lock_uninitialize(l));
 
@@ -235,7 +235,7 @@ UT_lock_assert()
 	assert_false(lock_acquire(l));
 	lock_assert(l);
 
-	assert_false(lock_release(l));
+	lock_release(l);
 	expect_assert_failure(lock_assert(l));
 
 	assert_false(lock_uninitialize(l));
@@ -282,8 +282,8 @@ FT_test_basic_usage()
 		assert_false(lock_acquire(l));
 		expect_assert_failure(lock_acquire(l));
 		lock_assert(l);
-		assert_false(lock_release(l));
-		assert_true(lock_release(l));
+		lock_release(l);
+		expect_assert_failure(lock_release(l));
 	}
 
 	assert_false(lock_uninitialize(l));
@@ -311,7 +311,7 @@ _concurrent_basic(struct lock *l)
 		assert_int_equal(concurrent_basic_shared_varialbe, pthread_self());
 
 		lock_assert(l);
-		assert_false(lock_release(l));
+		lock_release(l);
 	}
 
 	return NULL;

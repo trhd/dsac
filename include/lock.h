@@ -1,6 +1,6 @@
 /**
  * dsac -- Data Structures and Alorithms for C
- * Copyright (C) 2016-2017 Hemmo Nieminen
+ * Copyright (C) 2016-2018 Hemmo Nieminen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ bool lock_uninitialize(struct lock * lock);
 
 bool lock_acquire(struct lock * lock);
 bool lock_acquire_try(struct lock * lock);
-bool lock_release(struct lock * lock);
+void lock_release(struct lock * lock);
 
 #if !defined(NDEBUG) || defined(UNIT_TESTING)
 void lock_assert(const struct lock * lock);

@@ -1,6 +1,6 @@
 /**
  * dsac -- Data Structures and Alorithms for C
- * Copyright (C) 2016-2017 Hemmo Nieminen
+ * Copyright (C) 2016-2018 Hemmo Nieminen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -338,8 +338,7 @@ helper__UT_blocking_homogeneous_ring_buffer_read(struct tuple__UT_blocking_homog
 
 	t->res[b[0] - 'a'][b[1] - 'a']++;
 
-	if (lock_release(t->l))
-		return (void *)1;
+	lock_release(t->l);
 
 	return NULL;
 }
@@ -556,7 +555,7 @@ UT_blocking_homogeneous_ring_buffer_write_allocate()
 
 	strcpy(tmp, "foobar");
 
-	assert_false(blocking_homogeneous_ring_buffer_write_flush(ring));
+	blocking_homogeneous_ring_buffer_write_flush(ring);
 
 	assert_false(blocking_homogeneous_ring_buffer_read(ring, read));
 	assert_string_equal(tmp, "foobar");
@@ -1101,8 +1100,7 @@ helper__UT_blocking_homogeneous_ring_buffer_empty(struct tuple__UT_blocking_homo
 	if (!blocking_homogeneous_ring_buffer_write_try(t->ring, "foo"))
 		t->count++;
 
-	if (lock_release(t->lock))
-		goto err;
+	lock_release(t->lock);
 
 	if (blocking_homogeneous_ring_buffer_empty(t->ring) > 0)
 		goto err;
@@ -1121,7 +1119,8 @@ helper__UT_blocking_homogeneous_ring_buffer_empty(struct tuple__UT_blocking_homo
 	if ((bool)t->count == (blocking_homogeneous_ring_buffer_empty(t->ring) > 0))
 		goto err;
 
-	return lock_release(t->lock) ? (void*)-1 : NULL;
+	lock_release(t->lock);
+	return NULL;
 err:
 	lock_release(t->lock);
 	return (void*)1;

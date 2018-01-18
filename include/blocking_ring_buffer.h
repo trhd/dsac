@@ -1,6 +1,6 @@
 /**
  * dsac -- Data Structures and Alorithms for C
- * Copyright (C) 2016-2017 Hemmo Nieminen
+ * Copyright (C) 2016-2018 Hemmo Nieminen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -85,7 +85,7 @@ blocking_ring_buffer_write_allocate_try(struct blocking_ring_buffer * ring,
 		size_t data_length);
 
 
-bool
+void
 blocking_ring_buffer_write_flush(struct blocking_ring_buffer * ring);
 
 
