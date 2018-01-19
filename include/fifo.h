@@ -1,6 +1,6 @@
 /**
  * dsac -- Data Structures and Alorithms for C
- * Copyright (C) 2016-2017 Hemmo Nieminen
+ * Copyright (C) 2016-2018 Hemmo Nieminen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,10 +41,10 @@ fifo_initialize(fifo_meta_t * meta)
 	doubly_linked_list_initialize(meta);
 }
 
-static inline int
+static inline void
 fifo_push(fifo_meta_t *meta, fifo_t *buffer)
 {
-	return doubly_linked_list_insert_front(meta, buffer);
+	doubly_linked_list_insert_front(meta, buffer);
 }
 
 static inline fifo_t *

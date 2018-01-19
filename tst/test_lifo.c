@@ -1,6 +1,6 @@
 /**
  * dsac -- Data Structures and Alorithms for C
- * Copyright (C) 2016-2017 Hemmo Nieminen
+ * Copyright (C) 2016-2018 Hemmo Nieminen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ FT_basic_usage__1()
 
 	for (i = 0; i < val_count; ++i)
 	{
-		assert_int_equal(lifo_push(&meta, valbufs + i), 0);
+		lifo_push(&meta, valbufs + i);
 		assert_int_equal(lifo_size(&meta), i + 1);
 	}
 
@@ -92,7 +92,7 @@ FT_basic_usage__2()
 	assert_int_equal(lifo_size(&meta), 0);
 
 	for (i = 0; i < val_count; ++i)
-		assert_int_equal(lifo_push(&meta, valbufs + i), 0);
+		lifo_push(&meta, valbufs + i);
 
 	assert_false(lifo_empty(&meta));
 	assert_int_equal(lifo_size(&meta), val_count);
@@ -135,7 +135,7 @@ FT_basic_usage__3()
 		assert_true(lifo_empty(&meta));
 		assert_int_equal(lifo_size(&meta), 0);
 
-		assert_int_equal(lifo_push(&meta, valbufs + i), 0);
+		lifo_push(&meta, valbufs + i);
 
 		assert_false(lifo_empty(&meta));
 		assert_int_equal(lifo_size(&meta), 1);
@@ -175,26 +175,26 @@ FT_basic_usage__4()
 	assert_true(lifo_empty(&meta));
 	assert_int_equal(lifo_size(&meta), 0);
 
-	assert_int_equal(lifo_push(&meta, valbufs + i++), 0);
+	lifo_push(&meta, valbufs + i++);
 	assert_false(lifo_empty(&meta));
 	assert_int_equal(lifo_size(&meta), i);
 
 
-	assert_int_equal(lifo_push(&meta, valbufs + i++), 0);
+	lifo_push(&meta, valbufs + i++);
 
 	assert_ptr_equal(lifo_peek(&meta), valbufs + i - 1);
 	assert_ptr_equal(lifo_pop(&meta), valbufs + --i);
 
-	assert_int_equal(lifo_push(&meta, valbufs + i++), 0);
-	assert_int_equal(lifo_push(&meta, valbufs + i++), 0);
-	assert_int_equal(lifo_push(&meta, valbufs + i++), 0);
-	assert_int_equal(lifo_push(&meta, valbufs + i++), 0);
+	lifo_push(&meta, valbufs + i++);
+	lifo_push(&meta, valbufs + i++);
+	lifo_push(&meta, valbufs + i++);
+	lifo_push(&meta, valbufs + i++);
 
 	assert_ptr_equal(lifo_peek(&meta), valbufs + i - 1);
 	assert_ptr_equal(lifo_pop(&meta), valbufs + --i);
 
-	assert_int_equal(lifo_push(&meta, valbufs + i++), 0);
-	assert_int_equal(lifo_push(&meta, valbufs + i++), 0);
+	lifo_push(&meta, valbufs + i++);
+	lifo_push(&meta, valbufs + i++);
 
 	assert_ptr_equal(lifo_peek(&meta), valbufs + i - 1);
 	assert_ptr_equal(lifo_pop(&meta), valbufs + --i);
@@ -203,12 +203,12 @@ FT_basic_usage__4()
 	assert_ptr_equal(lifo_peek(&meta), valbufs + i - 1);
 	assert_ptr_equal(lifo_pop(&meta), valbufs + --i);
 
-	assert_int_equal(lifo_push(&meta, valbufs + i++), 0);
+	lifo_push(&meta, valbufs + i++);
 
 	assert_ptr_equal(lifo_peek(&meta), valbufs + i - 1);
 	assert_ptr_equal(lifo_pop(&meta), valbufs + --i);
 
-	assert_int_equal(lifo_push(&meta, valbufs + i++), 0);
+	lifo_push(&meta, valbufs + i++);
 
 	assert_ptr_equal(lifo_peek(&meta), valbufs + i - 1);
 	assert_ptr_equal(lifo_pop(&meta), valbufs + --i);

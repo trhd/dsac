@@ -1,6 +1,6 @@
 /**
  * dsac -- Data Structures and Alorithms for C
- * Copyright (C) 2016-2017 Hemmo Nieminen
+ * Copyright (C) 2016-2018 Hemmo Nieminen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,14 +28,11 @@ doubly_linked_list_initialize(struct doubly_linked_list_meta *m)
 	memset(m, 0, sizeof(*m));
 }
 
-int
+void
 doubly_linked_list_insert_front(struct doubly_linked_list_meta *m, struct doubly_linked_list *e)
 {
 	assert(m);
 	assert(e);
-
-	if (doubly_linked_list_find_front(m->head, e->data))
-		return EEXIST;
 
 	e->next = m->head;
 	e->prev = 0;
@@ -47,18 +44,13 @@ doubly_linked_list_insert_front(struct doubly_linked_list_meta *m, struct doubly
 		e->next->prev = e;
 
 	assert(e != e->next);
-
-	return 0;
 }
 
-int
+void
 doubly_linked_list_insert_back(struct doubly_linked_list_meta *m, struct doubly_linked_list *e)
 {
 	assert(m);
 	assert(e);
-
-	if (doubly_linked_list_find_back(m->tail, e->data))
-		return EEXIST;
 
 	e->prev = m->tail;
 	e->next = 0;
@@ -70,8 +62,6 @@ doubly_linked_list_insert_back(struct doubly_linked_list_meta *m, struct doubly_
 		e->prev->next = e;
 
 	assert(e != e->next);
-
-	return 0;
 }
 
 void

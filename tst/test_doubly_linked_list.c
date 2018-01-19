@@ -1,6 +1,6 @@
 /**
  * dsac -- Data Structures and Alorithms for C
- * Copyright (C) 2016-2017 Hemmo Nieminen
+ * Copyright (C) 2016-2018 Hemmo Nieminen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,12 +65,10 @@ FT_basic_usage__1()
 		assert_int_equal(doubly_linked_list_size(&dlmeta), 0);
 
 		if (i % 2)
-			assert_false(doubly_linked_list_insert_front(&dlmeta, &ll_bufs[i]));
+			doubly_linked_list_insert_front(&dlmeta, &ll_bufs[i]);
 		else
-			assert_false(doubly_linked_list_insert_back(&dlmeta, &ll_bufs[i]));
+			doubly_linked_list_insert_back(&dlmeta, &ll_bufs[i]);
 
-		assert_true(doubly_linked_list_insert_front(&dlmeta, &ll_bufs[i]));
-		assert_true(doubly_linked_list_insert_back(&dlmeta, &ll_bufs[i]));
 		assert_ptr_equal(doubly_linked_list_find_head(&dlmeta), &ll_bufs[i]);
 		assert_ptr_equal(doubly_linked_list_find_tail(&dlmeta), &ll_bufs[i]);
 
@@ -117,9 +115,9 @@ FT_basic_usage__2()
 		assert_int_equal(doubly_linked_list_size(&dlmeta), i);
 
 		if (i % 2)
-			assert_false(doubly_linked_list_insert_front(&dlmeta, &ll_bufs[i]));
+			doubly_linked_list_insert_front(&dlmeta, &ll_bufs[i]);
 		else
-			assert_false(doubly_linked_list_insert_back(&dlmeta, &ll_bufs[i]));
+			doubly_linked_list_insert_back(&dlmeta, &ll_bufs[i]);
 
 		assert_false(doubly_linked_list_empty(&dlmeta));
 		assert_int_equal(doubly_linked_list_size(&dlmeta), i + 1);
@@ -183,9 +181,9 @@ FT_basic_usage__3()
 		assert_int_equal(doubly_linked_list_size(&dlmeta), i);
 
 		if (i % 2)
-			assert_false(doubly_linked_list_insert_back(&dlmeta, &ll_bufs[i]));
+			doubly_linked_list_insert_back(&dlmeta, &ll_bufs[i]);
 		else
-			assert_false(doubly_linked_list_insert_front(&dlmeta, &ll_bufs[i]));
+			doubly_linked_list_insert_front(&dlmeta, &ll_bufs[i]);
 
 		assert_false(doubly_linked_list_empty(&dlmeta));
 		assert_int_equal(doubly_linked_list_size(&dlmeta), i + 1);
@@ -348,64 +346,46 @@ FT_basic_usage__4()
 
 	assert_true(doubly_linked_list_empty(&dlmeta));
 
-	assert_false(doubly_linked_list_insert_back(&dlmeta, &ll_bufs[5]));
-	assert_true(doubly_linked_list_insert_back(&dlmeta, &ll_bufs[5]));
-	assert_true(doubly_linked_list_insert_front(&dlmeta, &ll_bufs[5]));
+	doubly_linked_list_insert_back(&dlmeta, &ll_bufs[5]);
 	assert_ptr_equal(doubly_linked_list_find_head(&dlmeta), &ll_bufs[5]);
 	assert_ptr_equal(doubly_linked_list_find_tail(&dlmeta), &ll_bufs[5]);
 
-	assert_false(doubly_linked_list_insert_front(&dlmeta, &ll_bufs[8]));
-	assert_true(doubly_linked_list_insert_front(&dlmeta, &ll_bufs[8]));
-	assert_true(doubly_linked_list_insert_back(&dlmeta, &ll_bufs[8]));
+	doubly_linked_list_insert_front(&dlmeta, &ll_bufs[8]);
 
 	assert_ptr_equal(doubly_linked_list_find_head(&dlmeta), dlmeta.head);
 	assert_ptr_equal(doubly_linked_list_find_tail(&dlmeta), dlmeta.tail);
 
-	assert_false(doubly_linked_list_insert_back(&dlmeta, &ll_bufs[2]));
-	assert_true(doubly_linked_list_insert_front(&dlmeta, &ll_bufs[2]));
-	assert_true(doubly_linked_list_insert_back(&dlmeta, &ll_bufs[2]));
+	doubly_linked_list_insert_back(&dlmeta, &ll_bufs[2]);
 
 	assert_ptr_equal(doubly_linked_list_find_head(&dlmeta), dlmeta.head);
 	assert_ptr_equal(doubly_linked_list_find_tail(&dlmeta), dlmeta.tail);
 
-	assert_false(doubly_linked_list_insert_front(&dlmeta, &ll_bufs[6]));
-	assert_true(doubly_linked_list_insert_front(&dlmeta, &ll_bufs[6]));
-	assert_true(doubly_linked_list_insert_back(&dlmeta, &ll_bufs[6]));
+	doubly_linked_list_insert_front(&dlmeta, &ll_bufs[6]);
 
 	assert_ptr_equal(doubly_linked_list_find_head(&dlmeta), dlmeta.head);
 	assert_ptr_equal(doubly_linked_list_find_tail(&dlmeta), dlmeta.tail);
 
-	assert_false(doubly_linked_list_insert_back(&dlmeta, &ll_bufs[7]));
-	assert_true(doubly_linked_list_insert_front(&dlmeta, &ll_bufs[7]));
-	assert_true(doubly_linked_list_insert_back(&dlmeta, &ll_bufs[7]));
+	doubly_linked_list_insert_back(&dlmeta, &ll_bufs[7]);
 
 	assert_ptr_equal(doubly_linked_list_find_head(&dlmeta), dlmeta.head);
 	assert_ptr_equal(doubly_linked_list_find_tail(&dlmeta), dlmeta.tail);
 
-	assert_false(doubly_linked_list_insert_front(&dlmeta, &ll_bufs[3]));
-	assert_true(doubly_linked_list_insert_front(&dlmeta, &ll_bufs[3]));
-	assert_true(doubly_linked_list_insert_back(&dlmeta, &ll_bufs[3]));
+	doubly_linked_list_insert_front(&dlmeta, &ll_bufs[3]);
 
 	assert_ptr_equal(doubly_linked_list_find_head(&dlmeta), dlmeta.head);
 	assert_ptr_equal(doubly_linked_list_find_tail(&dlmeta), dlmeta.tail);
 
-	assert_false(doubly_linked_list_insert_back(&dlmeta, &ll_bufs[1]));
-	assert_true(doubly_linked_list_insert_front(&dlmeta, &ll_bufs[1]));
-	assert_true(doubly_linked_list_insert_back(&dlmeta, &ll_bufs[1]));
+	doubly_linked_list_insert_back(&dlmeta, &ll_bufs[1]);
 
 	assert_ptr_equal(doubly_linked_list_find_head(&dlmeta), dlmeta.head);
 	assert_ptr_equal(doubly_linked_list_find_tail(&dlmeta), dlmeta.tail);
 
-	assert_false(doubly_linked_list_insert_front(&dlmeta, &ll_bufs[4]));
-	assert_true(doubly_linked_list_insert_front(&dlmeta, &ll_bufs[4]));
-	assert_true(doubly_linked_list_insert_back(&dlmeta, &ll_bufs[4]));
+	doubly_linked_list_insert_front(&dlmeta, &ll_bufs[4]);
 
 	assert_ptr_equal(doubly_linked_list_find_head(&dlmeta), dlmeta.head);
 	assert_ptr_equal(doubly_linked_list_find_tail(&dlmeta), dlmeta.tail);
 
-	assert_false(doubly_linked_list_insert_back(&dlmeta, &ll_bufs[9]));
-	assert_true(doubly_linked_list_insert_front(&dlmeta, &ll_bufs[9]));
-	assert_true(doubly_linked_list_insert_back(&dlmeta, &ll_bufs[9]));
+	doubly_linked_list_insert_back(&dlmeta, &ll_bufs[9]);
 
 	assert_ptr_equal(doubly_linked_list_find_head(&dlmeta), dlmeta.head);
 	assert_ptr_equal(doubly_linked_list_find_tail(&dlmeta), dlmeta.tail);
@@ -512,6 +492,119 @@ FT_basic_usage__4()
 
 /***********************************************************************/
 
+static void
+FT_insert_duplicates()
+{
+	struct doubly_linked_list_meta dlmeta;
+	struct doubly_linked_list ll_bufs[18], *t;
+
+	doubly_linked_list_set(&ll_bufs[0], "a");
+	doubly_linked_list_set(&ll_bufs[1], "a");
+	doubly_linked_list_set(&ll_bufs[2], "a");
+	doubly_linked_list_set(&ll_bufs[3], "a");
+	doubly_linked_list_set(&ll_bufs[4], "a");
+	doubly_linked_list_set(&ll_bufs[5], "a");
+
+	doubly_linked_list_set(&ll_bufs[6], "b");
+	doubly_linked_list_set(&ll_bufs[7], "b");
+	doubly_linked_list_set(&ll_bufs[8], "b");
+	doubly_linked_list_set(&ll_bufs[9], "b");
+	doubly_linked_list_set(&ll_bufs[10], "b");
+	doubly_linked_list_set(&ll_bufs[11], "b");
+
+	doubly_linked_list_set(&ll_bufs[12], "c");
+	doubly_linked_list_set(&ll_bufs[13], "c");
+	doubly_linked_list_set(&ll_bufs[14], "c");
+	doubly_linked_list_set(&ll_bufs[15], "c");
+	doubly_linked_list_set(&ll_bufs[16], "c");
+	doubly_linked_list_set(&ll_bufs[17], "c");
+
+	doubly_linked_list_initialize(&dlmeta);
+
+	doubly_linked_list_insert_front(&dlmeta, &ll_bufs[0]);
+	doubly_linked_list_insert_front(&dlmeta, &ll_bufs[1]);
+	doubly_linked_list_insert_front(&dlmeta, &ll_bufs[2]);
+	doubly_linked_list_insert_back(&dlmeta, &ll_bufs[3]);
+	doubly_linked_list_insert_back(&dlmeta, &ll_bufs[4]);
+	doubly_linked_list_insert_back(&dlmeta, &ll_bufs[5]);
+
+	doubly_linked_list_insert_front(&dlmeta, &ll_bufs[6]);
+	doubly_linked_list_insert_front(&dlmeta, &ll_bufs[7]);
+	doubly_linked_list_insert_front(&dlmeta, &ll_bufs[8]);
+	doubly_linked_list_insert_back(&dlmeta, &ll_bufs[9]);
+	doubly_linked_list_insert_back(&dlmeta, &ll_bufs[10]);
+	doubly_linked_list_insert_back(&dlmeta, &ll_bufs[11]);
+
+	doubly_linked_list_insert_front(&dlmeta, &ll_bufs[12]);
+	doubly_linked_list_insert_front(&dlmeta, &ll_bufs[13]);
+	doubly_linked_list_insert_front(&dlmeta, &ll_bufs[14]);
+	doubly_linked_list_insert_back(&dlmeta, &ll_bufs[15]);
+	doubly_linked_list_insert_back(&dlmeta, &ll_bufs[16]);
+	doubly_linked_list_insert_back(&dlmeta, &ll_bufs[17]);
+
+	t = doubly_linked_list_remove_head(&dlmeta);
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), "c");
+	t = doubly_linked_list_remove_head(&dlmeta);
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), "c");
+	t = doubly_linked_list_remove_tail(&dlmeta);
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), "c");
+
+	t = doubly_linked_list_remove_front(&dlmeta, &"c");
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), "c");
+	t = doubly_linked_list_remove_back(&dlmeta, &"c");
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), "c");
+	t = doubly_linked_list_remove_front(&dlmeta, &"c");
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), "c");
+
+	t = doubly_linked_list_remove_head(&dlmeta);
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), "b");
+	t = doubly_linked_list_remove_head(&dlmeta);
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), "b");
+	t = doubly_linked_list_remove_tail(&dlmeta);
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), "b");
+
+	t = doubly_linked_list_remove_front(&dlmeta, &"b");
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), "b");
+	t = doubly_linked_list_remove_back(&dlmeta, &"b");
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), "b");
+	t = doubly_linked_list_remove_front(&dlmeta, &"b");
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), "b");
+
+	t = doubly_linked_list_remove_head(&dlmeta);
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), "a");
+	t = doubly_linked_list_remove_head(&dlmeta);
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), "a");
+	t = doubly_linked_list_remove_tail(&dlmeta);
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), "a");
+
+	t = doubly_linked_list_remove_front(&dlmeta, &"a");
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), "a");
+	t = doubly_linked_list_remove_back(&dlmeta, &"a");
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), "a");
+	t = doubly_linked_list_remove_front(&dlmeta, &"a");
+	assert_non_null(t);
+	assert_string_equal((char*)doubly_linked_list_get(t), "a");
+}
+
+/***********************************************************************/
+
 int
 main()
 {
@@ -520,7 +613,8 @@ main()
 		cmocka_unit_test(FT_basic_usage__1),
 		cmocka_unit_test(FT_basic_usage__2),
 		cmocka_unit_test(FT_basic_usage__3),
-		cmocka_unit_test(FT_basic_usage__4)
+		cmocka_unit_test(FT_basic_usage__4),
+		cmocka_unit_test(FT_insert_duplicates)
 	};
 
 	return cmocka_run_group_tests(tests, NULL, NULL);

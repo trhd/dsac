@@ -1,6 +1,6 @@
 /**
  * dsac -- Data Structures and Alorithms for C
- * Copyright (C) 2016-2017 Hemmo Nieminen
+ * Copyright (C) 2016-2018 Hemmo Nieminen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,10 +65,10 @@ doubly_linked_list_previous(const struct doubly_linked_list *entry)
 	return entry->prev;
 }
 
-int
+void
 doubly_linked_list_insert_front(struct doubly_linked_list_meta *meta, struct doubly_linked_list *entry);
 
-int
+void
 doubly_linked_list_insert_back(struct doubly_linked_list_meta *meta, struct doubly_linked_list *entry);
 
 void
