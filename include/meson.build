@@ -26,6 +26,7 @@ install_headers(
 		'debug_flags.h',
 		'doubly_linked_list.h',
 		'fifo.h',
+		'typed_fifo.h',
 		'flags.h',
 		'homogeneous_ring_buffer.h',
 		'typed_ring_buffer.h',

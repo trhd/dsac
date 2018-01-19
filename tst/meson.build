@@ -127,6 +127,11 @@ foreach t : [
 			[]
 		],
 		[
+			['test_typed_fifo.c'],
+			'typed_fifo',
+			[]
+		],
+		[
 			['test_flags.c'],
 			'flags',
 			[]
