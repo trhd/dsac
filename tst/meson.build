@@ -87,6 +87,11 @@ test('search_structure-splay',
 
 foreach t : [
 		[
+			['test_atomic_fifo.c'],
+			'atomic_fifo',
+			[]
+		],
+		[
 			['test_avl_tree.c'],
 			'avl_tree',
 			['-D_GNU_SOURCE']
@@ -248,6 +253,7 @@ foreach t : [
 			dependencies : _test_deps,
 			c_args : _test_cflags + t.get(2),
 			include_directories : dsac_include,
-		)
+		),
+		timeout : 60
 	)
 endforeach

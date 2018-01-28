@@ -34,6 +34,19 @@ refcount = _header_only
 
 condition = _header_only_gnu
 
+atomic_fifo_file = files('atomic_fifo.c')
+atomic_fifo = declare_dependency(
+	link_with : static_library(
+		'atomic_fifo',
+		atomic_fifo_file,
+		include_directories : dsac_include
+	),
+	include_directories : dsac_include,
+	version : meson.project_version()
+)
+_all_deps += atomic_fifo
+_all_sources += atomic_fifo_file
+
 avl_tree = declare_dependency(
 	link_with : static_library(
 		'avl_tree',
