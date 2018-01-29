@@ -27,6 +27,7 @@ add_test_setup(
 		'valgrind',
 			'--leak-check=full',
 			'--track-origins=yes',
+			'--time-stamp=yes',
 			'-v',
 			'--show-leak-kinds=all',
 			'--error-exitcode=1'
