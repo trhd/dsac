@@ -87,171 +87,47 @@ test('search_structure-splay',
 )
 
 foreach t : [
-		[
-			['test_atomic_fifo.c'],
-			'atomic_fifo',
-			[]
-		],
-		[
-			['test_typed_atomic_fifo.c'],
-			'typed_atomic_fifo',
-			[]
-		],
-		[
-			['test_avl_tree.c'],
-			'avl_tree',
-			['-D_GNU_SOURCE']
-		],
-		[
-			['test_bitmap.c'],
-			'bitmap',
-			[]
-		],
-		[
-			['test_debug_flags.c'],
-			'debug_flags',
-			[]
-		],
-		[
-			['test_blocking_ring_buffer.c'],
-			'blocking_ring_buffer',
-			['-D_GNU_SOURCE']
-		],
-		[
-			['test_blocking_homogeneous_ring_buffer.c'],
-			'blocking_homogeneous_ring_buffer',
-			['-D_GNU_SOURCE']
-		],
-		[
-			['test_doubly_linked_list.c'],
-			'doubly_linked_list',
-			[]
-		],
-		[
-			['test_condition.c'],
-			'condition',
-			['-D_GNU_SOURCE']
-		],
-		[
-			['test_fifo.c'],
-			'fifo',
-			[]
-		],
-		[
-			['test_typed_fifo.c'],
-			'typed_fifo',
-			[]
-		],
-		[
-			['test_flags.c'],
-			'flags',
-			[]
-		],
-		[
-			['test_homogeneous_ring_buffer.c'],
-			'homogeneous_ring_buffer',
-			[]
-		],
-		[
-			['test_typed_ring_buffer.c'],
-			'typed_ring_buffer',
-			[]
-		],
-		[
-			['test_lifo.c'],
-			'lifo',
-			[]
-		],
-		[
-			['test_linked_list.c', '../src/linked_list.c'],
-			'linked_list',
-			[]
-		],
-		[
-			['test_linked_list.c', '../src/linked_list.c'],
-			'linked_list__size',
-			['-DLINKED_LIST_CONFIG_SIZE_CACHE']
-		],
-		[
-			['test_linked_list.c', '../src/linked_list.c'],
-			'linked_list__notail',
-			['-DLINKED_LIST_CONFIG_NO_TAIL_POINTER']
-		],
-		[
-			['test_linked_list.c', '../src/linked_list.c'],
-			'linked_list__size_notail',
-			['-DLINKED_LIST_CONFIG_SIZE_CACHE', '-DLINKED_LIST_CONFIG_NO_TAIL_POINTER']
-		],
-		[
-			['test_refcount.c'],
-			'refcount',
-			[]
-		],
-		[
-			['test_typed_linked_list.c'],
-			'typed_linked_list',
-			[]
-		],
-		[
-			['test_lock.c'],
-			'lock',
-			['-D_GNU_SOURCE']
-		],
-		[
-			['test_mergesort.c'],
-			'mergesort',
-			[]
-		],
-		[
-			['test_quicksort.c'],
-			'quicksort',
-			[]
-		],
-		[
-			['test_sorting_algorithms.c'],
-			'sorting_algorithms',
-			[]
-		],
-		[
-			['test_ring_buffer.c'],
-			'ring_buffer',
-			[]
-		],
-		[
-			['test_radix_tree.c', '../src/radix_tree.c'],
-			'radix_tree',
-			[]
-		],
-		[
-			['test_radix_tree.c', '../src/radix_tree.c'],
-			'radix_tree__no_cached_key_length',
-			['-DRADIX_TREE_CONFIG_NO_CAHED_KEY_LENGHT']
-		],
-		[
-			['test_radix_tree.c', '../src/radix_tree.c'],
-			'radix_tree__prealloc_one',
-			['-DRADIX_TREE_CONFIG_ITERATION_PREALLOCATION=1']
-		],
-		[
-			['test_radix_tree.c', '../src/radix_tree.c'],
-			'radix_tree__prealloc_one__no_cached_key_length',
-			['-DRADIX_TREE_CONFIG_NO_CAHED_KEY_LENGHT', '-DRADIX_TREE_CONFIG_ITERATION_PREALLOCATION=1']
-		],
-		[
-			['test_radix_tree.c', '../src/radix_tree.c'],
-			'radix_tree__prealloc_thousand',
-			['-DRADIX_TREE_CONFIG_ITERATION_PREALLOCATION=1000']
-		],
-		[
-			['test_radix_tree.c', '../src/radix_tree.c'],
-			'radix_tree__prealloc_thousand__no_cached_key_length',
-			['-DRADIX_TREE_CONFIG_NO_CAHED_KEY_LENGHT', '-DRADIX_TREE_CONFIG_ITERATION_PREALLOCATION=1000']
-		],
-		[
-			['test_splay_tree.c', '../src/radix_tree.c'],
-			'splay_tree',
-			[]
-		]
+		[ ['test_atomic_fifo.c'], 'atomic_fifo', [] ],
+		[ ['test_typed_atomic_fifo.c'], 'typed_atomic_fifo', [] ],
+		[ ['test_avl_tree.c'], 'avl_tree', ['-D_GNU_SOURCE'] ],
+		[ ['test_bitmap.c'], 'bitmap', [] ],
+		[ ['test_debug_flags.c'], 'debug_flags', [] ],
+		[ ['test_blocking_ring_buffer.c'], 'blocking_ring_buffer', ['-D_GNU_SOURCE'] ],
+		[ ['test_blocking_homogeneous_ring_buffer.c'], 'blocking_homogeneous_ring_buffer', ['-D_GNU_SOURCE'] ],
+		[ ['test_doubly_linked_list.c'], 'doubly_linked_list', [] ],
+		[ ['test_condition.c'], 'condition', ['-D_GNU_SOURCE'] ],
+		[ ['test_fifo.c'], 'fifo', [] ],
+		[ ['test_typed_fifo.c'], 'typed_fifo', [] ],
+		[ ['test_flags.c'], 'flags', [] ],
+		[ ['test_homogeneous_ring_buffer.c'], 'homogeneous_ring_buffer', [] ],
+		[ ['test_typed_ring_buffer.c'], 'typed_ring_buffer', [] ],
+		[ ['test_lifo.c'], 'lifo', [] ],
+		[ ['test_linked_list.c', '../src/linked_list.c'], 'linked_list', [] ],
+		[ ['test_linked_list.c', '../src/linked_list.c'], 'linked_list__size',
+			['-DLINKED_LIST_CONFIG_SIZE_CACHE'] ],
+		[ ['test_linked_list.c', '../src/linked_list.c'], 'linked_list__notail',
+			['-DLINKED_LIST_CONFIG_NO_TAIL_POINTER'] ],
+		[ ['test_linked_list.c', '../src/linked_list.c'], 'linked_list__size_notail',
+			['-DLINKED_LIST_CONFIG_SIZE_CACHE', '-DLINKED_LIST_CONFIG_NO_TAIL_POINTER'] ],
+		[ ['test_refcount.c'], 'refcount', [] ],
+		[ ['test_typed_linked_list.c'], 'typed_linked_list', [] ],
+		[ ['test_lock.c'], 'lock', ['-D_GNU_SOURCE'] ],
+		[ ['test_mergesort.c'], 'mergesort', [] ],
+		[ ['test_quicksort.c'], 'quicksort', [] ],
+		[ ['test_sorting_algorithms.c'], 'sorting_algorithms', [] ],
+		[ ['test_ring_buffer.c'], 'ring_buffer', [] ],
+		[ ['test_radix_tree.c', '../src/radix_tree.c'], 'radix_tree', [] ],
+		[ ['test_radix_tree.c', '../src/radix_tree.c'], 'radix_tree__no_cached_key_length',
+			['-DRADIX_TREE_CONFIG_NO_CAHED_KEY_LENGHT'] ],
+		[ ['test_radix_tree.c', '../src/radix_tree.c'], 'radix_tree__prealloc_one',
+			['-DRADIX_TREE_CONFIG_ITERATION_PREALLOCATION=1'] ],
+		[ ['test_radix_tree.c', '../src/radix_tree.c'], 'radix_tree__prealloc_one__no_cached_key_length',
+			['-DRADIX_TREE_CONFIG_NO_CAHED_KEY_LENGHT', '-DRADIX_TREE_CONFIG_ITERATION_PREALLOCATION=1'] ],
+		[ ['test_radix_tree.c', '../src/radix_tree.c'], 'radix_tree__prealloc_thousand',
+			['-DRADIX_TREE_CONFIG_ITERATION_PREALLOCATION=1000'] ],
+		[ ['test_radix_tree.c', '../src/radix_tree.c'], 'radix_tree__prealloc_thousand__no_cached_key_length',
+			['-DRADIX_TREE_CONFIG_NO_CAHED_KEY_LENGHT', '-DRADIX_TREE_CONFIG_ITERATION_PREALLOCATION=1000'] ],
+		[ ['test_splay_tree.c', '../src/radix_tree.c'], 'splay_tree', [] ]
 	]
 	test(t.get(1),
 		executable(t.get(1),
