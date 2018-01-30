@@ -47,6 +47,8 @@ atomic_fifo = declare_dependency(
 _all_deps += atomic_fifo
 _all_sources += atomic_fifo_file
 
+typed_atomic_fifo = atomic_fifo
+
 avl_tree = declare_dependency(
 	link_with : static_library(
 		'avl_tree',

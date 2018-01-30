@@ -93,6 +93,11 @@ foreach t : [
 			[]
 		],
 		[
+			['test_typed_atomic_fifo.c'],
+			'typed_atomic_fifo',
+			[]
+		],
+		[
 			['test_avl_tree.c'],
 			'avl_tree',
 			['-D_GNU_SOURCE']
