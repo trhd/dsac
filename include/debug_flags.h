@@ -66,13 +66,13 @@
 # define DEBUG_FLAGS(...)
 # define DEBUG_FLAGS_ENUM(...)
 
-# define debug_flags_initialize(s)      do { s = s; } while (0)
-# define debug_flags_assert(s, ...)     do { s = s; } while (0)
-# define debug_flags_assert_not(s, ...) do { s = s; } while (0)
-# define debug_flags_set(s, ...)        do { s = s; } while (0)
-# define debug_flags_get(s, ...)        do { s = s; } while (0)
-# define debug_flags_clear(s, ...)      do { s = s; } while (0)
-# define debug_flags_copy(a, b)         do { a = a; b = b; } while (0)
-# define debug_flags_compare(a, b)      do { a = a; b = b; } while (0)
+# define debug_flags_initialize(s)      do { (void)s; } while (0)
+# define debug_flags_assert(s, ...)     do { (void)s; } while (0)
+# define debug_flags_assert_not(s, ...) do { (void)s; } while (0)
+# define debug_flags_set(s, ...)        do { (void)s; } while (0)
+# define debug_flags_get(s, ...)        do { (void)s; } while (0)
+# define debug_flags_clear(s, ...)      do { (void)s; } while (0)
+# define debug_flags_copy(a, b)         do { (void)a; (void)b; } while (0)
+# define debug_flags_compare(a, b)      do { (void)a; (void)b; } while (0)
 
 #endif
