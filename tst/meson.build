@@ -33,7 +33,7 @@ add_test_setup(
 			'--error-exitcode=1'
 	],
 	env : [ 'VALGRIND=1' ],
-	timeout_multiplier : 20
+	timeout_multiplier : 6
 )
 
 _test_deps = [
@@ -136,6 +136,6 @@ foreach t : [
 			c_args : _test_cflags + t.get(2),
 			include_directories : dsac_include,
 		),
-		timeout : 60
+		timeout : 300
 	)
 endforeach

@@ -99,8 +99,7 @@ _UT_atomic_fifo_push__multithread__helper(void * arg)
 static void
 UT_atomic_fifo_push__multithread()
 {
-	enum { thread_count = 10, element_count = 10000 };
-
+	unsigned int thread_count = VALGRIND ? 4 : 8, element_count = 5000;
 	struct _UT_atomic_fifo_push__multithread__shared_stuff * stuff
 		= test_malloc(thread_count * sizeof(struct _UT_atomic_fifo_push__multithread__shared_stuff));
 	struct atomic_fifo * f = test_malloc(sizeof(struct atomic_fifo));
@@ -118,10 +117,10 @@ UT_atomic_fifo_push__multithread()
 			atomic_fifo_set(&stuff[i].els[j], (void*)(i*stuff[i].count + j));
 	}
 
-	for (int i = 0 ; i < thread_count ; i++)
+	for (unsigned int i = 0 ; i < thread_count ; i++)
 		assert_int_equal(0, pthread_create(&threads[i], NULL, _UT_atomic_fifo_push__multithread__helper, &stuff[i]));
 
-	for (int i = 0 ; i < thread_count ; i++)
+	for (unsigned int i = 0 ; i < thread_count ; i++)
 		assert_int_equal(0, pthread_join(threads[i], NULL));
 
 	for (unsigned long i = 0 ; i < element_count ; i++)
@@ -238,8 +237,8 @@ _UT_atomic_fifo_pop__multithread__helper(void * arg)
 static void
 UT_atomic_fifo_pop__multithread()
 {
-	int thread_count = 10;
-	int element_count = VALGRIND ? 100 : 1000;
+	int thread_count = VALGRIND ? 4 : 8;
+	int element_count = VALGRIND ? 500 : 2000;
 
 	struct _UT_atomic_fifo_pop__multithread__shared_stuff * stuff
 		= test_malloc(sizeof(struct _UT_atomic_fifo_pop__multithread__shared_stuff));
@@ -326,19 +325,14 @@ _FT_concurrent_access__helper(void * arg)
 static void
 FT_concurrent_access()
 {
-	enum { thread_count = 10, element_count = 200, cycle_count = 1000 };
-
+	unsigned long thread_count = VALGRIND ? 3 : 6, element_count = 20, cycle_count = VALGRIND ? 500 : 3000;
 	struct _FT_concurrent_access__shared_stuff * stuff
 		= test_malloc(sizeof(struct _FT_concurrent_access__shared_stuff));
 	struct atomic_fifo * els[element_count];
 	pthread_t threads[thread_count];
 
 	atomic_fifo_initialize(&stuff->fifo);
-
-	if (VALGRIND)
-		stuff->count = cycle_count/10;
-	else
-		stuff->count = cycle_count;
+	stuff->count = cycle_count;
 
 	for (unsigned long i = 0 ; i < element_count ; i++)
 	{
@@ -348,21 +342,20 @@ FT_concurrent_access()
 		atomic_fifo_push(&stuff->fifo, els[i]);
 	}
 
-
-	for (int i = 0 ; i < thread_count ; i++)
+	for (unsigned long i = 0 ; i < thread_count ; i++)
 		assert_int_equal(0, pthread_create(&threads[i], NULL, _FT_concurrent_access__helper, stuff));
 
-	for (int i = 0 ; i < thread_count ; i++)
+	for (unsigned long i = 0 ; i < thread_count ; i++)
 	{
 		void * rv;
 		assert_int_equal(0, pthread_join(threads[i], &rv));
 		assert_null(rv);
 	}
 
-	for (int i = 0 ; i < element_count ; i++)
+	for (unsigned long i = 0 ; i < element_count ; i++)
 		assert_non_null(atomic_fifo_pop(&stuff->fifo));
 
-	for (int i = 0 ; i < element_count ; i++)
+	for (unsigned long i = 0 ; i < element_count ; i++)
 		test_free(els[i]);
 
 	test_free(stuff);
