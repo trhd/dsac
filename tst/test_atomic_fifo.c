@@ -237,7 +237,7 @@ _UT_atomic_fifo_pop__multithread__helper(void * arg)
 static void
 UT_atomic_fifo_pop__multithread()
 {
-	int thread_count = VALGRIND ? 4 : 8;
+	int thread_count = VALGRIND ? 2 : 8;
 	int element_count = VALGRIND ? 500 : 2000;
 
 	struct _UT_atomic_fifo_pop__multithread__shared_stuff * stuff
