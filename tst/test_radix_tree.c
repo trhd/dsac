@@ -1,6 +1,6 @@
 /**
  * dsac -- Data Structures and Alorithms for C
- * Copyright (C) 2016-2017 Hemmo Nieminen
+ * Copyright (C) 2016-2018 Hemmo Nieminen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -264,28 +264,17 @@ UT_radix_tree_insert__ENOMEM()
 	enum { node_count = 10 };
 	struct radix_tree * t = radix_tree_initialize(malloc_wrapper, free_wrapper, realloc_wrapper);
 
+	MOCK(malloc, NULL,
+			assert_true(radix_tree_insert(t, "foozar", "bar"))
+	);
+
+	MOCK(malloc, test_malloc(100),
+		MOCK(malloc, NULL,
+			assert_true(radix_tree_insert(t, "foozar", "bar"))
+		)
+	);
+
 	assert_false(radix_tree_insert(t, "foobar", "bar"));
-
-	MOCK(malloc, NULL, assert_true(radix_tree_insert(t, "foozar", "bar")));
-
-	MOCK(malloc, test_malloc(100),
-			MOCK(malloc, NULL, assert_true(radix_tree_insert(t, "foozar", "bar"))
-				)
-		);
-
-	MOCK(malloc, test_malloc(100),
-			MOCK(malloc, test_malloc(100),
-				MOCK(malloc, NULL, assert_true(radix_tree_insert(t, "foozar", "bar")))
-				)
-		);
-
-	MOCK(malloc, test_malloc(100),
-			MOCK(malloc, test_malloc(100),
-				MOCK(malloc, test_malloc(100),
-					MOCK(malloc, NULL, assert_true(radix_tree_insert(t, "foozar", "bar")))
-					)
-				)
-		);
 
 	radix_tree_uninitialize(&t);
 }
