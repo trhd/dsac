@@ -94,8 +94,11 @@ condition_timedwait(struct condition * condition, struct timespec const * delta)
 	int e;
 	struct timespec abs;
 
-	e = clock_gettime(CLOCK_MONOTONIC, &abs);
-	assert(!e);
+#if !defined(NDEBUG) || defined(UNIT_TESTING)
+	assert(!clock_gettime(CLOCK_MONOTONIC, &abs));
+#else
+	clock_gettime(CLOCK_MONOTONIC, &abs);
+#endif
 
 	abs.tv_sec += delta->tv_sec;
 
