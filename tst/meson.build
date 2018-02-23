@@ -89,6 +89,7 @@ test('search_structure-splay',
 foreach t : [
 		[ ['test_atomic_fifo.c'], 'atomic_fifo', [] ],
 		[ ['test_typed_atomic_fifo.c'], 'typed_atomic_fifo', [] ],
+		[ ['test_atomic_lifo.c'], 'atomic_lifo', [] ],
 		[ ['test_avl_tree.c'], 'avl_tree', ['-D_GNU_SOURCE'] ],
 		[ ['test_bitmap.c'], 'bitmap', [] ],
 		[ ['test_debug_flags.c'], 'debug_flags', [] ],

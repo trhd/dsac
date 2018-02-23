@@ -49,6 +49,21 @@ _all_sources += atomic_fifo_file
 
 typed_atomic_fifo = atomic_fifo
 
+atomic_lifo_file = files('atomic_lifo.c')
+atomic_lifo = declare_dependency(
+	link_with : static_library(
+		'atomic_lifo',
+		atomic_lifo_file,
+		include_directories : dsac_include
+	),
+	include_directories : dsac_include,
+	version : meson.project_version()
+)
+_all_deps += atomic_lifo
+_all_sources += atomic_lifo_file
+
+typed_atomic_lifo = atomic_lifo
+
 avl_tree = declare_dependency(
 	link_with : static_library(
 		'avl_tree',
