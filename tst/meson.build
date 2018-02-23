@@ -127,7 +127,7 @@ foreach t : [
 			['-DRADIX_TREE_CONFIG_ITERATION_PREALLOCATION=1000'] ],
 		[ ['test_radix_tree.c', '../src/radix_tree.c'], 'radix_tree__prealloc_thousand__no_cached_key_length',
 			['-DRADIX_TREE_CONFIG_NO_CAHED_KEY_LENGHT', '-DRADIX_TREE_CONFIG_ITERATION_PREALLOCATION=1000'] ],
-		[ ['test_splay_tree.c', '../src/radix_tree.c'], 'splay_tree', [] ]
+		[ ['test_splay_tree.c'], 'splay_tree', [] ]
 	]
 	test(t.get(1),
 		executable(t.get(1),
