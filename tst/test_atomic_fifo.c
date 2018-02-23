@@ -99,7 +99,7 @@ _UT_atomic_fifo_push__multithread__helper(void * arg)
 static void
 UT_atomic_fifo_push__multithread()
 {
-	unsigned int thread_count = VALGRIND ? 4 : 8, element_count = 5000;
+	unsigned int thread_count = VALGRIND ? 4 : 8, element_count = 2000;
 	struct _UT_atomic_fifo_push__multithread__shared_stuff * stuff
 		= test_malloc(thread_count * sizeof(struct _UT_atomic_fifo_push__multithread__shared_stuff));
 	struct atomic_fifo * f = test_malloc(sizeof(struct atomic_fifo));
@@ -237,8 +237,8 @@ _UT_atomic_fifo_pop__multithread__helper(void * arg)
 static void
 UT_atomic_fifo_pop__multithread()
 {
-	int thread_count = VALGRIND ? 2 : 8;
-	int element_count = VALGRIND ? 500 : 2000;
+	int thread_count = VALGRIND ? 4 : 8;
+	int element_count = VALGRIND ? 100 : 1600;
 
 	struct _UT_atomic_fifo_pop__multithread__shared_stuff * stuff
 		= test_malloc(sizeof(struct _UT_atomic_fifo_pop__multithread__shared_stuff));
@@ -325,7 +325,7 @@ _FT_concurrent_access__helper(void * arg)
 static void
 FT_concurrent_access()
 {
-	unsigned long thread_count = VALGRIND ? 3 : 6, element_count = 20, cycle_count = VALGRIND ? 500 : 3000;
+	unsigned long thread_count = VALGRIND ? 3 : 6, element_count = 20, cycle_count = VALGRIND ? 250 : 2000;
 	struct _FT_concurrent_access__shared_stuff * stuff
 		= test_malloc(sizeof(struct _FT_concurrent_access__shared_stuff));
 	struct atomic_fifo * els[element_count];
