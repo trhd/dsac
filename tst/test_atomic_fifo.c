@@ -222,13 +222,18 @@ _UT_atomic_fifo_pop__multithread__helper(void * arg)
 {
 	struct _UT_atomic_fifo_pop__multithread__shared_stuff * s
 		= (struct _UT_atomic_fifo_pop__multithread__shared_stuff *)arg;
-	struct atomic_fifo * f;
+	struct atomic_fifo * cur, * prev;
 
+	prev = NULL;
 	for (int i = 0 ; i < s->count ; i++)
 	{
-		f = atomic_fifo_pop(&s->fifo);
-		if (!f)
+		cur = atomic_fifo_pop(&s->fifo);
+
+		if (!cur)
 			return (void*)0x1;
+
+		if (prev && (unsigned long)atomic_fifo_get(prev) >= (unsigned long)atomic_fifo_get(cur))
+			return (void*)0x2;
 	}
 
 	return NULL;
