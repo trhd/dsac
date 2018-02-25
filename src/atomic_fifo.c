@@ -52,7 +52,7 @@ atomic_fifo_push(struct atomic_fifo * f, struct atomic_fifo * e)
 }
 
 static void
-atomic_restore_to(atomic_uintptr_t * d, uintptr_t e, uintptr_t v)
+atomic_set_from_to(atomic_uintptr_t * d, uintptr_t e, uintptr_t v)
 {
 	assert(d);
 	assert(e);
@@ -60,7 +60,7 @@ atomic_restore_to(atomic_uintptr_t * d, uintptr_t e, uintptr_t v)
 #if !defined(NDEBUG) || defined(UNIT_TESTING)
 	assert(atomic_compare_exchange_strong(d, &e, v));
 #else
-	atomic_compare_exchange_strong(d, &e, v);
+	for (uintptr_t t = e ; !atomic_compare_exchange_weak(d, &t, v) ; t = e);
 #endif
 }
 
@@ -88,7 +88,7 @@ reserve_next(struct atomic_fifo * f)
 	while (n == f);
 
 	if (!n)
-		atomic_restore_to(&f->next, (uintptr_t)f, 0);
+		atomic_set_from_to(&f->next, (uintptr_t)f, 0);
 
 	return n;
 }
@@ -99,30 +99,36 @@ atomic_fifo_pop(struct atomic_fifo * f)
 	assert(f);
 	debug_flags_assert(f, ATOMIC_FIFO_DEBUG_FLAG_INITIALIZED);
 
-	struct atomic_fifo * prev = f, * current;
+	struct atomic_fifo * current, * prev, * first = NULL;
 
 	current = reserve_next(f);
 
 	if (!current)
 		return NULL;
 
-	for (;;)
-	{
-		struct atomic_fifo * next = reserve_next(current);
+	prev = NULL;
+	first = current;
 
-		if (next)
-			atomic_restore_to(&prev->next, (uintptr_t)prev, (uintptr_t)current);
-		else
-		{
-			atomic_restore_to(&prev->next, (uintptr_t)prev, 0);
+	while (1)
+	{
+		struct atomic_fifo * next = (struct atomic_fifo *)atomic_load(&current->next);
+
+		if (!next)
 			break;
-		}
 
 		prev = current;
 		current = next;
 	}
 
-	return (struct atomic_fifo *)current;
+	if (prev)
+		atomic_set_from_to(&prev->next, (uintptr_t)current, 0);
+	else
+		first = 0;
+
+	if (f != prev)
+		atomic_set_from_to(&f->next, (uintptr_t)f, (uintptr_t)first);
+
+	return current;
 }
 
 void
