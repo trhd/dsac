@@ -14,6 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+default_timeout = 60
+
 _cmocka = dependency('cmocka')
 
 _test_cflags = [
@@ -33,7 +35,7 @@ add_test_setup(
 			'--error-exitcode=1'
 	],
 	env : [ 'VALGRIND=1' ],
-	timeout_multiplier : 6
+	timeout_multiplier : 10
 )
 
 _test_deps = [
@@ -70,7 +72,8 @@ test('search_structure-avl',
 			'-DTEST_ITERATION_COUNT=100000',
 			'-DTEST_ELEMENT_COUNT=100'
 		] + _test_cflags
-	)
+	),
+	timeout : default_timeout
 )
 
 test('search_structure-splay',
@@ -83,7 +86,8 @@ test('search_structure-splay',
 			'-DTEST_ITERATION_COUNT=100000',
 			'-DTEST_ELEMENT_COUNT=100'
 		] + _test_cflags
-	)
+	),
+	timeout : default_timeout
 )
 
 foreach t : [
@@ -137,6 +141,6 @@ foreach t : [
 			c_args : _test_cflags + t.get(2),
 			include_directories : dsac_include,
 		),
-		timeout : 300
+		timeout : default_timeout
 	)
 endforeach
