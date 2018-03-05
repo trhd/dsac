@@ -44,10 +44,10 @@ PREFIX(_set)(PREFIX(_t) * object, TYPED_ATOMIC_FIFO_CONFIG_TYPE * value)
 	atomic_fifo_set((struct atomic_fifo *)object, value);
 }
 
-static inline PREFIX(_t) *
+static inline TYPED_ATOMIC_FIFO_CONFIG_TYPE *
 PREFIX(_get)(PREFIX(_t) * object)
 {
-	return (PREFIX(_t)*)atomic_fifo_get((struct atomic_fifo *)object);
+	return (TYPED_ATOMIC_FIFO_CONFIG_TYPE*)atomic_fifo_get((struct atomic_fifo *)object);
 }
 
 static inline void
