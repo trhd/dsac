@@ -118,6 +118,7 @@ foreach t : [
 		[ ['test_refcount.c'], 'refcount', [] ],
 		[ ['test_typed_linked_list.c'], 'typed_linked_list', [] ],
 		[ ['test_lock.c'], 'lock', ['-D_GNU_SOURCE'] ],
+		[ ['test_sema.c'], 'sema', ['-D_GNU_SOURCE'] ],
 		[ ['test_mergesort.c'], 'mergesort', [] ],
 		[ ['test_quicksort.c'], 'quicksort', [] ],
 		[ ['test_sorting_algorithms.c'], 'sorting_algorithms', [] ],
