@@ -361,7 +361,7 @@ FT_concurrent_access()
 	{
 		void * rv;
 		assert_int_equal(0, pthread_join(threads[i], &rv));
-		assert_null(rv);
+		assert_int_equal((unsigned long)rv, 0);
 	}
 
 	for (unsigned long i = 0 ; i < element_count ; i++)

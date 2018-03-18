@@ -20,74 +20,79 @@
 #include "atomic_lifo.h"
 
 void
-atomic_lifo_initialize(struct atomic_lifo * f)
+atomic_lifo_initialize(struct atomic_lifo * head)
 {
-	assert(f);
+	assert(head);
 
-	atomic_init(&f->next, 0);
+	atomic_init(&head->next, 0);
 
-	debug_flags_initialize(f);
-	debug_flags_set(f, ATOMIC_LIFO_DEBUG_FLAG_INITIALIZED);
-}
-
-void
-atomic_lifo_push(struct atomic_lifo * f, struct atomic_lifo * e)
-{
-	assert(f);
-	assert(e);
-	debug_flags_assert(f, ATOMIC_LIFO_DEBUG_FLAG_INITIALIZED);
-	debug_flags_assert(e, ATOMIC_LIFO_DEBUG_FLAG_INITIALIZED);
-
-	struct atomic_lifo * t;
-
-	do
-	{
-		t = (struct atomic_lifo *)atomic_load(&f->next);
-		atomic_store(&e->next, (uintptr_t)t);
-	}
-	while (!atomic_compare_exchange_weak(&f->next, (uintptr_t*)&t, (uintptr_t)e));
+	debug_flags_initialize(head);
+	debug_flags_set(head, ATOMIC_LIFO_DEBUG_FLAG_INITIALIZED);
 }
 
 struct atomic_lifo *
-atomic_lifo_pop(struct atomic_lifo * f)
+acquire_head(struct atomic_lifo * head)
 {
-	assert(f);
-	debug_flags_assert(f, ATOMIC_LIFO_DEBUG_FLAG_INITIALIZED);
+	assert(head);
 
-	struct atomic_lifo * r, * t;
+	struct atomic_lifo * rv;
 
 	do
-	{
-		r = (struct atomic_lifo *)atomic_load(&f->next);
+		rv = (struct atomic_lifo *)atomic_exchange(&head->next, (uintptr_t)head);
+	while (rv == head);
 
-		if (!r)
-			return NULL;
-
-		t = (struct atomic_lifo *)atomic_load(&r->next); 
-	}
-	while(!atomic_compare_exchange_weak(&f->next, (uintptr_t*)&r, (uintptr_t)t));
-
-	atomic_store(&r->next, 0);
-
-	return r;
+	return rv;
 }
 
 void
-atomic_lifo_set(struct atomic_lifo * e, void * d)
+atomic_lifo_push(struct atomic_lifo * head, struct atomic_lifo * new)
 {
-	assert(e);
+	assert(head);
+	assert(new);
+	debug_flags_assert(head, ATOMIC_LIFO_DEBUG_FLAG_INITIALIZED);
+	debug_flags_assert(new, ATOMIC_LIFO_DEBUG_FLAG_INITIALIZED);
 
-	atomic_init(&e->next, 0);
-	e->data = d;
+	struct atomic_lifo * tmp = acquire_head(head);
 
-	debug_flags_initialize(e);
-	debug_flags_set(e, ATOMIC_LIFO_DEBUG_FLAG_INITIALIZED);
+	atomic_store(&new->next, (uintptr_t)tmp);
+	atomic_store(&head->next, (uintptr_t)new);
+}
+
+struct atomic_lifo *
+atomic_lifo_pop(struct atomic_lifo * head)
+{
+	assert(head);
+	debug_flags_assert(head, ATOMIC_LIFO_DEBUG_FLAG_INITIALIZED);
+
+	struct atomic_lifo * rv = acquire_head(head);
+
+	if (!rv)
+		atomic_store(&head->next, 0);
+	else
+	{
+		atomic_store(&head->next, rv->next);
+		atomic_store(&rv->next, 0);
+	}
+
+	return rv;
+}
+
+void
+atomic_lifo_set(struct atomic_lifo * entry, void * data)
+{
+	assert(entry);
+
+	atomic_init(&entry->next, 0);
+	entry->data = data;
+
+	debug_flags_initialize(entry);
+	debug_flags_set(entry, ATOMIC_LIFO_DEBUG_FLAG_INITIALIZED);
 }
 
 void *
-atomic_lifo_get(struct atomic_lifo *e)
+atomic_lifo_get(struct atomic_lifo * entry)
 {
-	assert(e);
+	assert(entry);
 
-	return e->data;
+	return entry->data;
 }
