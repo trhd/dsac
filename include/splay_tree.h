@@ -1,6 +1,6 @@
 /**
  * dsac -- Data Structures and Alorithms for C
- * Copyright (C) 2016-2017 Hemmo Nieminen
+ * Copyright (C) 2016-2018 Hemmo Nieminen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ struct splay_tree
 
 void
 splay_initialize(struct splay_tree * tree,
-		int (*comparison_function)(void const *, void const * key));
+		int (*comparison_function)(void const * first, void const * second));
 
 
 int
