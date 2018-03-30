@@ -62,34 +62,6 @@ _test_deps = [
 	)
 ]
 
-test('search_structure-avl',
-	executable('search_structure-avl',
-		'test_search_structure.c',
-		dependencies : _test_deps,
-		include_directories : dsac_include,
-		c_args : [
-			'-DSEARCH_STRUCTURE_BACKEND=avl',
-			'-DTEST_ITERATION_COUNT=100000',
-			'-DTEST_ELEMENT_COUNT=100'
-		] + _test_cflags
-	),
-	timeout : default_timeout
-)
-
-test('search_structure-splay',
-	executable('search_structure-splay',
-		'test_search_structure.c',
-		dependencies : _test_deps,
-		include_directories : dsac_include,
-		c_args : [
-			'-DSEARCH_STRUCTURE_BACKEND=splay',
-			'-DTEST_ITERATION_COUNT=100000',
-			'-DTEST_ELEMENT_COUNT=100'
-		] + _test_cflags
-	),
-	timeout : default_timeout
-)
-
 foreach t : [
 		[ ['test_atomic_fifo.c'], 'atomic_fifo', [] ],
 		[ ['test_typed_atomic_fifo.c'], 'typed_atomic_fifo', [] ],
@@ -134,7 +106,11 @@ foreach t : [
 			['-DRADIX_TREE_CONFIG_ITERATION_PREALLOCATION=1000'] ],
 		[ ['test_radix_tree.c', '../src/radix_tree.c'], 'radix_tree__prealloc_thousand__no_cached_key_length',
 			['-DRADIX_TREE_CONFIG_NO_CAHED_KEY_LENGHT', '-DRADIX_TREE_CONFIG_ITERATION_PREALLOCATION=1000'] ],
-		[ ['test_splay_tree.c'], 'splay_tree', [] ]
+		[ ['test_splay_tree.c'], 'splay_tree', [] ],
+		[ ['test_search_structure.c'], 'search_structure-avl',
+			['-DSEARCH_STRUCTURE_BACKEND=avl', '-DTEST_ITERATION_COUNT=100000', '-DTEST_ELEMENT_COUNT=100'] ],
+		[ ['test_search_structure.c'], 'search_structure-splay',
+			['-DSEARCH_STRUCTURE_BACKEND=splay', '-DTEST_ITERATION_COUNT=100000', '-DTEST_ELEMENT_COUNT=100'] ]
 	]
 	test(t.get(1),
 		executable(t.get(1),
