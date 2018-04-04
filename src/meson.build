@@ -239,6 +239,8 @@ splay_tree = declare_dependency(
 _all_deps += splay_tree
 _all_sources += files('splay_tree.c')
 
+typed_splay_tree = splay_tree
+
 search_structure_splay = splay_tree
 
 dsac_lib_all = library(
