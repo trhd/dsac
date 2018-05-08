@@ -1,6 +1,6 @@
 /**
  * dsac -- Data Structures and Alorithms for C
- * Copyright (C) 2016-2017 Hemmo Nieminen
+ * Copyright (C) 2016-2018 Hemmo Nieminen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,28 @@
 
 #include <string.h>
 #include "cmocka-wrapper.h"
+
+#ifndef USE_ATOMIC_DEBUG_FLAGS
+
 #include "debug_flags.h"
+
+#else
+
+#include "atomic_debug_flags.h"
+
+#define DEBUG_FLAGS(...)        ATOMIC_DEBUG_FLAGS(__VA_ARGS__)
+#define DEBUG_FLAGS_ENUM(...)   ATOMIC_DEBUG_FLAGS_ENUM(__VA_ARGS__)
+
+#define debug_flags_initialize  atomic_debug_flags_initialize
+#define debug_flags_set         atomic_debug_flags_set
+#define debug_flags_get         atomic_debug_flags_get
+#define debug_flags_copy        atomic_debug_flags_copy
+#define debug_flags_clear       atomic_debug_flags_clear
+#define debug_flags_assert      atomic_debug_flags_assert
+#define debug_flags_assert_not  atomic_debug_flags_assert_not
+#define debug_flags_compare     atomic_debug_flags_compare
+
+#endif
 
 enum constants
 {
@@ -57,7 +78,11 @@ UT_debug_flags_set()
 	expect_assert_failure(debug_flags_get((struct flag_holder_lite *)null_ptr, 1));
 	assert_false(debug_flags_get(h, 1));
 
+#ifdef USE_ATOMIC_DEBUG_FLAGS
+	expect_assert_failure(debug_flags_get(h, sizeof(h->_atomic_debug_flags) * 8 + 1));
+#else
 	expect_assert_failure(debug_flags_get(h, sizeof(h->_debug_flags) * 8 + 1));
+#endif
 
 	test_free(h);
 }
@@ -72,7 +97,11 @@ UT_debug_flags_get()
 
 	debug_flags_initialize(h);
 
+#ifdef USE_ATOMIC_DEBUG_FLAGS
+	expect_assert_failure(debug_flags_set(h, sizeof(h->_atomic_debug_flags) * 8 + 1));
+#else
 	expect_assert_failure(debug_flags_set(h, sizeof(h->_debug_flags) * 8 + 1));
+#endif
 	expect_assert_failure(debug_flags_set((struct flag_holder_lite *)null_ptr, 1));
 
 	for (i = 0; i < FLAG_HOLDER_SIZE; i += 2)
@@ -103,7 +132,11 @@ UT_debug_flags_clear()
 		debug_flags_set(h, i);
 
 	expect_assert_failure(debug_flags_clear((struct flag_holder_lite *)null_ptr, 1));
+#ifdef USE_ATOMIC_DEBUG_FLAGS
+	expect_assert_failure(debug_flags_clear(h, sizeof(h->_atomic_debug_flags) * 8 + 1));
+#else
 	expect_assert_failure(debug_flags_clear(h, sizeof(h->_debug_flags) * 8 + 1));
+#endif
 
 	for (i = 0; i < FLAG_HOLDER_SIZE; i++)
 	{
@@ -219,7 +252,11 @@ UT_debug_flags_assert()
 
 	debug_flags_initialize(h);
 
+#ifdef USE_ATOMIC_DEBUG_FLAGS
+	expect_assert_failure(debug_flags_assert(h, sizeof(h->_atomic_debug_flags) * 8 + 1));
+#else
 	expect_assert_failure(debug_flags_assert(h, sizeof(h->_debug_flags) * 8 + 1));
+#endif
 	expect_assert_failure(debug_flags_assert((struct flag_holder_lite *)null_ptr, 1));
 
 	for (i = 0; i < FLAG_HOLDER_SIZE; i += 2)
@@ -248,7 +285,11 @@ UT_debug_flags_assert_not()
 
 	debug_flags_initialize(h);
 
+#ifdef USE_ATOMIC_DEBUG_FLAGS
+	expect_assert_failure(debug_flags_assert_not(h, sizeof(h->_atomic_debug_flags) * 8 + 1));
+#else
 	expect_assert_failure(debug_flags_assert_not(h, sizeof(h->_debug_flags) * 8 + 1));
+#endif
 	expect_assert_failure(debug_flags_assert_not((struct flag_holder_lite *)null_ptr, 1));
 
 	for (i = 0; i < FLAG_HOLDER_SIZE; i += 2)
@@ -440,6 +481,9 @@ main()
 		cmocka_unit_test(UT_debug_flags_compare),
 		cmocka_unit_test(UT_debug_flags_assert),
 		cmocka_unit_test(UT_debug_flags_assert_not),
+#ifdef ATOMIC_FLAGS
+		// FIXME: Add some tests that test the atomicity of the atomic flags.
+#endif
 		cmocka_unit_test(ensure_initialization_clears_bits),
 		cmocka_unit_test(set_n_clear),
 		cmocka_unit_test(size_check),

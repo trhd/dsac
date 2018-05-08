@@ -1,6 +1,6 @@
 /**
  * dsac -- Data Structures and Alorithms for C
- * Copyright (C) 2016-2017 Hemmo Nieminen
+ * Copyright (C) 2016-2018 Hemmo Nieminen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,28 @@
 
 #include <stdbool.h>
 #include "cmocka-wrapper.h"
+
+#ifndef USE_ATOMIC_FLAGS
+
 #include "flags.h"
+
+#else
+
+#include "atomic_flags.h"
+
+#define FLAGS(...)        ATOMIC_FLAGS(__VA_ARGS__)
+#define FLAGS_ENUM(...)   ATOMIC_FLAGS_ENUM(__VA_ARGS__)
+
+#define flags_initialize  atomic_flags_initialize
+#define flags_set         atomic_flags_set
+#define flags_get         atomic_flags_get
+#define flags_copy        atomic_flags_copy
+#define flags_clear       atomic_flags_clear
+#define flags_assert      atomic_flags_assert
+#define flags_assert_not  atomic_flags_assert_not
+#define flags_compare     atomic_flags_compare
+
+#endif
 
 enum constants
 {
@@ -85,7 +106,7 @@ try_setting_and_unsetting_a_bit(struct flag_holder *f, size_t b)
 }
 
 static bool
-holder_is_all_clear(const struct flag_holder *f)
+holder_is_all_clear(struct flag_holder *f)
 {
 	assert_non_null(f);
 
@@ -124,7 +145,11 @@ UT_flags_set()
 	expect_assert_failure(flags_get((struct flag_holder_lite *)null_ptr, 1));
 	assert_false(flags_get(h, 1));
 
+#ifdef USE_ATOMIC_FLAGS
+	expect_assert_failure(flags_get(h, sizeof(h->_atomic_flags) * 8 + 1));
+#else
 	expect_assert_failure(flags_get(h, sizeof(h->_flags) * 8 + 1));
+#endif
 
 	test_free(h);
 }
@@ -139,7 +164,11 @@ UT_flags_get()
 
 	flags_initialize(h);
 
-	expect_assert_failure(flags_set(h, sizeof(h->_flags) * 8 + 1));
+#ifdef USE_ATOMIC_FLAGS
+	expect_assert_failure(flags_get(h, sizeof(h->_atomic_flags) * 8 + 1));
+#else
+	expect_assert_failure(flags_get(h, sizeof(h->_flags) * 8 + 1));
+#endif
 	expect_assert_failure(flags_set((struct flag_holder_lite *)null_ptr, 1));
 
 	for (i = 0; i < FLAG_HOLDER_SIZE; i += 2)
@@ -170,7 +199,11 @@ UT_flags_clear()
 		flags_set(h, i);
 
 	expect_assert_failure(flags_clear((struct flag_holder_lite *)null_ptr, 1));
+#ifdef USE_ATOMIC_FLAGS
+	expect_assert_failure(flags_clear(h, sizeof(h->_atomic_flags) * 8 + 1));
+#else
 	expect_assert_failure(flags_clear(h, sizeof(h->_flags) * 8 + 1));
+#endif
 
 	for (i = 0; i < FLAG_HOLDER_SIZE; i++)
 	{
@@ -286,7 +319,11 @@ UT_flags_assert()
 
 	flags_initialize(h);
 
+#ifdef USE_ATOMIC_FLAGS
+	expect_assert_failure(flags_assert(h, sizeof(h->_atomic_flags) * 8 + 1));
+#else
 	expect_assert_failure(flags_assert(h, sizeof(h->_flags) * 8 + 1));
+#endif
 	expect_assert_failure(flags_assert((struct flag_holder_lite *)null_ptr, 1));
 
 	for (i = 0; i < FLAG_HOLDER_SIZE; i += 2)
@@ -315,7 +352,11 @@ UT_flags_assert_not()
 
 	flags_initialize(h);
 
+#ifdef USE_ATOMIC_FLAGS
+	expect_assert_failure(flags_assert_not(h, sizeof(h->_atomic_flags) * 8 + 1));
+#else
 	expect_assert_failure(flags_assert_not(h, sizeof(h->_flags) * 8 + 1));
+#endif
 	expect_assert_failure(flags_assert_not((struct flag_holder_lite *)null_ptr, 1));
 
 	for (i = 0; i < FLAG_HOLDER_SIZE; i += 2)
@@ -492,6 +533,9 @@ main()
 		cmocka_unit_test(UT_flags_compare),
 		cmocka_unit_test(UT_flags_assert),
 		cmocka_unit_test(UT_flags_assert_not),
+#ifdef USE_ATOMIC_FLAGS
+		// FIXME: Add some tests that test the atomicity of the atomic flags.
+#endif
 		cmocka_unit_test(initialization_clears_memory),
 		cmocka_unit_test(setting_and_clearing_bits),
 		cmocka_unit_test(copying_a_whole_set_of_flags),
