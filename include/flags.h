@@ -1,6 +1,6 @@
 /**
  * dsac -- Data Structures and Alorithms for C
- * Copyright (C) 2016-2017 Hemmo Nieminen
+ * Copyright (C) 2016-2018 Hemmo Nieminen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 
 #include <assert.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <string.h>
 
 #define FLAGS(n)\
@@ -66,7 +67,7 @@ _flags_set(uint8_t *flags, unsigned int idx)
 	*(flags + f) |= 1 << b;
 }
 
-static inline int
+static inline bool
 _flags_get(const uint8_t *flags, unsigned int idx)
 {
 	assert(flags);
@@ -74,10 +75,15 @@ _flags_get(const uint8_t *flags, unsigned int idx)
 	int b = idx % 8,
 	    f = idx / 8;
 
-	return *(flags + f) & (1 << b) ? 1 : 0;
+	return *(flags + f) & (1 << b);
 }
 
-#if !defined(NDEBUG) || defined(UNIT_TESTING)
+#if defined(NDEBUG) && !defined(UNIT_TESTING)
+
+# define flags_assert(s, i)
+# define flags_assert_not(s, i)
+
+#else
 
 #define flags_assert(s, i)\
 	(assert((s)), _flags_assert_index_in_range(s, i), _flags_assert((s)->_flags, i))
@@ -95,18 +101,10 @@ _flags_assert(const uint8_t * flags __attribute__((unused)), unsigned int idx __
 static inline void
 _flags_assert_not(const uint8_t *flags, unsigned int idx)
 {
-#if !defined(NDEBUG) || defined(UNIT_TESTING)
 	assert(flags);
 	assert(!_flags_get(flags, idx));
-#else
-	(void)sizeof(flags);
-	(void)sizeof(idx);
-#endif
 }
 
-#else
-#define flags_assert(s, i)
-#define flags_assert_not(s, i)
 #endif
 
 static inline void
