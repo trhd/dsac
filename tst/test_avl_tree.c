@@ -53,7 +53,7 @@ UT_avl_initialize__NULL()
 	struct avl_tree * t = test_malloc(sizeof(struct avl_tree));
 
 	expect_assert_failure(avl_initialize(NULL, NULL));
-	expect_assert_failure(avl_initialize(NULL, (int(*)(void const *, void const *))memcmp));
+	expect_assert_failure(avl_initialize(NULL, (int(*)(void const *, void const *))strcmp));
 	expect_assert_failure(avl_initialize(t, NULL));
 
 	test_free(t);

@@ -21,9 +21,12 @@
 #include "cmocka-wrapper.h"
 #include "quicksort.h"
 
-static long
-cmp_long(long a, long b)
+static int
+cmp_long(void const * ap, void const * bp)
 {
+	unsigned long a = (unsigned long)ap,
+	              b = (unsigned long)bp;
+
 	if (a < b)
 		return -1;
 	else if (a > b)

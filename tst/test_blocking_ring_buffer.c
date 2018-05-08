@@ -1094,7 +1094,8 @@ UT_blocking_ring_buffer_peek_try()
 
 	assert_false(blocking_ring_buffer_write_try(ring, "aa", 2));
 	l = buf_size;
-	strncpy(rb, "foobar", 6);
+	strcpy(rb, "foobar");
+	rb[6] = 'x';
 	assert_false(blocking_ring_buffer_peek_try(ring, rb, &l));
 	assert_int_equal(l, 2);
 	rb[2] = '\0';
@@ -1102,7 +1103,8 @@ UT_blocking_ring_buffer_peek_try()
 
 	assert_false(blocking_ring_buffer_write_try(ring, "bb", 2));
 	l = buf_size;
-	strncpy(rb, "foobar", 6);
+	strcpy(rb, "foobar");
+	rb[6] = 'x';
 	assert_false(blocking_ring_buffer_peek_try(ring, rb, &l));
 	assert_int_equal(l, 2);
 	rb[2] = '\0';
@@ -1110,7 +1112,8 @@ UT_blocking_ring_buffer_peek_try()
 
 	assert_false(blocking_ring_buffer_write_try(ring, "cc", 2));
 	l = buf_size;
-	strncpy(rb, "foobar", 6);
+	strcpy(rb, "foobar");
+	rb[6] = 'x';
 	assert_false(blocking_ring_buffer_peek_try(ring, rb, &l));
 	assert_int_equal(l, 2);
 	rb[2] = '\0';

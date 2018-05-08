@@ -671,7 +671,8 @@ UT_ring_buffer_peek()
 
 	assert_false(ring_buffer_write(ring, "aa", 2));
 	l = buf_size;
-	strncpy(rb, "foobar", 6);
+	strcpy(rb, "foobar");
+	rb[6] = 'x';
 	assert_false(ring_buffer_peek(ring, rb, &l));
 	assert_int_equal(l, 2);
 	rb[2] = '\0';
@@ -679,7 +680,8 @@ UT_ring_buffer_peek()
 
 	assert_false(ring_buffer_write(ring, "bb", 2));
 	l = buf_size;
-	strncpy(rb, "foobar", 6);
+	strcpy(rb, "foobar");
+	rb[6] = 'x';
 	assert_false(ring_buffer_peek(ring, rb, &l));
 	assert_int_equal(l, 2);
 	rb[2] = '\0';
@@ -687,7 +689,8 @@ UT_ring_buffer_peek()
 
 	assert_false(ring_buffer_write(ring, "cc", 2));
 	l = buf_size;
-	strncpy(rb, "foobar", 6);
+	strcpy(rb, "foobar");
+	rb[6] = 'x';
 	assert_false(ring_buffer_peek(ring, rb, &l));
 	assert_int_equal(l, 2);
 	rb[2] = '\0';

@@ -21,9 +21,12 @@
 #include "cmocka-wrapper.h"
 #include "mergesort.h"
 
-static long
-cmp_long(long a, long b)
+static int
+cmp_long(void const * ap, void const * bp)
 {
+	unsigned long a = (unsigned long)ap,
+	              b = (unsigned long)bp;
+
 	if (a < b)
 		return -1;
 	else if (a > b)
@@ -51,8 +54,7 @@ FT_sort_10()
 	assert_int_equal(sizeof(test_data_numbers_mixed), sizeof(test_data_numbers_sorted));
 
 	mergesort((const void **)test_data_numbers_mixed,
-			sizeof(test_data_numbers_mixed) / sizeof(long),
-			(int(*)(const void *, const void *))cmp_long);
+			sizeof(test_data_numbers_mixed) / sizeof(long), cmp_long);
 
 	assert_memory_equal(test_data_numbers_mixed,
 			test_data_numbers_sorted,
@@ -79,8 +81,7 @@ FT_sort_20()
 	assert_int_equal(sizeof(test_data_numbers_mixed), sizeof(test_data_numbers_sorted));
 
 	mergesort((const void **)test_data_numbers_mixed,
-			sizeof(test_data_numbers_mixed) / sizeof(long),
-			(int(*)(const void *, const void *))cmp_long);
+			sizeof(test_data_numbers_mixed) / sizeof(long), cmp_long);
 
 	assert_memory_equal(test_data_numbers_mixed,
 			test_data_numbers_sorted,
