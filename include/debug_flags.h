@@ -1,6 +1,6 @@
 /**
  * dsac -- Data Structures and Alorithms for C
- * Copyright (C) 2016-2017 Hemmo Nieminen
+ * Copyright (C) 2016-2018 Hemmo Nieminen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -66,13 +66,13 @@
 # define DEBUG_FLAGS(...)
 # define DEBUG_FLAGS_ENUM(...)
 
-# define debug_flags_initialize(s)      do { (void)s; } while (0)
-# define debug_flags_assert(s, ...)     do { (void)s; } while (0)
-# define debug_flags_assert_not(s, ...) do { (void)s; } while (0)
-# define debug_flags_set(s, ...)        do { (void)s; } while (0)
-# define debug_flags_get(s, ...)        do { (void)s; } while (0)
-# define debug_flags_clear(s, ...)      do { (void)s; } while (0)
-# define debug_flags_copy(a, b)         do { (void)a; (void)b; } while (0)
-# define debug_flags_compare(a, b)      do { (void)a; (void)b; } while (0)
+# define debug_flags_initialize(s)      do { (void)sizeof(s); } while (0)
+# define debug_flags_assert(s, ...)     do { (void)sizeof(s); } while (0)
+# define debug_flags_assert_not(s, ...) do { (void)sizeof(s); } while (0)
+# define debug_flags_set(s, ...)        do { (void)sizeof(s); } while (0)
+# define debug_flags_get(s, ...)        do { (void)sizeof(s); } while (0)
+# define debug_flags_clear(s, ...)      do { (void)sizeof(s); } while (0)
+# define debug_flags_copy(a, b)         do { (void)sizeof(a); (void)sizeof(b); } while (0)
+# define debug_flags_compare(a, b)      do { (void)sizeof(a); (void)sizeof(b); } while (0)
 
 #endif
