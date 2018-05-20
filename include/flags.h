@@ -89,7 +89,7 @@ _flags_get(const uint8_t *flags, unsigned int idx)
 	(assert((s)), _flags_assert_index_in_range(s, i), _flags_assert((s)->_flags, i))
 
 static inline void
-_flags_assert(const uint8_t * flags __attribute__((unused)), unsigned int idx __attribute__((unused)))
+_flags_assert(const uint8_t * flags, unsigned int idx)
 {
 	assert(flags);
 	assert(_flags_get(flags, idx));
