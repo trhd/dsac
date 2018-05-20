@@ -33,6 +33,7 @@ atomic_flags = _header_only
 debug_flags = _header_only
 atomic_debug_flags = _header_only
 refcount = _header_only
+spinlock = _header_only
 
 condition = _header_only_gnu
 

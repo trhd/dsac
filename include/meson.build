@@ -36,6 +36,7 @@ install_headers(
 		'linked_list.h',
 		'typed_linked_list.h',
 		'lock.h',
+		'spinlock.h',
 		'quicksort.h',
 		'ring_buffer.h',
 		'search_structure-avl.h',
