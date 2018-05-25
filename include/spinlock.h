@@ -104,7 +104,7 @@ spinlock_acquire(struct spinlock * l)
 	for (unsigned long old = 0 ; !atomic_compare_exchange_weak(&l->locked, &old, tid) ; old = 0)
 		assert(old != tid);
 #else
-	while (atomic_flag_test_and_set(&l->locked));
+	while (atomic_flag_test_and_set_explicit(&l->locked, memory_order_acquire));
 #endif
 
 }
@@ -124,7 +124,7 @@ spinlock_acquire_try(struct spinlock * l)
 	assert(!rv || old != tid);
 	return rv;
 #else
-	return atomic_flag_test_and_set(&l->locked);
+	return atomic_flag_test_and_set_explicit(&l->locked, memory_order_acquire);
 #endif
 
 }
@@ -156,6 +156,6 @@ spinlock_release(struct spinlock * l)
 #if !defined(NDEBUG) || defined(UNIT_TESTING)
 	atomic_store(&l->locked, 0);
 #else
-	atomic_flag_clear(&l->locked);
+	atomic_flag_clear_explicit(&l->locked, memory_order_release);
 #endif
 }
