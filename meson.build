@@ -17,7 +17,7 @@
 project(
 	'dsac',
 	'c',
-	version : '7.1.0',
+	version : '7.2.0',
 	meson_version : '>=0.45.0',
 	license : 'GPLv3',
 	default_options : [
