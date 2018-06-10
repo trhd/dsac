@@ -1,3 +1,0 @@
-[submodule ".travis"]
-	path = .travis
-	url = http://github.com/trhd/travis.git
